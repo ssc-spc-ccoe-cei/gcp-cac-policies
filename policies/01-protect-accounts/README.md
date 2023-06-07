@@ -34,7 +34,7 @@ If you have Enterprise, Education Standard or Education Plus, Voice Premier, or 
 
 ### Policy Flow Diagram
 
-![01-protect-accounts](../policy_diagrams/01-protect-accounts.png "01-protect-accounts")
+![01-protect-accounts](../../policy_diagrams/01-protect-accounts.png "01-protect-accounts")
 
 ### Compliant
 
@@ -60,7 +60,7 @@ Check for the presence of two (2) files in the `guardrail-01` Google Cloud Stora
 
 ### Policy Flow Diagram
 
-![01-file-check](../policy_diagrams/01-file-check.png "01-file-check.rego")
+![01-file-check](../../policy_diagrams/01-file-check.png "01-file-check.rego")
 
 ### Compliant
 
