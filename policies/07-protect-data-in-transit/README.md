@@ -36,7 +36,7 @@ More information about SSL policies can be found here: [link](https://cloud.goog
 
 ### Policy Flow Diagram
 
-![07-minimum-tls-version](../policy_diagrams/07-minimum-tls-version.png "07-minimum-tls-version")
+![07-minimum-tls-version](../../policy_diagrams/07-minimum-tls-version.png "07-minimum-tls-version")
 
 ### Compliant
 

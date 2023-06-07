@@ -21,7 +21,7 @@ If the resource is not exempt, then its location will be checked against a list 
 
 ### Policy Flow Diagram
 
-![05-data-location](../policy_diagrams/05-data-location.png "05-data-location")
+![05-data-location](../../policy_diagrams/05-data-location.png "05-data-location")
 
 ### Compliant
 
@@ -48,7 +48,7 @@ More information regarding value groups can be found [here](https://cloud.google
 
 ### Policy Flow Diagram
 
-![05-restrict-location-org-policy](../policy_diagrams/05-restrict-location-org-policy.png "05-restrict-location-org-policy")
+![05-restrict-location-org-policy](../../policy_diagrams/05-restrict-location-org-policy.png "05-restrict-location-org-policy")
 
 ### Compliant
 

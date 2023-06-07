@@ -31,7 +31,7 @@ It should be noted that due to the complex nature of VPC Service Controls and Ac
 
 ### Policy Flow Diagram
 
-![02-access-policy](../policy_diagrams/02-access-policy.png "02-access-policy")
+![02-access-policy](../../policy_diagrams/02-access-policy.png "02-access-policy")
 
 ### Compliant
 
@@ -57,7 +57,7 @@ Check for the presence of three (3) files in the `guardrail-02` Google Cloud Sto
 
 ### Policy Flow Diagram
 
-![02-file-check](../policy_diagrams/02-file-check.png "02-file-check")
+![02-file-check](../../policy_diagrams/02-file-check.png "02-file-check")
 
 ### Compliant
 

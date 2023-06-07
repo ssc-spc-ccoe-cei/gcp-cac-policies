@@ -23,7 +23,7 @@ This policy will check for any findings in Security Command Center that relate t
 
 ### Policy Flow Diagram
 
-![06-data-at-rest](../policy_diagrams/06-data-at-rest.png "06-data-at-rest")
+![06-data-at-rest](../../policy_diagrams/06-data-at-rest.png "06-data-at-rest")
 
 ### Compliant
 

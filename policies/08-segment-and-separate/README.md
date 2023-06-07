@@ -19,7 +19,7 @@ Check for the presence of one (1) file in the `guardrail-08` Google Cloud Storag
 
 ### Policy Flow Diagram
 
-![08-file-check](../policy_diagrams/08-file-check.png "08-file-check")
+![08-file-check](../../policy_diagrams/08-file-check.png "08-file-check")
 
 ### Compliant
 
