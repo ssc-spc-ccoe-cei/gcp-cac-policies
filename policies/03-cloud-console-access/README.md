@@ -98,7 +98,7 @@ It should be noted that due to the complex nature of VPC Service Controls and Ac
 
 ### Policy Flow Diagram
 
-![03-access-policy](../policy_diagrams/03-access-policy.png "03-access-policy")
+![03-access-policy](../../policy_diagrams/03-access-policy.png "03-access-policy")
 
 ### Compliant
 
