@@ -43,17 +43,16 @@ exempt_resources := [
 	"compute.googleapis.com/Project",
 	"compute.googleapis.com/GlobalAddress",
 	"compute.googleapis.com/GlobalForwardingRule",
-	"cloudkms.googleapis.com/CryptoKey",
-	"cloudkms.googleapis.com/KeyRing",
-	"cloudkms.googleapis.com/CryptoKeyVersion",
 	"serviceusage.googleapis.com/Service",
-	"secretmanager.googleapis.com/SecretVersion",
-	"secretmanager.googleapis.com/Secret",
 	"logging.googleapis.com/LogSink",
 	"monitoring.googleapis.com/AlertPolicy",
 	"pubsub.googleapis.com/Topic",
 	"cloudbilling.googleapis.com/ProjectBillingInfo",
 	"cloudbilling.googleapis.com/BillingAccount",
+    "compute.googleapis.com/InstanceTemplate",
+    "logging.googleapis.com/LogMetric",
+    "pubsub.googleapis.com/Subscription",
+
 ]
 
 # METADATA
