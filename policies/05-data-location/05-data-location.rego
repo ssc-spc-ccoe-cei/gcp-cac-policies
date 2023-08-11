@@ -52,6 +52,8 @@ exempt_resources := [
     "compute.googleapis.com/InstanceTemplate",
     "logging.googleapis.com/LogMetric",
     "pubsub.googleapis.com/Subscription",
+    "secretmanager.googleapis.com/SecretVersion",
+	"secretmanager.googleapis.com/Secret",
 
 ]
 
