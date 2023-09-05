@@ -14,13 +14,13 @@ import future.keywords.in
 required_log_sink_asset_type := "logging.googleapis.com/LogSink"
 
 # Log Sink name must start with below
-required_log_sink_name := "org_log_sink"
+required_log_sink_name := "org-log-sink"
 
 # Asset type must match below to be considered storage bucket
 required_bucket_asset_type := "storage.googleapis.com/Bucket"
 
 # Bucket name must start with below
-required_bucket_name := "org_log_bucket"
+required_bucket_name := "security-log-bucket"
 
 # Metadata variables
 guardrail := {"guardrail": "11"}
