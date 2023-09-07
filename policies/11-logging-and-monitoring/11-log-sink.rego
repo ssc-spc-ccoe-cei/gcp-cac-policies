@@ -36,7 +36,7 @@ is_log_sink_asset(asset) if {
 # METADATA
 # description: Checks if log sink name starts with required_log_sink_name
 log_sink_name_correct(asset) if {
-	endswith(asset.name, required_log_sink_name)
+	startswith(asset.name, required_log_sink_name)
 }
 
 # METADATA
