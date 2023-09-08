@@ -36,7 +36,7 @@ is_log_sink_asset(asset) if {
 # METADATA
 # description: Checks if log sink name starts with required_log_sink_name
 log_sink_name_correct(asset) if {
-	startswith(asset.name, required_log_sink_name)
+	contains(asset.name, required_log_sink_name)
 }
 
 # METADATA
@@ -48,14 +48,14 @@ is_log_bucket_asset(asset) if {
 # METADATA
 # description: Checks if storage bucket name starts with required_bucket_name
 log_bucket_name_correct(asset) if {
-	startswith(asset.name, required_bucket_name)
+	contains(asset.name, required_bucket_name)
 }
 
 # METADATA
 # description: Check if log sink is using a compliant bucket for log destination
 is_correct_log_bucket_destination(log_sink) if {
 	log_sink_destination := log_sink.resource.data.destination
-	startswith(compliant_log_bucket[_].name, log_sink_destination)
+	contains(compliant_log_bucket[_].name, log_sink_destination)
 }
 
 # METADATA
