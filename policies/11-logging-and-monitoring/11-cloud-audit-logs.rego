@@ -11,7 +11,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Log name to check for
-required_log_name := "cloudaudit.googleapis"
+required_log_name := "cloudaudit"
 
 # Metadata variables
 guardrail := {"guardrail": "11"}
