@@ -11,7 +11,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Log name to check for
-required_log_name := "cloudaudit"
+required_log_name := "cloudaudit.googleapis.com%2Fdata_access"
 
 # Metadata variables
 guardrail := {"guardrail": "11"}
@@ -21,7 +21,7 @@ description := {"description": "Logging and Monitoring"}
 # METADATA
 # description: Checks if log name matches required_log_name
 is_correct_log_name(asset) if {
-	contains(asset.logName, required_log_name)
+	endswith(asset.logName, required_log_name)
 }
 
 # METADATA
