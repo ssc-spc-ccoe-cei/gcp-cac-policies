@@ -25,7 +25,7 @@ required_bucket_name := "security-log-bucket"
 # Metadata variables
 guardrail := {"guardrail": "11"}
 
-description := {"description": "Logging and Monitoring"}
+description := {"description": "GUARDRAIL 11: LOGGING AND MONITORING"}
 
 # METADATA
 # description: Checks if asset is a log sink

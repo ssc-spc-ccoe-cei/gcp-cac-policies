@@ -16,7 +16,7 @@ required_log_name := "cloudaudit.googleapis.com%2Factivity"
 # Metadata variables
 guardrail := {"guardrail": "11"}
 
-description := {"description": "Logging and Monitoring"}
+description := {"description": "GUARDRAIL 11: LOGGING AND MONITORING"}
 
 # METADATA
 # description: Checks if log name matches required_log_name

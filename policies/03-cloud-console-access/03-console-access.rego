@@ -19,7 +19,7 @@ required_policy := "policies/iam.allowedPolicyMemberDomains"
 # Metadata variables
 guardrail := {"guardrail": "03"}
 
-description := {"description": "Cloud Console Access"}
+description := {"description": "GUARDRAIL 3: CLOUD CONSOLE ACCESS"}
 
 # METADATA
 # description: Checks if asset is required type

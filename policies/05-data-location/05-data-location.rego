@@ -29,7 +29,7 @@ trimmed_regions := [
 # Metadata variables
 guardrail := {"guardrail": "05"}
 
-description := {"description": "Data Location"}
+description := {"description": "GUARDRAIL 5: DATA LOCATION"}
 
 # List of resources that will be exempt if they are located outside of the allowed regions.
 # This list should contain non-region based resources (global only), or resources

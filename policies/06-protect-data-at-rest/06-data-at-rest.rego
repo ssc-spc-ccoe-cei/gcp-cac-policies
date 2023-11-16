@@ -16,7 +16,7 @@ required_scc_category := "CMEK_DISABLED"
 # Metadata variables
 guardrail := {"guardrail": "06"}
 
-description := {"description": "Protection of Data-at-Rest"}
+description := {"description": "GUARDRAIL 6: PROTECTION OF DATA-AT-REST"}
 
 # METADATA
 # description: Checks if finding is required type

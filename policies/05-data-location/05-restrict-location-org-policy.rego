@@ -22,7 +22,7 @@ required_value := "in:canada-locations"
 # Metadata variables
 guardrail := {"guardrail": "05"}
 
-description := {"description": "Data Location"}
+description := {"description": "GUARDRAIL 5: DATA LOCATION"}
 
 # METADATA
 # description: Checks if asset is required type

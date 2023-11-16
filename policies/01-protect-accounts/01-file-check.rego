@@ -19,7 +19,7 @@ required_file_count := 3
 # Metadata variables
 guardrail := {"guardrail": "01"}
 
-description := {"description": "Protect Root/Global Admin Account"}
+description := {"description": "GUARDRAIL 1: PROTECT ROOT/GLOBAL ADMINS ACCOUNT"}
 
 # METADATA
 # description: Check if asset's name matches what's required

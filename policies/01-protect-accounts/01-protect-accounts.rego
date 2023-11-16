@@ -16,7 +16,7 @@ required_service_name := "admin.googleapis.com"
 # Metadata variables
 guardrail := {"guardrail": "01"}
 
-description := {"description": "Protect Root/Global Admin Account"}
+description := {"description": "GUARDRAIL 1: PROTECT ROOT/GLOBAL ADMINS ACCOUNT"}
 
 # METADATA
 # description: Check if asset's service name matches what's required

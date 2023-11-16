@@ -25,7 +25,7 @@ required_iam_member := "user:cloudbrokeringservices@ssc-cloud.canada.ca"
 # Metadata variables
 guardrail := {"guardrail": "04"}
 
-description := {"description": "Enterprise Monitoring Accounts"}
+description := {"description": "GUARDRAIL 4: ENTERPRISE MONITORING ACCOUNTS"}
 
 # METADATA
 # description: Check if asset's type matches what's required

@@ -19,7 +19,7 @@ required_file_count := 2
 # Metadata variables
 guardrail := {"guardrail": "03"}
 
-description := {"description": "Cloud Console Access"}
+description := {"description": "GUARDRAIL 3: CLOUD CONSOLE ACCESS"}
 
 # METADATA
 # description: Check if asset's name matches what's required
