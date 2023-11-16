@@ -36,7 +36,7 @@ audit_log_assets := {asset |
 # title: Audit Logs Detected - COMPLIANT
 # description: If audit logs are found with correct name then reply back COMPLIANT
 reply contains response if {
-	count(audit_log_assets) == 0
+	count(audit_log_assets) > 0
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Audit Logs at Organization-level detected."}
@@ -47,7 +47,7 @@ reply contains response if {
 # title: Audit Logs Not Detected - NON-COMPLIANT
 # description: If audit logs are NOT found with correct name then reply back NON-COMPLIANT
 reply contains response if {
-	count(audit_log_assets) < 0
+	count(audit_log_assets) == 0
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Audit Logs at Organization-level NOT detected."}
