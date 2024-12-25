@@ -26,7 +26,7 @@ insecure_port_range := [
 # Metadata variables
 guardrail := {"guardrail": "09"}
 
-description := {"description": "GUARDRAIL 9: NETWORK SECURITY SERVICES"}
+description := {"description": "Network Security Services"}
 
 # METADATA
 # description: Checks if asset matches required asset type

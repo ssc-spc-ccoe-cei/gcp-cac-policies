@@ -19,7 +19,7 @@ required_policy := "policies/commerceorggovernance.disablePublicMarketplace"
 # Metadata variables
 guardrail := {"guardrail": "12"}
 
-description := {"description": "GUARDRAIL 12: CONFIGURATION OF CLOUD MARKETPLACES"}
+description := {"description": "Configuration of Cloud Marketplaces"}
 
 # METADATA
 # description: Checks if asset is required type

@@ -30,7 +30,7 @@ More information regarding Cloud Audit logs found here: [link](https://cloud.goo
 
 ### Policy Flow Diagram
 
-![11-cloud-audit-logs](../../policy_diagrams/11-cloud-audit-logs.png "11-cloud-audit-logs")
+![11-cloud-audit-logs](../policy_diagrams/11-cloud-audit-logs.png "11-cloud-audit-logs")
 
 ### Compliant
 
@@ -52,7 +52,7 @@ This policy will check for the presence of a log sink that's configured with a s
 
 ### Policy Flow Diagram
 
-![11-log-sink](../../policy_diagrams/11-log-sink.png "11-log-sink")
+![11-log-sink](../policy_diagrams/11-log-sink.png "11-log-sink")
 
 ### Compliant
 

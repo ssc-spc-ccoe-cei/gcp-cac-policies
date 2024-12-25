@@ -34,7 +34,7 @@ required_ssl_policy_profiles := ["RESTRICTED", "MODERN"]
 # Metadata variables
 guardrail := {"guardrail": "07"}
 
-description := {"description": "GUARDRAIL 7: PROTECTION OF DATA-IN-TRANSIT"}
+description := {"description": "Protection of Data-in-Transit"}
 
 # METADATA
 # description: Checks if asset matches required load balancer asset type

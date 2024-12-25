@@ -24,7 +24,7 @@ The Organization Policy is called `Disable Public Marketplace` (ID: `constraints
 
 ### Policy Flow Diagram
 
-![12-disable-public-marketplace-org-policy](../../policy_diagrams/12-disable-public-marketplace-org-policy.png "12-disable-public-marketplace-org-policy")
+![12-disable-public-marketplace-org-policy](../policy_diagrams/12-disable-public-marketplace-org-policy.png "12-disable-public-marketplace-org-policy")
 
 ### Compliant
 
@@ -58,7 +58,7 @@ To ensure only Organization Administrators can manage solutions, this policy wil
 
 ### Policy Flow Diagram
 
-![12-private-catalogue-admin](../../policy_diagrams/12-private-catalogue-admin.png "12-private-catalogue-admin")
+![12-private-catalogue-admin](../policy_diagrams/12-private-catalogue-admin.png "12-private-catalogue-admin")
 
 ### Compliant
 

@@ -16,7 +16,7 @@ required_asset_type := "cloudresourcemanager.googleapis.com/Organization"
 # Metadata variables
 guardrail := {"guardrail": "09"}
 
-description := {"description": "GUARDRAIL 9: NETWORK SECURITY SERVICES"}
+description := {"description": "Network Security Services"}
 
 # METADATA
 # description: Check if asset's type matches what's required

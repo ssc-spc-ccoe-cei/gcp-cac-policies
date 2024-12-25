@@ -19,7 +19,7 @@ required_file_count := 4
 # Metadata variables
 guardrail := {"guardrail": "02"}
 
-description := {"description": "GUARDRAIL 2: MANAGEMENT OF ADMINISTRATIVE PRIVILEGES"}
+description := {"description": "Management of Administrative Privileges"}
 
 # METADATA
 # description: Check if asset's name matches what's required

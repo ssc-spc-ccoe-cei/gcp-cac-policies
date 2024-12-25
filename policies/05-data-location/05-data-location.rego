@@ -29,7 +29,7 @@ trimmed_regions := [
 # Metadata variables
 guardrail := {"guardrail": "05"}
 
-description := {"description": "GUARDRAIL 5: DATA LOCATION"}
+description := {"description": "Data Location"}
 
 # List of resources that will be exempt if they are located outside of the allowed regions.
 # This list should contain non-region based resources (global only), or resources
@@ -43,18 +43,17 @@ exempt_resources := [
 	"compute.googleapis.com/Project",
 	"compute.googleapis.com/GlobalAddress",
 	"compute.googleapis.com/GlobalForwardingRule",
+	"cloudkms.googleapis.com/CryptoKey",
+	"cloudkms.googleapis.com/KeyRing",
+	"cloudkms.googleapis.com/CryptoKeyVersion",
 	"serviceusage.googleapis.com/Service",
+	"secretmanager.googleapis.com/SecretVersion",
+	"secretmanager.googleapis.com/Secret",
 	"logging.googleapis.com/LogSink",
 	"monitoring.googleapis.com/AlertPolicy",
 	"pubsub.googleapis.com/Topic",
 	"cloudbilling.googleapis.com/ProjectBillingInfo",
 	"cloudbilling.googleapis.com/BillingAccount",
-    "compute.googleapis.com/InstanceTemplate",
-    "logging.googleapis.com/LogMetric",
-    "pubsub.googleapis.com/Subscription",
-    "secretmanager.googleapis.com/SecretVersion",
-	"secretmanager.googleapis.com/Secret",
-
 ]
 
 # METADATA

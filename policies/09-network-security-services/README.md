@@ -30,7 +30,7 @@ More information about best practices for firewall rules can be found here: [lin
 
 ### Policy Flow Diagram
 
-![09-check-firewall-rules](../../policy_diagrams/09-check-firewall-rules.png "09-check-firewall-rules")
+![09-check-firewall-rules](../policy_diagrams/09-check-firewall-rules.png "09-check-firewall-rules")
 
 ### Compliant
 
@@ -56,7 +56,7 @@ The organization policy is called `Restrict Public IP access on Cloud SQL instan
 
 ### Policy Flow Diagram
 
-![09-cloud-sql-ext-ip-org-policy](../../policy_diagrams/09-cloud-sql-ext-ip-org-policy.png "09-cloud-sql-ext-ip-org-policy")
+![09-cloud-sql-ext-ip-org-policy](../policy_diagrams/09-cloud-sql-ext-ip-org-policy.png "09-cloud-sql-ext-ip-org-policy")
 
 ### Compliant
 
@@ -87,7 +87,7 @@ The organization policy is called `Skip default network creation` (ID: `constrai
 
 ### Policy Flow Diagram
 
-![09-default-network-org-policy](../../policy_diagrams/09-default-network-org-policy.png "09-default-network-org-policy")
+![09-default-network-org-policy](../policy_diagrams/09-default-network-org-policy.png "09-default-network-org-policy")
 
 ### Compliant
 
@@ -121,7 +121,7 @@ The organization policy is called `Enforce Public Access Prevention` (ID: `const
 
 ### Policy Flow Diagram
 
-![09-gcs-public-bucket-org-policy](../../policy_diagrams/09-gcs-public-bucket-org-policy.png "09-gcs-public-bucket-org-policy")
+![09-gcs-public-bucket-org-policy](../policy_diagrams/09-gcs-public-bucket-org-policy.png "09-gcs-public-bucket-org-policy")
 
 ### Compliant
 
@@ -152,7 +152,7 @@ The organization policy is called `Define allowed external IPs for VM instances`
 
 ### Policy Flow Diagram
 
-![09-vm-ext-ip-org-policy](../../policy_diagrams/09-vm-ext-ip-org-policy.png "09-vm-ext-ip-org-policy")
+![09-vm-ext-ip-org-policy](../policy_diagrams/09-vm-ext-ip-org-policy.png "09-vm-ext-ip-org-policy")
 
 ### Compliant
 
@@ -185,7 +185,7 @@ It should be noted that due to the complex nature of VPC Service Controls and Ac
 
 ### Policy Flow Diagram
 
-![09-access-policy](../../policy_diagrams/09-access-policy.png "09-access-policy")
+![09-access-policy](../policy_diagrams/09-access-policy.png "09-access-policy")
 
 ### Compliant
 

@@ -23,7 +23,7 @@ The roles that are being looked for are:
 
 ### Policy Flow Diagram
 
-![04-monitoring-account](../../policy_diagrams/04-monitoring-account.png "04-monitoring-account")
+![04-monitoring-account](../policy_diagrams/04-monitoring-account.png "04-monitoring-account")
 
 ### Compliant
 

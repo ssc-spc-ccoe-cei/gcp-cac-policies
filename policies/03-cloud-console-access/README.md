@@ -25,7 +25,7 @@ The Organization Policy is called `Domain restricted sharing` (ID: `constraints/
 
 ### Policy Flow Diagram
 
-![03-console-access](../../policy_diagrams/03-console-access.png "03-console-access")
+![03-console-access](../policy_diagrams/03-console-access.png "03-console-access")
 
 ### Compliant
 
@@ -66,7 +66,7 @@ Check for the presence of one (1) file in the `guardrail-03` Google Cloud Storag
 
 ### Policy Flow Diagram
 
-![03-file-check](../../policy_diagrams/03-file-check.png "03-file-check")
+![03-file-check](../policy_diagrams/03-file-check.png "03-file-check")
 
 ### Compliant
 
@@ -98,7 +98,7 @@ It should be noted that due to the complex nature of VPC Service Controls and Ac
 
 ### Policy Flow Diagram
 
-![03-access-policy](../../policy_diagrams/03-access-policy.png "03-access-policy")
+![03-access-policy](../policy_diagrams/03-access-policy.png "03-access-policy")
 
 ### Compliant
 

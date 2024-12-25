@@ -19,7 +19,7 @@ blocked_role := ["roles/cloudprivatecatalogproducer.admin"]
 # Metadata variables
 guardrail := {"guardrail": "12"}
 
-description := {"description": "GUARDRAIL 12: CONFIGURATION OF CLOUD MARKETPLACES"}
+description := {"description": "Configuration of Cloud Marketplaces"}
 
 # METADATA
 # description: Checks role bindings matches blocked_role

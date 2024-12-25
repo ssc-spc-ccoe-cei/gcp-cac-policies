@@ -19,7 +19,7 @@ required_file_count := 2
 # Metadata variables
 guardrail := {"guardrail": "08"}
 
-description := {"description": "GUARDRAIL 8: NETWORK SEGMENTATION AND SEPARATION"}
+description := {"description": "Segment and Seperate"}
 
 # METADATA
 # description: Check if asset's name matches what's required
