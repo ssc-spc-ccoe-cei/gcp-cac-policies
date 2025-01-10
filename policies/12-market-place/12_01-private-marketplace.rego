@@ -10,26 +10,35 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Metadata variables
+guardrail := {"guardrail": "12"}
+description := {"description": "validation 01 - Third Party Marketplace Restrictions"}
+
 # Name of files data object to look for
 required_name := "guardrail-12"
 validation_number := "01"
 
+# METADATA
+# title: CLIENT INPUT
 # Number of files that need to be present for compliance
 required_file_count := 1
+# description: takes on the value of env var, GR12_01_APPROVAL_FILENAME
+#              filename should begin with "01_APPROVAL" but can have different suffix and file type
+#              i.e. export GR12_01_APPROVAL_FILENAME='01_APPROVAL_email.pdf'
+env := opa.runtime().env
+required_approval_filename := env["GR12_01_APPROVAL_FILENAME"]
 
-required_approval_filename := "01_APPROVAL_email.pdf"
-
-# Metadata variables
-guardrail := {"guardrail": "12"}
-
-description := {"description": "validation 01 - Third Party Marketplace Restrictions"}
 
 # METADATA
+# title: HELPER FUNCTIONS
 # description: Check if asset's name matches what's required
 is_correct_name(asset) if {
   asset.name = required_name
 }
 
+
+# METADATA
+# title: VALIDATION / DATA PROCESSING
 validation_files_list := {file |
   some asset in input.data
   some file in asset.files

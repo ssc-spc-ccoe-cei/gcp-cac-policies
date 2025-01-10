@@ -2,7 +2,6 @@
 # title: Guardrail 03 , Validation 01 - Check for Allowed Policy Member Domains
 # description: Check whether monitoring & auditing is implemented for all user accounts
 package policies.guardrail_03_01_domains
-#package example
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -11,29 +10,36 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
-required_asset_type := "orgpolicy.googleapis.com/Policy"
-required_policy := "policies/iam.allowedPolicyMemberDomains"
-
-# METADATA
-# description: list of GCP Org and/or Workspace Customer IDs
-# this is not the same as an org ID
-# run `gcloud organization list` to find yours
-required_customer_ids := ["C03xxxx4x", "Abc123", "XYZ890"]
-
 
 # Metadata variables
 guardrail := {"guardrail": "03"}
-
 description := {"description": "validation 01 - Dedicated Admin accounts"}
 
+required_asset_type := "orgpolicy.googleapis.com/Policy"
+required_policy := "policies/iam.allowedPolicyMemberDomains"
+
+
 # METADATA
+# title: CLIENT INPUT
+# description: list of GCP Org and/or Workspace Customer IDs
+# run `gcloud organization list` to find yours
+required_customer_ids := ["C03xxxx4x", "Abc123", "XYZ890"]
+env := opa.runtime().env
+# description: takes on the value of env var, GR03_01_CUSTOMER_IDS
+#              list of GCP Org and/or Workspace Customer IDs
+#              run `gcloud organization list` to find yours
+#              i.e. export GR03_01_CUSTOMER_IDS='C03xxxx4x,Abc123,XYZ890'
+required_customer_ids := split(env["GR03_01_CUSTOMER_IDS"], ",")
+
+
+# METADATA
+# title: HELPER FUNCTIONS
 # description: Checks if asset's type matches what's required
 is_correct_asset_type(asset) if {
 	asset.asset_type == required_asset_type
   endswith(asset.name, required_policy)
 }
 
-# METADATA
 # description: Check if for every element in the policy's allowed values list,
 # it matches an element in the client provided list
 # AND the corollary must also be true
@@ -50,14 +56,17 @@ has_allowed_customer_ids(asset) if {
   }
 }
 
+
 # METADATA
+# title: VALIDATION / DATA PROCESSING
 # title: Check for existence of Workspace logs
 # description: Check for a NON MATCH between the provided list and the allowedValues list in policy
 contains_non_match := {asset.resource.data.spec.rules[_].values.allowedValues[_] |
-  some asset in input#.data
+  some asset in input.data
   is_correct_asset_type(asset)
   not has_allowed_customer_ids(asset)
 }
+
 
 # METADATA
 # title: Dedicated user accounts for administration - COMPLIANT

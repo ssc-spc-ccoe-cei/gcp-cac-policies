@@ -16,8 +16,11 @@ validation_number := "02"
 
 # Number of files that need to be present for compliance
 required_file_count := 1
-
-required_approval_filename := "02_APPROVAL_email.pdf"
+# description: takes on the value of env var, GR08_02_APPROVAL_FILENAME
+#              filename should begin with "02_APPROVAL" but can have different suffix and file type
+#              i.e. export GR08_02_APPROVAL_FILENAME='02_APPROVAL_email.pdf'
+env := opa.runtime().env
+required_approval_filename := env["GR08_02_APPROVAL_FILENAME"]
 
 # Metadata variables
 guardrail := {"guardrail": "08"}

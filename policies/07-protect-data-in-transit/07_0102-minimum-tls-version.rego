@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 07 - Check Minimum TLS Version
 # description: Check web-based services are leveraging minimum TLS 1.2
-package policies.guardrail_07_tls
+package policies.guardrail_07_0102_tls
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -34,7 +34,7 @@ required_ssl_policy_profiles := ["RESTRICTED", "MODERN"]
 # Metadata variables
 guardrail := {"guardrail": "07"}
 
-description := {"description": "Protection of Data-in-Transit"}
+description := {"description": "Validation 01 & 02 - Protection of Data-in-Transit"}
 
 # METADATA
 # description: Checks if asset matches required load balancer asset type

@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 09 - Check for External Forwarding Rules
 # description: Check for ingress allow firewall rules with source range too broad
-package policies.guardrail_09_fwdingrule
+package policies.guardrail_07_0102_fwdingrule
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -24,9 +24,9 @@ insecure_port_range := [
 ]
 
 # Metadata variables
-guardrail := {"guardrail": "09"}
+guardrail := {"guardrail": "07"}
 
-description := {"description": "Network Security Services"}
+description := {"description": "Validation 01 & 02 - Network Security Services"}
 
 # METADATA
 # description: Checks if asset matches required asset type

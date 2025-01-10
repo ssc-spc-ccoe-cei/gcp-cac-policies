@@ -14,24 +14,35 @@ import future.keywords.in
 required_name := "guardrail-02"
 validation_number := "09"
 
-required_has_non_org_users := "false" # set to "true" if there are no non-organizational users
-
-# Number of files that need to be present for compliance
-required_file_count := 1
-
-required_approval_filename := "09_APPROVAL_email.pdf"
-
 # Metadata variables
 guardrail := {"guardrail": "02"}
-
 description := {"description": "validation 09 - Non-organizational Users"}
 
+
 # METADATA
+# title: CLIENT INPUT
+# description: Number of files that need to be present for compliance
+required_file_count := 1
+
+env := opa.runtime().env
+# description: set to "true" if there are NO non-organizational users
+required_has_non_org_users := env["GR02_09_HAS_NON_ORG_USERS"]
+# description: takes on the value of env var, GR02_09_APPROVAL_FILENAME
+#              filename should begin with "09_APPROVAL" but can have different suffix and file type
+#              i.e. export GR02_09_APPROVAL_FILENAME='09_APPROVAL_email.pdf'
+required_approval_filename := env["GR02_09_APPROVAL_FILENAME"]
+
+
+# METADATA
+# title: HELPER FUNCTIONS
 # description: Check if asset's name matches what's required
 is_correct_name(asset) if {
 	asset.name = required_name
 }
 
+
+# METADATA
+# title: VALIDATION / DATA PROCESSING
 validation_files_list := {file |
   some asset in input.data
   some file in asset.files

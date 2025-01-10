@@ -1,7 +1,7 @@
 # METADATA
-# title: Guardrail 01 , Validation 04 - Check for Monitioring & Audit Logs
+# title: Guardrail 11 , Validation 03 - Check for Monitioring & Audit Logs
 # description: Check whether monitoring & auditing is implemented for all user accounts
-package policies.guardrail_01_04_audit
+package policies.guardrail_11_03_audit
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -12,8 +12,8 @@ import future.keywords.in
 
 
 # Metadata variables
-guardrail := {"guardrail": "01"}
-description := {"description": "validation 04 - User account Monitoring and Auditing"}
+guardrail := {"guardrail": "11"}
+description := {"description": "validation 03 - User account Monitoring and Auditing"}
 
 # Log name to check for
 required_log_name := "cloudaudit.googleapis.com%2Factivity"

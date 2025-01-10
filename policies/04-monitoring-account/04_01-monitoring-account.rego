@@ -10,6 +10,10 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Metadata variables
+guardrail := {"guardrail": "04"}
+description := {"description": "Enterprise Monitoring Accounts"}
+
 # IAM Roles required
 roles_required := [
 	"roles/resourcemanager.organizationViewer",
@@ -22,12 +26,9 @@ required_asset_type := "cloudresourcemanager.googleapis.com/Organization"
 # IAM member to look for
 required_iam_member := "group:cloudbrokeringservices@ssc-cloud.canada.ca"
 
-# Metadata variables
-guardrail := {"guardrail": "04"}
-
-description := {"description": "Enterprise Monitoring Accounts"}
 
 # METADATA
+# title: HELPER FUNCTIONS
 # description: Check if asset's type matches what's required
 is_correct_asset(asset) if {
 	asset.asset_type == required_asset_type
@@ -45,14 +46,15 @@ role_found(role) if {
 	role in member_roles
 }
 
+
 # METADATA
+# title: VALIDATION / DATA PROCESSING
 # description: Store policy binding(s) if asset is correct
 binding_assets := {asset.iam_policy.bindings |
 	some asset in input.data
 	is_correct_asset(asset)
 }
 
-# METADATA
 # description: Store role bindings for required_iam_member
 member_roles := [binding.role |
 	some asset in binding_assets
@@ -60,7 +62,6 @@ member_roles := [binding.role |
 	is_correct_member(binding)
 ]
 
-# METADATA
 # description: |
 # Iterate through roles in roles_required and check if they match
 # the roles that are assigned to required_iam_member. Store
@@ -69,6 +70,7 @@ missing_roles := [role |
 	some role in roles_required
 	not role_found(role)
 ]
+
 
 # METADATA
 # title: Policy COMPLIANT

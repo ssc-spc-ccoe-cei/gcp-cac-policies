@@ -10,20 +10,25 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Metadata variables
+guardrail := {"guardrail": "11"}
+description := {"description": "validation 04 - Essential Contacts"}
+
+
 # Name of files data object to look for
 required_name := "guardrail-11"
 validation_number := "04"
 
 # Number of files that need to be present for compliance
-required_org_id := "1234567890"
 required_security_contacts_count := 2
+# description: takes on the value of env var, GR11_04_ORG_ID
+#              i.e. export GR11_04_ORG_ID='1234567890'
+env := opa.runtime().env
+required_org_id := env["GR11_04_ORG_ID"]
 
-# Metadata variables
-guardrail := {"guardrail": "11"}
-
-description := {"description": "validation 04 - Essential Contacts"}
 
 # METADATA
+# title: HELPER FUNCTIONS
 # description: Check if asset's name matches what's required
 is_correct_asset(asset) if {
   startswith(asset.name, concat("/", ["organizations", required_org_id, "contacts"]))
@@ -34,6 +39,9 @@ has_security_notification(asset) if {
   contains(notification_categories, "SECURITY")
 }
 
+
+# METADATA
+# title: VALIDATION / DATA PROCESSING
 contains_security_essentialcontacts := {asset.email |
   some asset in input.data
   is_correct_asset(asset)

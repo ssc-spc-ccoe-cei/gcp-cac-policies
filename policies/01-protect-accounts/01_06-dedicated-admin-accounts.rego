@@ -2,7 +2,6 @@
 # title: Guardrail 01 , Validation 04 - Check for Monitioring & Audit Logs
 # description: Check whether monitoring & auditing is implemented for all user accounts
 package policies.guardrail_01_06_audit
-#package example
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -11,29 +10,32 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
-required_asset_type := "cloudresourcemanager.googleapis.com/Organization"
-
-# METADATA
-# description: list of UPNs of privileged users' accounts (UPN should be prefixed with "user:")
-required_privileged_users_list := ["user:ca_labadmins@acceleratorlabs.ca"]
-
-# METADATA
-# description: list of UPNs of privileged users' regular accounts (UPN should be prefixed with "user:")
-required_regular_users_list := ["user:jenn.charland@acceleratorlabs.ca", "user:glen.z.yu@acceleratorlabs.ca"]
-#required_regular_users_list := ["user:glen.z.yu@acceleratorlabs.ca", "user:ca_labadmins@acceleratorlabs.ca"] # this would fail
-
 # Metadata variables
 guardrail := {"guardrail": "01"}
-
 description := {"description": "validation 06 - Dedicated Admin accounts"}
 
+required_asset_type := "cloudresourcemanager.googleapis.com/Organization"
+
+
 # METADATA
-# description: Checks if asset's type matches what's required
+# title: CLIENT INPUT
+env := opa.runtime().env
+# description: takes on the value of env var, GR01_06_PRIVILEGED_USERS
+#              list of UPNs of privileged users' accounts (UPN should be prefixed with "user:")
+#              i.e. export GR01_06_PRIVILEGED_USERS='user:adminuser.one@ssc.gc.ca,user:anotheradmin.two@ssc.gc.ca'
+required_privileged_users_list := split(env["GR01_06_PRIVILEGED_USERS"], ",")
+# description: takes on the value of env var, GR01_06_REGULAR_USERS
+#              list of UPNs of privileged users' regular accounts (UPN should be prefixed with "user:")
+#              i.e. export GR01_06_REGULAR_USERS='user:someuser.one@ssc.gc.ca,user:anotheruser.two@ssc.gc.ca'
+required_regular_users_list := split(env["GR01_06_REGULAR_USERS"], ",")
+
+
+# METADATA
+# title: HELPER FUNCTIONS
 is_correct_asset_type(asset) if {
 	asset.asset_type == required_asset_type
 }
 
-# METADATA
 # description: Check if role is Org Admin and if corresponding members has users
 has_user_members(asset) if {
   binding = asset.iam_policy.bindings[_]
@@ -41,7 +43,6 @@ has_user_members(asset) if {
   startswith(binding.members[_], "user:")
 }
 
-# METADATA
 # description: Check if user is Org Admin AND is in the privileged users list
 has_user_members_in_org_admins_list(asset) if {
   binding = asset.iam_policy.bindings[_]
@@ -51,7 +52,6 @@ has_user_members_in_org_admins_list(asset) if {
   endswith(member, user)
 }
 
-# METADATA
 # description: Check if user is Org Admin AND is in the regular users list
 has_user_members_in_reg_users_list(asset) if {
   binding = asset.iam_policy.bindings[_]
@@ -61,15 +61,16 @@ has_user_members_in_reg_users_list(asset) if {
   endswith(member, user)
 }
 
+
 # METADATA
-# title: Check for existence of Workspace logs
-# description: Check for audit log with correct log name
+# title: VALIDATION / DATA PROCESSING
 contains_dedicated_org_admin_users := {asset |
   some asset in input.data
   has_user_members(asset)
   has_user_members_in_org_admins_list(asset)    # privileged user is an Org Admin
   not has_user_members_in_reg_users_list(asset) # regular user is not an Org Admin
 }
+
 
 # METADATA
 # title: Dedicated user accounts for administration - COMPLIANT

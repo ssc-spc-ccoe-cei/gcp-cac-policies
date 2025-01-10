@@ -14,22 +14,33 @@ import future.keywords.in
 required_name := "guardrail-08"
 validation_number := "01"
 
-# Number of files that need to be present for compliance
-required_file_count := 1
-
-required_approval_filename := "01_APPROVAL_email.pdf"
-
 # Metadata variables
 guardrail := {"guardrail": "08"}
-
 description := {"description": "validation 01 - Network Architecture with Appropriate Segmentation"}
 
+
+
 # METADATA
+# title: CLIENT INPUT
+# description: Number of files that need to be present for compliance
+required_file_count := 1
+# description: takes on the value of env var, GR08_01_APPROVAL_FILENAME
+#              filename should begin with "01_APPROVAL" but can have different suffix and file type
+#              i.e. export GR08_01_APPROVAL_FILENAME='01_APPROVAL_email.pdf'
+env := opa.runtime().env
+required_approval_filename := env["GR08_01_APPROVAL_FILENAME"]
+
+
+# METADATA
+# title: HELPER FUNCTIONS
 # description: Check if asset's name matches what's required
 is_correct_name(asset) if {
 	asset.name = required_name
 }
 
+
+# METADATA
+# title: VALIDATION / DATA PROCESSING
 validation_files_list := {file |
   some asset in input.data
   some file in asset.files

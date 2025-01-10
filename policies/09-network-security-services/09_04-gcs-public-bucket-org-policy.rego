@@ -10,16 +10,15 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Metadata variables
+guardrail := {"guardrail": "09"}
+description := {"description": "Network Security Services"}
+
 # Asset type must be Policy
 required_asset_type := "orgpolicy.googleapis.com/Policy"
 
 # Org Policy must be storage.publicAccessPrevention
 required_policy := "policies/storage.publicAccessPrevention"
-
-# Metadata variables
-guardrail := {"guardrail": "09"}
-
-description := {"description": "Network Security Services"}
 
 # METADATA
 # description: Checks if asset is required type

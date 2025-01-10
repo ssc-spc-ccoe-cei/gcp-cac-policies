@@ -16,8 +16,10 @@ validation_number := "01"
 
 # Number of files that need to be present for compliance
 required_file_count := 1
-
-required_approval_filename := "01_APPROVAL_email.pdf"
+# description: takes on the value of env var, GR13_01_APPROVAL_FILENAME
+#              filename should begin with "01_APPROVAL" but can have different suffix and file type
+#              i.e. export GR13_01_APPROVAL_FILENAME='01_APPROVAL_email.pdf'
+required_approval_filename := env["GR13_01_APPROVAL_FILENAME"]
 
 # Metadata variables
 guardrail := {"guardrail": "13"}

@@ -1,7 +1,7 @@
 # METADATA
-# title: Guardrail 10, Validation 01 - Ensure MOU uploaded
+# title: Guardrail 01, Validation 05 - Ensure Alerts for Suspicious Activity have been implemented
 # description: Check for presence of required file(s) in Cloud Storage
-package policies.guardrail_10_01_files
+package policies.guardrail_01_05_files
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -10,30 +10,31 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
-# Metadata variables
-guardrail := {"guardrail": "10"}
-description := {"description": "validation 01 - Memorandum of Understanding"}
-
 # Name of files data object to look for
-required_name := "guardrail-10"
-validation_number := "01"
+required_name := "guardrail-01"
+validation_number := "05"
+
+# Metadata variables
+guardrail := {"guardrail": "01"}
+description := {"description": "validation 05 - Suspicious Activity Alerts"}
+
 
 # METADATA
 # title: CLIENT INPUT
-# Number of files that need to be present for compliance
+# description: Number of files that need to be present for compliance
 required_file_count := 1
-# description: takes on the value of env var, GR10_01_APPROVAL_FILENAME
-#              filename should begin with "01_APPROVAL" but can have different suffix and file type
-#              i.e. export GR10_01_APPROVAL_FILENAME='01_APPROVAL_email.pdf'
+# description: takes on the value of env var, GR01_05_APPROVAL_FILENAME
+#              filename should begin with "05_APPROVAL" but can have different suffix and file type
+#              i.e. export GR01_05_APPROVAL_FILENAME='05_APPROVAL_email.pdf'
 env := opa.runtime().env
-required_approval_filename := env["GR10_01_APPROVAL_FILENAME"]
+required_approval_filename := env["GR01_05_APPROVAL_FILENAME"]
 
 
 # METADATA
 # title: HELPER FUNCTIONS
 # description: Check if asset's name matches what's required
 is_correct_name(asset) if {
-  asset.name = required_name
+	asset.name = required_name
 }
 
 
@@ -54,36 +55,36 @@ contains_approval if {
 
 
 # METADATA
-# title: MOU Policy - COMPLIANT
+# title: Privileged Account Management Plan - COMPLIANT
 # description: If validation/evidence file count meets miniumum AND has approval, then COMPLIANT
 reply contains response if {
   count(validation_files_list) >= required_file_count
   contains_approval
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
-	msg := {"msg": sprintf("Required Memorandum of Understanding file(s) AND Approval file for [%v, validation %v] detected.", [required_name, validation_number])}
+	msg := {"msg": sprintf("Required Reporting Rules and Alerts have been added AND Approval file for [%v, validation %v] detected.", [required_name, validation_number])}
 	response := object.union_n([guardrail, status, msg, description, check])
 }
 
 # METADATA
 # title: Policy - PENDING
-# description: If validation/evidence file count meets miniumum, but not approval, then PENDING
+# description: If validation/evidence file count meets miniumum, but not approval, then PENDING 
 reply contains response if {
   count(validation_files_list) >= required_file_count
   not contains_approval
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "PENDING"}
-	msg := {"msg": sprintf("Required Memorandum of Understanding file(s) for [%v, validation %v] detected. Approval file NOT detected.", [required_name, validation_number])}
+	msg := {"msg": sprintf("Required Reporting Rules and Alerts have been added for [%v, validation %v] detected. Approval file NOT detected.", [required_name, validation_number])}
 	response := object.union_n([guardrail, status, msg, description, check])
 }
 
 # METADATA
 # title: Policy - NON-COMPLIANT
-# description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT
+# description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT 
 reply contains response if {
   count(validation_files_list) < required_file_count
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("Required Memorandum of Understanding file(s) for [%v, validation %v] NOT detected. Only the following was found: [%v]", [required_name, validation_number, validation_files_list])}
+	msg := {"msg": sprintf("Required Reporting Rules and Alerts for [%v, validation %v] NOT detected. Only the following was found: [%v]", [required_name, validation_number, validation_files_list])}
 	response := object.union_n([guardrail, status, msg, description, check])
 }

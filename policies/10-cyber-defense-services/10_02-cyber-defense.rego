@@ -10,6 +10,11 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+
+# Metadata variables
+guardrail := {"guardrail": "10"}
+description := {"description": "validation 02 - Cyber Centre Sensors"}
+
 # Name of files data object to look for
 required_name := "guardrail-10"
 validation_number := "02"
@@ -19,12 +24,9 @@ required_asset_type_03 := "cloudfunctions.googleapis.com/Function"
 required_asset_type_04 := "run.googleapis.com/Service"
 required_asset_type_05 := "storage.googleapis.com/Bucket"
 
-# Metadata variables
-guardrail := {"guardrail": "10"}
-
-description := {"description": "validation 02 - Cyber Centre Sensors"}
 
 # METADATA
+# title: HELPER FUNCTIONS
 # description: Check if asset's name matches what's required and has expected name(s)
 is_correct_asset_01(asset) if {
   asset.asset_type = required_asset_type_01
@@ -52,6 +54,8 @@ is_correct_asset_05(asset) if {
 }
 
 
+# METADATA
+# title: VALIDATION / DATA PROCESSING
 matching_assets_01 := {asset |
 	some asset in input.data
 	is_correct_asset_01(asset)

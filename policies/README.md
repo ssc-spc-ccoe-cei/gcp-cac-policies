@@ -23,3 +23,62 @@ This repository contains all the policy artifacts for the CaC Tool. Each policy 
 ## Overall workflow for CaC Validation Checking
 
 ![Compliance Validation Workflow](assets/policy_diagrams/compliance-workflow.png "Compliance Validation Workflow")
+
+
+## Environment Variables with OPA repository
+
+If you want to pass a list as a variable (i.e. you want `myvar := ["item1", "item2", "item3"]`), you *CANNOT* do `export MYVAR = '["item1", "item2", "item3"]'` as this will be interpreted as a string (that just looks like a list).
+
+Attempting to make the item a list using square brackets `[ ]` in Rego will introduce a lot of additional escape `\\` characters for the escapes and quotes -- and this is not what we want. Instead, what you want is to export your list variable values as unquoted, comma-delimited strings and we then use Rego's [`string.split`](https://www.openpolicyagent.org/docs/latest/policy-reference/#builtin-strings-split) function to split your string and returns a list object where and item will be in double quotes.
+
+For example: `export MYVAR = "item1,item2,item3"`, once passed to `string.split(env["MYVAR"], ",")`, will become `["item1", "item2", "item3"]`
+
+
+### List of ENV VARS
+
+Naming format is `GR<GUARDRAIL_NUMBER>_<VALIDATION_NUMBER>_VARNAME`.  If the `VARNAME` is plural, then the env var is expected to be a list.
+
+i.e. 
+- `GR01_03_DOMAIN` is an env var for Guardrail 01, Validation 03 and it's the domain
+- `GR02_08_ALLOWED_DOMAINS` is an env var for Guardrail 02, Validation 08 and is a list of allowed domain(s) -- and of course, if it's only 1 item in this list, that is okay too
+
+
+```
+required_domain := env["GR01_03_DOMAIN"]
+required_approval_filename := env["GR01_05_APPROVAL_FILENAME"]
+required_privileged_users_list := split(env["GR01_06_PRIVILEGED_USERS"], ",")
+required_regular_users_list := split(env["GR01_06_REGULAR_USERS"], ",")
+
+required_domain := env["GR02_01_DOMAIN"]
+required_domains_allow_list := split(env["GR02_01_PRIVILEGED_USERS"], ",")
+required_domains_deny_list := split(env["GR02_01_REGULAR_USERS"], ",")
+required_approval_filename := env["GR02_02_APPROVAL_FILENAME"]
+required_approval_filename := env["GR02_03_APPROVAL_FILENAME"]
+required_approval_filename := env["GR02_06_APPROVAL_FILENAME"]
+required_domains_allow_list := split(env["GR02_08_ALLOWED_DOMAINS"], ",")
+required_domains_deny_list := split(env["GR02_08_DENY_DOMAINS"], ",")
+required_has_non_org_users := env["GR02_09_HAS_NON_ORG_USERS"]
+required_approval_filename := env["GR02_09_APPROVAL_FILENAME"]
+required_has_non_org_users := env["GR02_10_HAS_NON_ORG_USERS"]
+required_approval_filename := env["GR02_10_APPROVAL_FILENAME"]
+required_customer_ids := split(env["GR03_01_CUSTOMER_IDS"], ",")
+required_allowed_cidrs := split(env["GR03_01_ALLOWED_CIDRS"], ",")
+
+required_security_category_key := env["GR05_01_SECURITY_CATEGORY_KEY"]
+
+required_allowed_ca_issuers_list := split(env["GR07_03_ALLOWED_CA_ISSUERS"], ",")
+
+required_approval_filename := env["GR08_01_APPROVAL_FILENAME"]
+required_approval_filename := env["GR08_02_APPROVAL_FILENAME"]
+required_approval_filename := env["GR08_03_APPROVAL_FILENAME"]
+
+required_approval_filename := env["GR10_01_APPROVAL_FILENAME"]
+
+required_approval_filename := env["GR11_06_APPROVAL_FILENAME"]
+required_org_id := env["GR11_04_ORG_ID"]
+
+required_approval_filename := env["GR12_01_APPROVAL_FILENAME"]
+
+required_approval_filename := env["GR13_01_APPROVAL_FILENAME"]
+required_approval_filename := env["GR13_04_APPROVAL_FILENAME"]
+```

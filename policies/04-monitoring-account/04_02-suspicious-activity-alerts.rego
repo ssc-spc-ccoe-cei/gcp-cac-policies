@@ -1,0 +1,70 @@
+# METADATA
+# title: Guardrail 04, Validation 02 - Ensure Alerts for Suspicious Activity have been implemented
+# description: Check for presence of required file(s) in Cloud Storage
+#              NOTE this is a duplicate of GR1.5
+package policies.guardrail_04_02_files
+
+# Import future keywords
+# More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
+import future.keywords.contains
+import future.keywords.every
+import future.keywords.if
+import future.keywords.in
+
+# Name of files data object to look for
+required_name := "guardrail-04"
+validation_number := "02"
+
+# Metadata variables
+guardrail := {"guardrail": "04"}
+description := {"description": "validation 02 - Suspicious Activity Alerts"}
+
+# description: GR04_02 is dependent on GR01_05, so we're checking for GR01_05's compliance status
+required_guardrail_check := "guardrail-01"
+
+# METADATA
+# description: takes on the value of env var, GR01_05_APPROVAL_FILENAME
+#              there is NO client input required here as it should already exist for GR1.5
+env := opa.runtime().env
+required_approval_filename := env["GR01_05_APPROVAL_FILENAME"]
+
+
+# METADATA
+# title: HELPER FUNCTIONS
+# description: Check if asset's name matches what's required
+is_correct_name(asset) if {
+	asset.name = required_guardrail_check
+}
+
+
+# METADATA
+# title: VALIDATION / DATA PROCESSING
+# description: checking GR01_05 for approval file
+contains_approval if {
+  some asset in input.data
+  some file in asset.files
+  endswith(file, concat("/", [required_guardrail_check, "validations", required_approval_filename]))
+}
+
+
+# METADATA
+# title: Suspicious Activity Alerts Policy - COMPLIANT
+# description: If GR01_05 is compliant, then COMPLIANT
+reply contains response if {
+  contains_approval
+	check := {"check_type": "MANDATORY"}
+	status := {"status": "COMPLIANT"}
+	msg := {"msg": sprintf("Required suspicious activity alerts compliant for [%v, validation %v] as Guardrail 01, Validation 05 is also compliant.", [required_name, validation_number])}
+	response := object.union_n([guardrail, status, msg, description, check])
+}
+
+# METADATA
+# title: Policy - NON-COMPLIANT
+# description: If GR01_05 not compliant, then NON-COMPLIANT 
+reply contains response if {
+  not contains_approval
+	check := {"check_type": "MANDATORY"}
+	status := {"status": "NON-COMPLIANT"}
+	msg := {"msg": sprintf("Required suspicious activity alerts for [%v, validation %v] NOT detected. Please confirm Guardrail 01, Validation 05 is compliant.", [required_name, validation_number, validation_files_list])}
+	response := object.union_n([guardrail, status, msg, description, check])
+}
