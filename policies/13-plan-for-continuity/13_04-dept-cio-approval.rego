@@ -16,7 +16,7 @@ validation_number := "04"
 
 # Number of files that need to be present for compliance
 # No upload required here: document should be uploaded in GR13.1
-required_file_count := 0
+required_file_count := 1
 # description: takes on the value of env var, GR13_04_APPROVAL_FILENAME
 #              filename should begin with "04_APPROVAL" but can have different suffix and file type
 #              i.e. export GR13_04_APPROVAL_FILENAME='04_APPROVAL_email.pdf'
@@ -68,5 +68,16 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "PENDING"}
 	msg := {"msg": sprintf("Required Departmental CIO approval Emergency Account Procedure file(s) for [%v, validation %v] NOT detected.", [required_name, validation_number])}
+	response := object.union_n([guardrail, status, msg, description, check])
+}
+
+# METADATA
+# title: Policy - NON-COMPLIANT
+# description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT
+reply contains response if {
+  count(validation_files_list) < required_file_count
+  check := {"check_type": "MANDATORY"}
+	status := {"status": "NON-COMPLIANT"}
+	msg := {"msg": sprintf("Required Emergency Account Procedure file(s) from guardrail-13, validation 01 for [%v, validation %v] NOT detected. Only the following was found: [%v]", [required_name, validation_number, validation_files_list])}
 	response := object.union_n([guardrail, status, msg, description, check])
 }
