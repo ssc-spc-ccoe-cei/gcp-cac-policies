@@ -26,11 +26,11 @@ required_domain := env["GR02_01_DOMAIN"]
 # description: takes on the value of env var, GR02_01_PRIVILEGED_USERS
 #              list of UPNs of privileged users' accounts (UPN should be prefixed with "user:")
 #              i.e. export GR02_01_PRIVILEGED_USERS='user:someadminuser.one@ssc.gc.ca,user:anotheradminuser.two@ssc.gc.ca'
-required_domains_allow_list := split(env["GR02_01_PRIVILEGED_USERS"], ",")
+required_privileged_users_list := split(env["GR02_01_PRIVILEGED_USERS"], ",")
 # description: takes on the value of env var, GR02_01_REGULAR_USERS
 #              list of UPNs of privileged users' regular accounts (UPN should be prefixed with "user:")
 #              i.e. export GR02_01_REGULAR_USERS='user:someuser.one@ssc.gc.ca,user:anotheruser.two@ssc.gc.ca'
-required_domains_deny_list := split(env["GR02_01_REGULAR_USERS"], ",")
+required_regular_users_list := split(env["GR02_01_REGULAR_USERS"], ",")
 
 
 

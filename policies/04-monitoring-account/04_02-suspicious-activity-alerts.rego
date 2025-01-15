@@ -19,14 +19,12 @@ validation_number := "02"
 guardrail := {"guardrail": "04"}
 description := {"description": "validation 02 - Suspicious Activity Alerts"}
 
-# description: GR04_02 is dependent on GR01_05, so we're checking for GR01_05's compliance status
-required_guardrail_check := "guardrail-01"
 
 # METADATA
-# description: takes on the value of env var, GR01_05_APPROVAL_FILENAME
-#              there is NO client input required here as it should already exist for GR1.5
-env := opa.runtime().env
-required_approval_filename := env["GR01_05_APPROVAL_FILENAME"]
+# description: GR04_02 is dependent on GR01_05, so we're checking for GR01_05's compliance status
+required_guardrail_check := "guardrail-01"
+# description: approval filename should begin with "05_APPROVAL", but can be of any suffix/file type
+required_approval_filename := "05_APPROVAL"]
 
 
 # METADATA

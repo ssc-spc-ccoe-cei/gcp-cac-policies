@@ -23,11 +23,8 @@ description := {"description": "validation 05 - Suspicious Activity Alerts"}
 # title: CLIENT INPUT
 # description: Number of files that need to be present for compliance
 required_file_count := 1
-# description: takes on the value of env var, GR01_05_APPROVAL_FILENAME
-#              filename should begin with "05_APPROVAL" but can have different suffix and file type
-#              i.e. export GR01_05_APPROVAL_FILENAME='05_APPROVAL_email.pdf'
-env := opa.runtime().env
-required_approval_filename := env["GR01_05_APPROVAL_FILENAME"]
+# description: approval filename should begin with "05_APPROVAL", but can be of any suffix/file type
+required_approval_filename := "05_APPROVAL"
 
 
 # METADATA
@@ -50,7 +47,7 @@ contains_approval if {
   count(validation_files_list) >= required_file_count + 1
   some asset in input.data
   some file in asset.files
-  endswith(file, concat("/", [required_name, "validations", required_approval_filename]))
+  startswith(file, concat("/", [required_name, "validations", required_approval_filename]))
 }
 
 

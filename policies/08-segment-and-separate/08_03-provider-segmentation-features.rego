@@ -19,11 +19,8 @@ validation_number := "03"
 # This validation is to ensure the network architecture and cloud deployment guide makes use of provider features
 # There is no "NON-COMPLIANT" status that comes out of this as it builds on 8.1 and 8.2
 required_file_count := 1
-# description: takes on the value of env var, GR08_03_APPROVAL_FILENAME
-#              filename should begin with "03_APPROVAL" but can have different suffix and file type
-#              i.e. export GR08_03_APPROVAL_FILENAME='03_APPROVAL_email.pdf'
-env := opa.runtime().env
-required_approval_filename := env["GR08_03_APPROVAL_FILENAME"]
+# description: approval filename should begin with "03_APPROVAL", but can be of any suffix/file type
+required_approval_filename := "03_APPROVAL"
 
 # Metadata variables
 guardrail := {"guardrail": "08"}
@@ -46,7 +43,7 @@ contains_approval if {
   count(validation_files_list) >= required_file_count + 1
   some asset in input.data
   some file in asset.files
-  endswith(file, concat("/", [required_name, "validations", required_approval_filename]))
+  startswith(file, concat("/", [required_name, "validations", required_approval_filename]))
 }
 
 

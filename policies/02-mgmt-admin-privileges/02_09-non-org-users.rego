@@ -16,21 +16,19 @@ validation_number := "09"
 
 # Metadata variables
 guardrail := {"guardrail": "02"}
-description := {"description": "validation 09 - Non-organizational Users"}
+description := {"description": "validation 09 - Non-organizational/Guest Users"}
 
 
 # METADATA
 # title: CLIENT INPUT
 # description: Number of files that need to be present for compliance
 required_file_count := 1
+# description: approval filename should begin with "09_APPROVAL", but can be of any suffix/file type
+required_approval_filename := "09_APPROVAL"
 
 env := opa.runtime().env
-# description: set to "true" if there are NO non-organizational users
-required_has_non_org_users := env["GR02_09_HAS_NON_ORG_USERS"]
-# description: takes on the value of env var, GR02_09_APPROVAL_FILENAME
-#              filename should begin with "09_APPROVAL" but can have different suffix and file type
-#              i.e. export GR02_09_APPROVAL_FILENAME='09_APPROVAL_email.pdf'
-required_approval_filename := env["GR02_09_APPROVAL_FILENAME"]
+# description: set to "true" if there are guest users
+required_has_guest_users := env["GR02_09_HAS_GUEST_USERS"]
 
 
 # METADATA
@@ -53,26 +51,26 @@ contains_approval if {
   count(validation_files_list) >= required_file_count + 1
   some asset in input.data
   some file in asset.files
-  endswith(file, concat("/", [required_name, "validations", required_approval_filename]))
+  startswith(file, concat("/", [required_name, "validations", required_approval_filename]))
 }
 
 
 # METADATA
-# title: NO Non-organizational Users. Policy - COMPLIANT
-# description: No non-organizational users; automatically compliant
+# title: NO Guest Users. Policy - COMPLIANT
+# description: No guest users; automatically compliant
 reply contains response if {
-  required_has_non_org_users == "true"
+  required_has_guest_users == "false"
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
-	msg := {"msg": sprintf("No non-organization users detected for [%v, validation %v].", [required_name, validation_number])}
+	msg := {"msg": sprintf("No guest users detected for [%v, validation %v].", [required_name, validation_number])}
 	response := object.union_n([guardrail, status, msg, description, check])
 }
 
 # METADATA
-# title: Non-organizational Users Review Policy - COMPLIANT
+# title: Guest Users Review Policy - COMPLIANT
 # description: If validation/evidence file count meets miniumum AND has approval, then COMPLIANT
 reply contains response if {
-  required_has_non_org_users == "false"
+  required_has_guest_users == "true"
   count(validation_files_list) >= required_file_count
   contains_approval
 	check := {"check_type": "MANDATORY"}
@@ -85,7 +83,7 @@ reply contains response if {
 # title: Policy - PENDING
 # description: If validation/evidence file count meets miniumum, but not approval, then PENDING
 reply contains response if {
-  required_has_non_org_users == "false"
+  required_has_guest_users == "true"
   count(validation_files_list) >= required_file_count
   not contains_approval
 	check := {"check_type": "MANDATORY"}
@@ -98,7 +96,7 @@ reply contains response if {
 # title: Policy - NON-COMPLIANT
 # description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT
 reply contains response if {
-  required_has_non_org_users == "false"
+  required_has_guest_users == "true"
   count(validation_files_list) < required_file_count
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}

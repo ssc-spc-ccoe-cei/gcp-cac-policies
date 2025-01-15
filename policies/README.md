@@ -45,22 +45,17 @@ i.e.
 
 ```
 required_domain := env["GR01_03_DOMAIN"]
-required_approval_filename := env["GR01_05_APPROVAL_FILENAME"]
 required_privileged_users_list := split(env["GR01_06_PRIVILEGED_USERS"], ",")
 required_regular_users_list := split(env["GR01_06_REGULAR_USERS"], ",")
 
 required_domain := env["GR02_01_DOMAIN"]
-required_domains_allow_list := split(env["GR02_01_PRIVILEGED_USERS"], ",")
-required_domains_deny_list := split(env["GR02_01_REGULAR_USERS"], ",")
-required_approval_filename := env["GR02_02_APPROVAL_FILENAME"]
-required_approval_filename := env["GR02_03_APPROVAL_FILENAME"]
-required_approval_filename := env["GR02_06_APPROVAL_FILENAME"]
+required_privileged_users_list := split(env["GR02_01_PRIVILEGED_USERS"], ",")
+required_regular_users_list := split(env["GR02_01_REGULAR_USERS"], ",")
 required_domains_allow_list := split(env["GR02_08_ALLOWED_DOMAINS"], ",")
 required_domains_deny_list := split(env["GR02_08_DENY_DOMAINS"], ",")
-required_has_non_org_users := env["GR02_09_HAS_NON_ORG_USERS"]
-required_approval_filename := env["GR02_09_APPROVAL_FILENAME"]
-required_has_non_org_users := env["GR02_10_HAS_NON_ORG_USERS"]
-required_approval_filename := env["GR02_10_APPROVAL_FILENAME"]
+required_has_guest_users := env["GR02_09_HAS_GUEST_USERS"]
+required_has_guest_users := env["GR02_10_HAS_GUEST_USERS"]
+
 required_customer_ids := split(env["GR03_01_CUSTOMER_IDS"], ",")
 required_allowed_cidrs := split(env["GR03_01_ALLOWED_CIDRS"], ",")
 
@@ -68,17 +63,5 @@ required_security_category_key := env["GR05_01_SECURITY_CATEGORY_KEY"]
 
 required_allowed_ca_issuers_list := split(env["GR07_03_ALLOWED_CA_ISSUERS"], ",")
 
-required_approval_filename := env["GR08_01_APPROVAL_FILENAME"]
-required_approval_filename := env["GR08_02_APPROVAL_FILENAME"]
-required_approval_filename := env["GR08_03_APPROVAL_FILENAME"]
-
-required_approval_filename := env["GR10_01_APPROVAL_FILENAME"]
-
-required_approval_filename := env["GR11_06_APPROVAL_FILENAME"]
 required_org_id := env["GR11_04_ORG_ID"]
-
-required_approval_filename := env["GR12_01_APPROVAL_FILENAME"]
-
-required_approval_filename := env["GR13_01_APPROVAL_FILENAME"]
-required_approval_filename := env["GR13_04_APPROVAL_FILENAME"]
 ```

@@ -16,11 +16,9 @@ validation_number := "04"
 
 # Number of files that need to be present for compliance
 # No upload required here: document should be uploaded in GR13.1
-required_file_count := 1
-# description: takes on the value of env var, GR13_04_APPROVAL_FILENAME
-#              filename should begin with "04_APPROVAL" but can have different suffix and file type
-#              i.e. export GR13_04_APPROVAL_FILENAME='04_APPROVAL_email.pdf'
-required_approval_filename := env["GR13_04_APPROVAL_FILENAME"]
+required_file_count := 0
+# description: approval filename should begin with "04_APPROVAL", but can be of any suffix/file type
+required_approval_filename := "04_APPROVAL"
 
 # Metadata variables
 guardrail := {"guardrail": "13"}
@@ -43,7 +41,7 @@ contains_approval if {
   count(validation_files_list) >= required_file_count + 1
   some asset in input.data
   some file in asset.files
-  endswith(file, concat("/", [required_name, "validations", required_approval_filename]))
+  startswith(file, concat("/", [required_name, "validations", required_approval_filename]))
 }
 
 

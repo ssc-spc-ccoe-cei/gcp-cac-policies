@@ -23,11 +23,8 @@ description := {"description": "validation 06 - Password Policy Implementation"}
 # title: CLIENT INPUT
 # description: Number of files that need to be present for compliance
 required_file_count := 1
-# description: takes on the value of env var, GR02_06_APPROVAL_FILENAME
-#              filename should begin with "06_APPROVAL" but can have different suffix and file type
-#              i.e. export GR02_06_APPROVAL_FILENAME='06_APPROVAL_email.pdf'
-env := opa.runtime().env
-required_approval_filename := env["GR02_06_APPROVAL_FILENAME"]
+# description: approval filename should begin with "06_APPROVAL", but can be of any suffix/file type
+required_approval_filename := "06_APPROVAL"
 
 # METADATA
 # title: HELPER FUNCTIONS
@@ -49,7 +46,7 @@ contains_approval if {
   count(validation_files_list) >= required_file_count + 1
   some asset in input.data
   some file in asset.files
-  endswith(file, concat("/", [required_name, "validations", required_approval_filename]))
+  startswith(file, concat("/", [required_name, "validations", required_approval_filename]))
 }
 
 
