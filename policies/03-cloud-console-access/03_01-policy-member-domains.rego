@@ -40,6 +40,10 @@ is_correct_asset_type(asset) if {
   endswith(asset.name, required_policy)
 }
 
+is_org_policy(asset) if {
+  split(asset.name, "/")[3] == "organizations"
+}
+
 # description: Check if for every element in the policy's allowed values list,
 # it matches an element in the client provided list
 # AND the corollary must also be true
@@ -64,6 +68,7 @@ has_allowed_customer_ids(asset) if {
 contains_non_match := {asset.resource.data.spec.rules[_].values.allowedValues[_] |
   some asset in input.data
   is_correct_asset_type(asset)
+  is_org_policy(asset)
   not has_allowed_customer_ids(asset)
 }
 
