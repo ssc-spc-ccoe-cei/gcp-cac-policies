@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 11 , Validation 01 & 02 - Check for that Essential & Event Logging is Enabled
 # description: Check whether monitoring & auditing is implemented for all user accounts
-package policies.guardrail_11_0102_audit
+package policies.guardrail_11_0102_logging
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -13,7 +13,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "11"}
-description := {"description": "validation 01 & 02 - Essential & Event Logging Enabled"}
+validation := {"validation": "0102"}
+description := {"description": "Essential & Event Logging Enabled"}
 
 # Log name to check for
 required_log_name := "cloudaudit.googleapis.com%2Factivity"
@@ -49,7 +50,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Essential & Event Logs detected."}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -60,5 +61,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": "Essential & Event Logs NOT detected."}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

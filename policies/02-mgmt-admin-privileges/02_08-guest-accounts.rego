@@ -1,6 +1,6 @@
 # METADATA title: Guardrail 02, Validation 08 - Guest User Access
 # description: Check for presence of authorized guest users
-package policies.guardrail_02_08_audit
+package policies.guardrail_02_08_access
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -15,17 +15,18 @@ validation_number := "08"
 
 # Metadata variables
 guardrail := {"guardrail": "02"}
-description := {"description": "validation 08 - Guest User Access"}
+validation := {"validation": "08"}
+description := {"description": "Guest User Access"}
 
 
 # METADATA
 # description: CLIENT INPUT
 env := opa.runtime().env
 # description: takes on the value of env var, GR02_08_ALLOWED_DOMAINS
-#              i.e. export GR02_08_ALLOWED_DOMAIN='ssc.gc.ca'
+#              i.e. export GR02_08_ALLOWED_DOMAINS='ssc.gc.ca'
 required_domains_allow_list := split(env["GR02_08_ALLOWED_DOMAINS"], ",")
 # description: takes on the value of env var, GR02_08_DENY_DOMAINS
-#              i.e. export GR02_08_DENY_DOMAIN='gmail.com,outlook.com'
+#              i.e. export GR02_08_DENY_DOMAINS='gmail.com,outlook.com'
 required_domains_deny_list := split(env["GR02_08_DENY_DOMAINS"], ",")
 
 # METADATA
@@ -92,7 +93,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("No unauthorized guest users have been detected for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -103,5 +104,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Unauthorized guest users were detected for [%v, validation %v]. The following [%v] unauthorized guests were found: [%v].  And the following [%v] guests were found to be from banned domains: [%v].", [required_name, validation_number, count(unauthorized_guests_set), unauthorized_guests_set, count(denied_guests_set), denied_guests_set])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 07, Validation 03 - Check Certificate CAs
 # description: Check that certificates are from approved Certificate Authorities
-package policies.guardrail_07_03_audit
+package policies.guardrail_07_03_certs
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -12,7 +12,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "07"}
-description := {"description": "validation 03 - Certificates from Approved CA Issuers"}
+validation := {"validation": "03"}
+description := {"description": "Certificates from Approved CA Issuers"}
 
 required_asset_kind := "certificatemanager#certificate#issuer"
 
@@ -36,6 +37,7 @@ is_correct_asset(asset) if {
 # description: Check if cert is from approved CAs list
 has_allowed_ca(asset) if {
   some ca in required_allowed_ca_issuers_list
+  is_correct_asset(asset)
   asset.issuer_org == ca
 }
 
@@ -45,6 +47,7 @@ has_allowed_ca(asset) if {
 # description: Store certs names that are not from approved CAs
 assets_with_non_approved_ca := {asset.name |
 	some asset in input.data
+  is_correct_asset(asset)
   not has_allowed_ca(asset)
 }
 
@@ -57,7 +60,7 @@ reply contains response if {
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Certificates are in found to be from approved Certificate Authorities"}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # description: If some certificates are NOT from approved CAs, then NON-COMPLIANT and report list
@@ -66,5 +69,5 @@ reply contains response if {
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("The following certificates have been found to come from non-approved Certificate Authorities: [%v]", [assets_with_non_approved_ca])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

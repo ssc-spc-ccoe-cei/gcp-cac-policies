@@ -16,13 +16,13 @@ validation_number := "02"
 
 # Number of files that need to be present for compliance
 required_file_count := 1
-# description: approval filename should begin with "02_APPROVAL", but can be of any suffix/file type
+# description: filename should begin with "02_APPROVAL" but can have different suffix and file type
 required_approval_filename := "02_APPROVAL"
 
 # Metadata variables
 guardrail := {"guardrail": "08"}
-
-description := {"description": "validation 02 - Cloud Deployment Guide"}
+validation := {"validation": "02"}
+description := {"description": "Cloud Deployment Guide"}
 
 # METADATA
 # description: Check if asset's name matches what's required
@@ -53,7 +53,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required Cloud Deployment Guide file(s) AND Approval file for [%v, validation %v] detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -65,7 +65,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "PENDING"}
 	msg := {"msg": sprintf("Required Cloud Deployment Guide file(s) for [%v, validation %v] detected. Approval file NOT detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -76,5 +76,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Cloud Deployment Guide file(s) for [%v, validation %v] NOT detected. Only the following was found: [%v]", [required_name, validation_number, validation_files_list])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

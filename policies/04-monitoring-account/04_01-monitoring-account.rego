@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 04 - Check Monitoring Account IAM Roles
 # description: Check roles assigned to account are correct to to enable enterprise monitoring and visibility
-package policies.guardrail_04_monitor
+package policies.guardrail_04_01_monitor
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -12,6 +12,7 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "04"}
+validation := {"validation": "01"}
 description := {"description": "Enterprise Monitoring Accounts"}
 
 # IAM Roles required
@@ -82,7 +83,7 @@ reply contains response if {
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("IAM Member [%v] found with correct roles assigned [%v].", [required_iam_member, roles_required])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -95,5 +96,5 @@ reply contains response if {
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("IAM Member [%v] missing required role [%v].", [required_iam_member, role])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

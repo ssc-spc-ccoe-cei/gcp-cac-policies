@@ -1,6 +1,6 @@
 # METADATA
 # title: Guardrail 03 , Validation 01 - Check for Allowed Policy Member Domains
-# description: Check whether monitoring & auditing is implemented for all user accounts
+# description: Check whether Allowed Policy Member Domains is implemented for Endpoint Management
 package policies.guardrail_03_01_domains
 
 # Import future keywords
@@ -13,7 +13,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "03"}
-description := {"description": "validation 01 - Dedicated Admin accounts"}
+validation := {"validation": "01a"}
+description := {"description": "Endpoint Management - Allowed Policy Member Domains"}
 
 required_asset_type := "orgpolicy.googleapis.com/Policy"
 required_policy := "policies/iam.allowedPolicyMemberDomains"
@@ -41,7 +42,7 @@ is_correct_asset_type(asset) if {
 }
 
 is_org_policy(asset) if {
-  split(asset.name, "/")[3] == "organizations"
+	split(asset.name, "/")[3] == "organizations"
 }
 
 # description: Check if for every element in the policy's allowed values list,
@@ -81,7 +82,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Policy Member Domains configuration detected."}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -92,5 +93,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Items in policy allowed values of [%v] do NOT match the client provided list of %v.", [contains_non_match, required_customer_ids])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

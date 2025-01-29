@@ -1,7 +1,7 @@
 # METADATA
-# title: Guardrail 01 , Validation 04 - Check for Monitioring & Audit Logs
+# title: Guardrail 01, Validation 06 - Dedicated Admin accounts
 # description: Check whether monitoring & auditing is implemented for all user accounts
-package policies.guardrail_01_06_audit
+package policies.guardrail_01_06_accounts
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -12,7 +12,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "01"}
-description := {"description": "validation 06 - Dedicated Admin accounts"}
+validation := {"validation": "06"}
+description := {"description": "Dedicated Admin accounts"}
 
 required_asset_type := "cloudresourcemanager.googleapis.com/Organization"
 
@@ -80,7 +81,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Dedicated Organization Admin users detected."}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -91,5 +92,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": "Dedicated Organization Admin users NOT detected."}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

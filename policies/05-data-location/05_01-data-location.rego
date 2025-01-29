@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 05, Validation 01 - Check Asset Location
 # description: Check assets are in approved location
-package policies.guardrail_05_01_audit
+package policies.guardrail_05_01_location
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -12,7 +12,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "05"}
-description := {"description": "validation 01 - Data Location"}
+validation := {"validation": "01a"}
+description := {"description": "Data Location"}
 
 # List of allowed regions that assets must reside in
 allowed_regions := [
@@ -86,6 +87,7 @@ has_location_field(asset) if {
 # description: Check if asset is exempt
 is_exempt_asset(asset) if {
 	asset.asset_type in exempt_resources
+  has_location_field(asset)
 }
 
 is_tagged_asset(asset) if {
@@ -93,6 +95,7 @@ is_tagged_asset(asset) if {
 }
 
 is_exempt_security_categories(asset) if {
+  has_location_field(asset)
   is_tagged_asset(asset)
   endswith(asset.tag_key, required_security_category_key)
   some value in exempt_security_categories
@@ -101,13 +104,16 @@ is_exempt_security_categories(asset) if {
 
 # description: Check if asset is in allowed location
 in_allowed_location(asset) if {
+  has_location_field(asset)
 	asset.resource.location in allowed_regions
 }
 is_exempt_audit(asset) if {
+  has_location_field(asset)
 	asset.resource.data.description == "Audit bucket"
 	asset.resource.location == "global"
 }
 is_exempt_default(asset) if {
+  has_location_field(asset)
 	asset.resource.data.description == "Default bucket"
 	asset.resource.location == "global"
 }
@@ -125,6 +131,7 @@ assets_with_location := {asset |
 # description: Store the names assets that are not part of the exempt_resources list
 assets_not_exempt := {asset.name |
 	some asset in assets_with_location
+  has_location_field(asset)
 	not is_exempt_asset(asset)
 	not is_exempt_default(asset)
 	not is_exempt_audit(asset)
@@ -133,6 +140,7 @@ assets_not_exempt := {asset.name |
 # descripiton: Store the names of assets with valid exemption tags
 assets_with_exempt_security_categories := {asset.name |
   some asset in input.data
+  has_location_field(asset)
   is_exempt_security_categories(asset)
 }
 
@@ -148,7 +156,7 @@ reply contains response if {
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Assets are in found to be in accordance to the data location policy"}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # description: | 
@@ -160,5 +168,5 @@ reply contains response if {
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("The following assets have been found to violate the data location policy: [%v]", [assets_not_exempt - assets_with_exempt_security_categories])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

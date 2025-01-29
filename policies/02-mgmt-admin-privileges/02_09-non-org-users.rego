@@ -16,14 +16,14 @@ validation_number := "09"
 
 # Metadata variables
 guardrail := {"guardrail": "02"}
-description := {"description": "validation 09 - Non-organizational/Guest Users"}
+validation := {"validation": "09"}
+description := {"description": "Non-organizational Users"}
 
 
 # METADATA
 # title: CLIENT INPUT
 # description: Number of files that need to be present for compliance
 required_file_count := 1
-# description: approval filename should begin with "09_APPROVAL", but can be of any suffix/file type
 required_approval_filename := "09_APPROVAL"
 
 env := opa.runtime().env
@@ -56,18 +56,18 @@ contains_approval if {
 
 
 # METADATA
-# title: NO Guest Users. Policy - COMPLIANT
-# description: No guest users; automatically compliant
+# title: NO Non-organizational Users. Policy - COMPLIANT
+# description: No non-organizational users; automatically compliant
 reply contains response if {
   required_has_guest_users == "false"
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
-	msg := {"msg": sprintf("No guest users detected for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	msg := {"msg": sprintf("No non-organization users detected for [%v, validation %v].", [required_name, validation_number])}
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
-# title: Guest Users Review Policy - COMPLIANT
+# title: Non-organizational Users Review Policy - COMPLIANT
 # description: If validation/evidence file count meets miniumum AND has approval, then COMPLIANT
 reply contains response if {
   required_has_guest_users == "true"
@@ -76,7 +76,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required Password Policy file(s) AND Approval file for [%v, validation %v] detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -89,7 +89,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "PENDING"}
 	msg := {"msg": sprintf("Required Password Policy file(s) for [%v, validation %v] detected. Approval file NOT detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -101,5 +101,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Password Policy file(s) for [%v, validation %v] NOT detected. Only the following was found: [%v]", [required_name, validation_number, validation_files_list])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

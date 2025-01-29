@@ -18,14 +18,15 @@ validation_number := "03"
 # There is nothing to upload for this validation
 # This validation is to ensure the network architecture and cloud deployment guide makes use of provider features
 # There is no "NON-COMPLIANT" status that comes out of this as it builds on 8.1 and 8.2
-required_file_count := 1
-# description: approval filename should begin with "03_APPROVAL", but can be of any suffix/file type
+required_file_count := 0
+# description: filename should begin with "03_APPROVAL" but can have different suffix and file type
+env := opa.runtime().env
 required_approval_filename := "03_APPROVAL"
 
 # Metadata variables
 guardrail := {"guardrail": "08"}
-
-description := {"description": "validation 03 - Provider Segmentation Features"}
+validation := {"validation": "03"}
+description := {"description": "Provider Segmentation Features"}
 
 # METADATA
 # description: Check if asset's name matches what's required
@@ -56,7 +57,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required Provider Segmentation Feature usage Approval file for [%v, validation %v] detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -68,5 +69,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "PENDING"}
 	msg := {"msg": sprintf("Required Provider Segmentation Feature usage Approval for [%v, validation %v] NOT detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

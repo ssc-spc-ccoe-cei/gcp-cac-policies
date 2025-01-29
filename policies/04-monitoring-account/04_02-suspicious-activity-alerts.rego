@@ -17,14 +17,15 @@ validation_number := "02"
 
 # Metadata variables
 guardrail := {"guardrail": "04"}
-description := {"description": "validation 02 - Suspicious Activity Alerts"}
+validation := {"validation": "02"}
+description := {"description": "Suspicious Activity Alerts"}
 
-
-# METADATA
 # description: GR04_02 is dependent on GR01_05, so we're checking for GR01_05's compliance status
 required_guardrail_check := "guardrail-01"
-# description: approval filename should begin with "05_APPROVAL", but can be of any suffix/file type
-required_approval_filename := "05_APPROVAL"]
+
+# METADATA
+# description: there is NO client input required here as it should already exist for GR1.5
+required_approval_filename := "05_APPROVAL"
 
 
 # METADATA
@@ -41,7 +42,7 @@ is_correct_name(asset) if {
 contains_approval if {
   some asset in input.data
   some file in asset.files
-  endswith(file, concat("/", [required_guardrail_check, "validations", required_approval_filename]))
+  startswith(file, concat("/", [required_guardrail_check, "validations", required_approval_filename]))
 }
 
 
@@ -53,7 +54,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required suspicious activity alerts compliant for [%v, validation %v] as Guardrail 01, Validation 05 is also compliant.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation,status, msg, description, check])
 }
 
 # METADATA
@@ -63,6 +64,6 @@ reply contains response if {
   not contains_approval
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("Required suspicious activity alerts for [%v, validation %v] NOT detected. Please confirm Guardrail 01, Validation 05 is compliant.", [required_name, validation_number, validation_files_list])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	msg := {"msg": sprintf("Required suspicious activity alerts for [%v, validation %v] NOT detected. Please confirm Guardrail 01, Validation 05 is compliant.", [required_name, validation_number])}
+	response := object.union_n([guardrail, validation,status, msg, description, check])
 }

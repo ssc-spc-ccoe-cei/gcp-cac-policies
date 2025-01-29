@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 01, Validation 01 & 02 - MFA Enforcement
 # description: Check for presence of required user MFA enforcement
-package policies.guardrail_01_0102_audit
+package policies.guardrail_01_0102_mfa
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -16,7 +16,8 @@ validation_number := "01 & 02"
 
 # Metadata variables
 guardrail := {"guardrail": "01"}
-description := {"description": "validation 01 & 02 - MFA Enforcement"}
+validation := {"validation": "0102"}
+description := {"description": "MFA Enforcement"}
 
 
 # METADATA
@@ -57,7 +58,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required MFA Enforcement policy detected for users in [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -68,5 +69,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required MFA Enforcement policy NOT detected for user(s) in [%v, validation %v]. Found [%v] users without MFA Enforced: [%v]", [required_name, validation_number, count(mfa_not_enforced_set), mfa_not_enforced_set])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

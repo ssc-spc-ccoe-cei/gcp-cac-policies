@@ -1,6 +1,6 @@
 # METADATA title: Guardrail 02, Validation 01 - Access Configuration & Policies
 # description: Check that access configurations & policies have been implemented
-package policies.guardrail_02_01_audit
+package policies.guardrail_02_01_access
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -15,7 +15,8 @@ validation_number := "01"
 
 # Metadata variables
 guardrail := {"guardrail": "02"}
-description := {"description": "validation 01 - Access Configuration & Policies"}
+validation := {"validation": "01"}
+description := {"description": "Access Configuration & Policies"}
 
 
 # METADATA
@@ -109,7 +110,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("No regular users have been detected to be assigned Org Admin rights in [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -120,7 +121,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Non-privileged user(s) has been found to have the organizationAdmin role in [%v, validation %v]. Regular users found: [%v]", [required_name, validation_number, org_admin_role_non_priv_users_list])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -131,5 +132,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Regular user(s) has been found to have the GCP Org Admins group in [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

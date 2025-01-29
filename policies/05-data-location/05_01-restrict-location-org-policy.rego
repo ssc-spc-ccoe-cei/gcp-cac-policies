@@ -13,7 +13,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "05"}
-description := {"description": "validation 01 - Data Location"}
+validation := {"validation": "01b"}
+description := {"description": "Data Location Restriction Policy"}
 
 # Asset type must match below
 required_asset_type := "orgpolicy.googleapis.com/Policy"
@@ -119,8 +120,7 @@ reply contains response if {
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level and enforced.", [required_policy])}
-	asset_name := {"asset_name": asset.name}
-	response := object.union_n([guardrail, status, msg, asset_name, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -134,8 +134,7 @@ reply contains response if {
 	status := {"status": "WARN"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level and NOT enforced.", [required_policy])}
-	asset_name := {"asset_name": asset.name}
-	response := object.union_n([guardrail, status, msg, asset_name, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -148,8 +147,7 @@ reply contains response if {
 	status := {"status": "NOT-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at Project level and enforced.", [required_policy])}
-	asset_name := {"asset_name": asset.name}
-	response := object.union_n([guardrail, status, msg, asset_name, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -163,8 +161,7 @@ reply contains response if {
 	status := {"status": "NOT-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] override detected at the Project level.", [required_policy])}
-	asset_name := {"asset_name": asset.name}
-	response := object.union_n([guardrail, status, msg, asset_name, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -178,8 +175,7 @@ reply contains response if {
 	status := {"status": "NOT-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Project level and NOT enforced.", [required_policy])}
-	asset_name := {"asset_name": asset.name}
-	response := object.union_n([guardrail, status, msg, asset_name, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -191,5 +187,5 @@ reply contains response if {
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] NOT detected at the Organization Level.", [required_policy])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

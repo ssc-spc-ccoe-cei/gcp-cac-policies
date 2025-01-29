@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 13, Validation 02 - Emergency Account alerts
-# description: Check for presence of required file(s) in Cloud Storage
-package policies.guardrail_13_02_files
+# description: Check for presence of Log-based Alerts for Breakglass account usage
+package policies.guardrail_13_02_alerts
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -22,8 +22,8 @@ required_alert_filter := "protoPayload.authenticationInfo.principalEmail = \"bre
 
 # Metadata variables
 guardrail := {"guardrail": "13"}
-
-description := {"description": "validation 02 - Emergency Account alerts"}
+validation := {"validation": "02"}
+description := {"description": "Emergency Account alerts"}
 
 # METADATA
 # description: Check if asset's name matches what's required
@@ -50,7 +50,7 @@ reply contains response if {
   check := {"check_type": "MANDATORY"}
   status := {"status": "COMPLIANT"}
   msg := {"msg": sprintf("Required Emergency Account alert(s) for [%v, validation %v] detected.", [required_name, validation_number])}
-  response := object.union_n([guardrail, status, msg, description, check])
+  response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -61,5 +61,5 @@ reply contains response if {
   check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Emergency Account alert(s) for [%v, validation %v] NOT detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+  response := object.union_n([guardrail, validation, status, msg, description, check])
 }

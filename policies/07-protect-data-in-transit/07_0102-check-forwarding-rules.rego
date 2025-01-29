@@ -1,5 +1,5 @@
 # METADATA
-# title: Guardrail 09 - Check for External Forwarding Rules
+# title: Guardrail 07, Validation 01 -  Check for External Forwarding Rules
 # description: Check for ingress allow firewall rules with source range too broad
 package policies.guardrail_07_0102_fwdingrule
 
@@ -25,8 +25,8 @@ insecure_port_range := [
 
 # Metadata variables
 guardrail := {"guardrail": "07"}
-
-description := {"description": "Validation 01 & 02 - Network Security Services"}
+validation := {"validation": "0102b"}
+description := {"description": "Check for External Forwarding Rules "}
 
 # METADATA
 # description: Checks if asset matches required asset type
@@ -77,8 +77,7 @@ reply contains response if {
 	check := {"check_type": "RECOMMENDED"}
 	ports := asset.resource.data.portRange
 	msg := {"msg": sprintf("TCP Load Balancer/ForwardingRule combination detected using insecure port: [%v].", [ports])}
-	asset_name := {"asset_name": asset.name}
-	response := object.union_n([guardrail, status, msg, asset_name, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -91,5 +90,5 @@ reply contains response if {
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "RECOMMENDED"}
 	msg := {"msg": "No TCP Load Balancer/ForwardingRule combination detected using insecure ports"}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

@@ -12,7 +12,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "11"}
-description := {"description": "validation 04 - Essential Contacts"}
+validation := {"validation": "04"}
+description := {"description": "Essential Contacts"}
 
 
 # Name of files data object to look for
@@ -57,7 +58,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required number of Essential Contacts for Security detected for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -68,5 +69,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required number of Essential Contacts for Security NOT detected for [%v, validation %v]. Only the following contacts were found: [%v]", [required_name, validation_number, contains_security_essentialcontacts])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

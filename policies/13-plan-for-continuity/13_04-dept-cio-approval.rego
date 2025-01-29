@@ -17,13 +17,13 @@ validation_number := "04"
 # Number of files that need to be present for compliance
 # No upload required here: document should be uploaded in GR13.1
 required_file_count := 0
-# description: approval filename should begin with "04_APPROVAL", but can be of any suffix/file type
+# description: filename should begin with "04_APPROVAL" but can have different suffix and file type
 required_approval_filename := "04_APPROVAL"
 
 # Metadata variables
 guardrail := {"guardrail": "13"}
-
-description := {"description": "validation 04 - Deptartmental CIO Approval of Emergency Account Procedure"}
+validation := {"validation": "04"}
+description := {"description": "Deptartmental CIO Approval of Emergency Account Procedure"}
 
 # METADATA
 # description: Check if asset's name matches what's required
@@ -54,7 +54,7 @@ reply contains response if {
   check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required Departmental CIO approval Emergency Account Procedure file(s) for [%v, validation %v] detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -66,16 +66,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "PENDING"}
 	msg := {"msg": sprintf("Required Departmental CIO approval Emergency Account Procedure file(s) for [%v, validation %v] NOT detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
-}
-
-# METADATA
-# title: Policy - NON-COMPLIANT
-# description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT
-reply contains response if {
-  count(validation_files_list) < required_file_count
-  check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("Required Emergency Account Procedure file(s) from guardrail-13, validation 01 for [%v, validation %v] NOT detected. Only the following was found: [%v]", [required_name, validation_number, validation_files_list])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

@@ -1,6 +1,6 @@
 # METADATA
-# title: Guardrail 03 , Validation 01 - Check for Monitioring & Audit Logs
-# description: Check whether monitoring & auditing is implemented for all user accounts
+# title: Guardrail 03 , Validation 01 - Check for Access Context Manage IP Constraints
+# description: Check whether IP Constraints being implemented for Endpoint Management
 package policies.guardrail_03_01_acm
 #package example
 
@@ -13,7 +13,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "03"}
-description := {"description": "validation 01 - Access Context Manager IP Constraints"}
+validation := {"validation": "01b"}
+description := {"description": "Endpoint Management - Access Context Manager IP Constraints"}
 
 required_asset_type:= "accesscontextmanager#accesspolicy"
 
@@ -71,7 +72,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Access Context Manager IP restrictions detected."}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -82,5 +83,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
   msg := {"msg": sprintf("Access Policy [%v] contained IPs that did NOT match with provided allowed IP CIDRs.", [contains_non_match])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

@@ -15,7 +15,7 @@ required_scc_category := "CMEK_DISABLED"
 
 # Metadata variables
 guardrail := {"guardrail": "06"}
-
+validation := {"validation": "0102"}
 description := {"description": "Protection of Data-at-Rest"}
 
 # METADATA
@@ -40,7 +40,7 @@ reply contains response if {
 	status := {"status": "WARN"}
 	check := {"check_type": "RECOMMENDED"}
 	msg := {"msg": sprintf("SCC category ending in [%v] detected. Check Security Command Center for more information.", [required_scc_category])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -51,5 +51,5 @@ reply contains response if {
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "RECOMMENDED"}
 	msg := {"msg": sprintf("SCC category ending in [%v] not detected.", [required_scc_category])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 10, Validation 02 - Ensure Cyber Centre's sensors are installed
 # description: Check for presence of required Cyber Centre components
-package policies.guardrail_10_02_files
+package policies.guardrail_10_02_cbs
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -13,7 +13,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "10"}
-description := {"description": "validation 02 - Cyber Centre Sensors"}
+validation := {"validation": "02"}
+description := {"description": "Cyber Centre Sensors"}
 
 # Name of files data object to look for
 required_name := "guardrail-10"
@@ -94,7 +95,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required Cyber Centre Sensor components installed for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -105,7 +106,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Cyber Centre Sensor component Pub/Sub Topic NOT installed for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -116,7 +117,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Cyber Centre Sensor component Pub/Sub Subscription NOT installed for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -127,7 +128,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Cyber Centre Sensor component Cloud (Run) Functions NOT installed for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -138,7 +139,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Cyber Centre Sensor component Cloud Run Service NOT installed for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -149,5 +150,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Cyber Centre Sensor component GCS Bucket NOT installed for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

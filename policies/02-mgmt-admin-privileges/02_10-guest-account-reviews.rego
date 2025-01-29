@@ -16,14 +16,14 @@ validation_number := "10"
 
 # Metadata variables
 guardrail := {"guardrail": "02"}
-description := {"description": "validation 10 - Guest Account Reviews"} 
+validation := {"validation": "10"}
+description := {"description": "Guest Account Reviews"} 
 
 
 # METADATA
 # title: CLIENT INPUT
 # description: Number of files that need to be present for compliance
 required_file_count := 1
-# description: approval filename should begin with "10_APPROVAL", but can be of any suffix/file type
 required_approval_filename := "10_APPROVAL"
 
 env := opa.runtime().env
@@ -63,7 +63,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("No non-organization users detected for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -76,7 +76,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required Guest Account Review file(s) AND Approval file for [%v, validation %v] detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -89,7 +89,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "PENDING"}
 	msg := {"msg": sprintf("Required Guest Account Review file(s) for [%v, validation %v] detected. Approval file NOT detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -101,5 +101,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Guest Account Reviews file(s) for [%v, validation %v] NOT detected. Only the following was found: [%v]", [required_name, validation_number, validation_files_list])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

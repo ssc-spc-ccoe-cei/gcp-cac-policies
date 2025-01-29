@@ -1,6 +1,6 @@
 # METADATA title: Guardrail 01, Validation 03 - Global Admin count
 # description: Check for global admin count
-package policies.guardrail_01_03_audit
+package policies.guardrail_01_03_accounts
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -15,7 +15,8 @@ validation_number := "03"
 
 # Metadata variables
 guardrail := {"guardrail": "01"}
-description := {"description": "validation 03 - Global Admins count"}
+validation := {"validation": "03"}
+description := {"description": "Global Admins count"}
 
 # METADATA
 # title: CLIENT INPUT
@@ -69,7 +70,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Valid number of Org Admins found for [%v, validation %v]. The following [%v] Org Admins were found: [%v]", [required_name, validation_number, count(combined_members_set), combined_members_set])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -80,7 +81,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Less than 2 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v].  The following were found: [%v].", [required_name, validation_number, combined_members_set])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -91,5 +92,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("More than 5 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v].  The following [%v] were found: [%v].", [required_name, validation_number, count(combined_members_set), combined_members_set])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

@@ -13,7 +13,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "11"}
-description := {"description": "validation 03 - User account Monitoring and Auditing"}
+validation := {"validation": "03"}
+description := {"description": "User account Monitoring and Auditing"}
 
 # Log name to check for
 required_log_name := "cloudaudit.googleapis.com%2Factivity"
@@ -49,7 +50,7 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Google Workspace Audit Logs at Organization-level detected."}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -60,5 +61,5 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": "Google Workspace Audit Logs at Organization-level NOT detected."}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

@@ -1,6 +1,6 @@
 # METADATA
 # title: Guardrail 13, Validation 03 - Emergency Account testing
-# description: Check for presence of required file(s) in Cloud Storage
+# description: Check for presence of Emergency/Breakglass Account Testing
 package policies.guardrail_13_03_files
 
 # Import future keywords
@@ -22,8 +22,8 @@ required_emergency_account_upn := "breakglass@ssc.gc.ca"
 
 # Metadata variables
 guardrail := {"guardrail": "13"}
-
-description := {"description": "validation 03 - Emergency Account testing"}
+validation := {"validation": "03"}
+description := {"description": "Emergency Account testing"}
 
 # METADATA
 # description: Check if asset's name matches what's required
@@ -50,7 +50,7 @@ reply contains response if {
   check := {"check_type": "MANDATORY"}
   status := {"status": "COMPLIANT"}
   msg := {"msg": sprintf("Required Emergency Account testing for [%v, validation %v] detected at these times: [%v].", [required_name, validation_number, matching_assets])}
-  response := object.union_n([guardrail, status, msg, description, check])
+  response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
@@ -61,5 +61,5 @@ reply contains response if {
   check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Required Emergency Account testing for [%v, validation %v] NOT detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, status, msg, description, check])
+	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
