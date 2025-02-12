@@ -252,8 +252,9 @@ reply contains response if {
 	not is_using_valid_ssl_policy(policy_name)
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
-	msg := {"msg": sprintf("External HTTPS Load Balancer using invalid SSL Policy [%v] .", [policy_name])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": "External HTTPS Load Balancer using invalid SSL Policy."}
+  asset_name := {"asset_name": policy_name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
@@ -268,8 +269,9 @@ reply contains response if {
 	is_using_valid_ssl_policy(policy_name)
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
-	msg := {"msg": sprintf("External HTTPS Load Balancer using valid SSL Policy [%v].", [policy_name])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": "External HTTPS Load Balancer using valid SSL Policy."}
+  asset_name := {"asset_name": policy_name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
@@ -280,8 +282,8 @@ reply contains response if {
 reply contains response if {
 	some asset in int_target_proxy_assets
 	is_using_default_ssl_policy(asset)
-	status := {"status": "WARN"}
-	check := {"check_type": "RECOMMENDED"}
+	status := {"status": "NON-COMPLIANT"}
+	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Internal HTTPS Load Balancer using [GCP Default] SSL Policy."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -296,10 +298,11 @@ reply contains response if {
 	some asset in int_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	not is_using_valid_ssl_policy(policy_name)
-	status := {"status": "WARN"}
-	check := {"check_type": "RECOMMENDED"}
-	msg := {"msg": sprintf("Internal HTTPS Load Balancer using invalid SSL Policy [%v] .", [policy_name])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	status := {"status": "NON-COMPLIANT"}
+	check := {"check_type": "MANDATORY"}
+	msg := {"msg": "Internal HTTPS Load Balancer using invalid SSL Policy."}
+  asset_name := {"asset_name": policy_name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
@@ -313,7 +316,8 @@ reply contains response if {
 	policy_name := asset.resource.data.sslPolicy
 	is_using_valid_ssl_policy(policy_name)
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "RECOMMENDED"}
-	msg := {"msg": sprintf("Internal HTTPS Load Balancer using valid SSL Policy [%v].", [policy_name])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	check := {"check_type": "MANDATORY"}
+	msg := {"msg": "Internal HTTPS Load Balancer using valid SSL Policy."}
+  asset_name := {"asset_name": policy_name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

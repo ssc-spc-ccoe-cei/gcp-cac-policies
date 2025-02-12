@@ -68,6 +68,7 @@ reply contains response if {
   count(contains_security_essentialcontacts) < required_security_contacts_count
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("Required number of Essential Contacts for Security NOT detected for [%v, validation %v]. Only the following contacts were found: [%v]", [required_name, validation_number, contains_security_essentialcontacts])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Required number of Essential Contacts for Security NOT detected for [%v, validation %v]. [%v] were found.", [required_name, validation_number, count(contains_security_essentialcontacts)])}
+  asset_name := {"asset_name": contains_security_essentialcontacts}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

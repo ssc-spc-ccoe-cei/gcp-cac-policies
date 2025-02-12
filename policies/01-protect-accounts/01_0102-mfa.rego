@@ -68,6 +68,7 @@ reply contains response if {
   count(mfa_not_enforced_users_list) > 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("Required MFA Enforcement policy NOT detected for user(s) in [%v, validation %v]. Found [%v] users without MFA Enforced: [%v]", [required_name, validation_number, count(mfa_not_enforced_set), mfa_not_enforced_set])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Required MFA Enforcement policy NOT detected for user(s) in [%v, validation %v]. Found [%v] users without MFA Enforced", [required_name, validation_number, count(mfa_not_enforced_set)])}
+  asset_name := {"asset_name": mfa_not_enforced_set}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

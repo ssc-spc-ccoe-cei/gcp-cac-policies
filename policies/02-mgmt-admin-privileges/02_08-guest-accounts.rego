@@ -101,8 +101,10 @@ reply contains response if {
 # description: If guests are NOT from approved/allowed domains OR en NON-COMPLIANT
 reply contains response if {
   count(unauthorized_guests_set) + count(denied_guests_set) > 0
+  combined_set := unauthorized_guests_set | denied_guests_set
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("Unauthorized guest users were detected for [%v, validation %v]. The following [%v] unauthorized guests were found: [%v].  And the following [%v] guests were found to be from banned domains: [%v].", [required_name, validation_number, count(unauthorized_guests_set), unauthorized_guests_set, count(denied_guests_set), denied_guests_set])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Unauthorized guest users were detected for [%v, validation %v]. [%v] unauthorized guests were found.  And [%v] guests were found to be from banned domains.", [required_name, validation_number, count(unauthorized_guests_set), count(denied_guests_set)])}
+  asset_name := {"asset_name": combined_set}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

@@ -9,7 +9,7 @@ This repository contains all the policy artifacts for the CaC Tool. Each policy 
 
 ## Overall workflow for CaC Validation Checking
 
-![Compliance Validation Workflow](assets/policy_diagrams/compliance-workflow.png "Compliance Validation Workflow")
+![Compliance Validation Workflow](documentation/policy_diagrams/compliance-workflow.png "Compliance Validation Workflow")
 
 ## Environment Variables with OPA repository
 
@@ -24,30 +24,23 @@ For example: `export MYVAR = "item1,item2,item3"`, once passed to `string.split(
 
 Naming format is `GR<GUARDRAIL_NUMBER>_<VALIDATION_NUMBER>_VARNAME`.  If the `VARNAME` is plural, then the env var is expected to be a list.
 
-i.e. 
-- `GR01_03_DOMAIN` is an env var for Guardrail 01, Validation 03 and it's the domain
-- `GR02_08_ALLOWED_DOMAINS` is an env var for Guardrail 02, Validation 08 and is a list of allowed domain(s) -- and of course, if it's only 1 item in this list, that is okay too
-
-
-```
-required_domain := env["GR01_03_DOMAIN"]
-required_privileged_users_list := split(env["GR01_06_PRIVILEGED_USERS"], ",")
-required_regular_users_list := split(env["GR01_06_REGULAR_USERS"], ",")
-
-required_domain := env["GR02_01_DOMAIN"]
-required_privileged_users_list := split(env["GR02_01_PRIVILEGED_USERS"], ",")
-required_regular_users_list := split(env["GR02_01_REGULAR_USERS"], ",")
-required_domains_allow_list := split(env["GR02_08_ALLOWED_DOMAINS"], ",")
-required_domains_deny_list := split(env["GR02_08_DENY_DOMAINS"], ",")
-required_has_guest_users := env["GR02_09_HAS_GUEST_USERS"]
-required_has_guest_users := env["GR02_10_HAS_GUEST_USERS"]
-
-required_customer_ids := split(env["GR03_01_CUSTOMER_IDS"], ",")
-required_allowed_cidrs := split(env["GR03_01_ALLOWED_CIDRS"], ",")
-
-required_security_category_key := env["GR05_01_SECURITY_CATEGORY_KEY"]
-
-required_allowed_ca_issuers_list := split(env["GR07_03_ALLOWED_CA_ISSUERS"], ",")
-
-required_org_id := env["GR11_04_ORG_ID"]
-```
+|Variable | Description | Example|
+|:-|:-|:-|
+|GR01_03_DOMAIN |||
+|GR01_06_PRIVILEGED_USERS|||
+|GR02_01_DOMAIN|||
+|GR01_03_DOMAIN|||
+|GR01_06_PRIVILEGED_USERS|||
+|GR01_06_REGULAR_USERS|||
+|GR02_01_DOMAIN|||
+|GR02_01_PRIVILEGED_USERS|||
+|GR02_01_REGULAR_USERS|||
+|GR02_08_ALLOWED_DOMAINS|||
+|GR02_08_DENY_DOMAINS|||
+|GR02_09_HAS_GUEST_USERS|||
+|GR02_10_HAS_GUEST_USERS|||
+|GR03_01_CUSTOMER_IDS|||
+|GR03_01_ALLOWED_CIDRS|||
+|GR05_01_SECURITY_CATEGORY_KEY|||
+|GR07_03_ALLOWED_CA_ISSUERS|||
+|GR11_04_ORG_ID|||

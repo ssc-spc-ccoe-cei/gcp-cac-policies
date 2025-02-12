@@ -69,8 +69,9 @@ reply contains response if {
   count(combined_members_set) <= 5
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
-	msg := {"msg": sprintf("Valid number of Org Admins found for [%v, validation %v]. The following [%v] Org Admins were found: [%v]", [required_name, validation_number, count(combined_members_set), combined_members_set])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Valid number of Org Admins found for [%v, validation %v]. [%v] Org Admins were found.", [required_name, validation_number, count(combined_members_set)])}
+  asset_name := {"asset_name": combined_members_set}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
@@ -80,8 +81,9 @@ reply contains response if {
   count(combined_members_set) < 2
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("Less than 2 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v].  The following were found: [%v].", [required_name, validation_number, combined_members_set])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Less than 2 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v]. [%v] were found.", [required_name, validation_number, count(combined_members_set)])}
+  asset_name := {"asset_name": combined_members_set}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
@@ -91,6 +93,7 @@ reply contains response if {
   count(combined_members_set) > 5
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("More than 5 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v].  The following [%v] were found: [%v].", [required_name, validation_number, count(combined_members_set), combined_members_set])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("More than 5 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v]. [%v] were found.", [required_name, validation_number, count(combined_members_set)])}
+  asset_name := {"asset_name": combined_members_set}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

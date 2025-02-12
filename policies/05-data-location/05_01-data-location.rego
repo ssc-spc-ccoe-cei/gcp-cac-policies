@@ -39,7 +39,12 @@ required_tagged_asset_kind := "cloudresourcemanager#tagged#asset"
 # List of resources that will be exempt if they are located outside of the allowed regions.
 # This list should contain non-region based resources (global only), or resources
 # that can't exist in allowed_regions.
+# in v2, Organization, Folder, Project, and Organization Policies was added to the list
 exempt_resources := [
+  "cloudresourcemanager.googleapis.com/Organization",
+  "cloudresourcemanager.googleapis.com/Folder",
+  "cloudresourcemanager.googleapis.com/Project",
+  "orgpolicy.googleapis.com/Policy",
 	"compute.googleapis.com/Firewall",
 	"compute.googleapis.com/FirewallPolicy",
 	"compute.googleapis.com/Route",
@@ -165,8 +170,10 @@ reply contains response if {
 # If the difference is NOT an empty list, then NON-COMPLIANT and report list
 reply contains response if {
   count(assets_not_exempt - assets_with_exempt_security_categories) > 0
+  violating_assets := assets_not_exempt - assets_with_exempt_security_categories
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
-	msg := {"msg": sprintf("The following assets have been found to violate the data location policy: [%v]", [assets_not_exempt - assets_with_exempt_security_categories])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": "Assets have been found to violate the data location policy"}
+  asset_name := {"asset_name": violating_assets}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

@@ -82,7 +82,7 @@ reply contains response if {
 	count(missing_roles) == 0
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
-	msg := {"msg": sprintf("IAM Member [%v] found with correct roles assigned [%v].", [required_iam_member, roles_required])}
+	msg := {"msg": sprintf("IAM Member [%v] found with correct roles assigned.", [required_iam_member])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
@@ -95,6 +95,7 @@ reply contains response if {
 	some role in missing_roles
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
-	msg := {"msg": sprintf("IAM Member [%v] missing required role [%v].", [required_iam_member, role])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("IAM Member [%v] missing required role.", [required_iam_member])}
+  asset_name := {"asset_name": role}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

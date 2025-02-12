@@ -82,6 +82,7 @@ reply contains response if {
 	count(contains_non_match) > 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-  msg := {"msg": sprintf("Access Policy [%v] contained IPs that did NOT match with provided allowed IP CIDRs.", [contains_non_match])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+  msg := {"msg": "Access Policy contained IPs that did NOT match with provided allowed IP CIDRs."}
+  asset_name := {"asset_name": contains_non_match}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

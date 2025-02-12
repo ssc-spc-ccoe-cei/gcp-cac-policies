@@ -68,6 +68,7 @@ reply contains response if {
   count(assets_with_non_approved_ca) > 0
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
-	msg := {"msg": sprintf("The following certificates have been found to come from non-approved Certificate Authorities: [%v]", [assets_with_non_approved_ca])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": "Certificates have been found to come from non-approved Certificate Authorities"}
+  asset_name := {"asset_name": assets_with_non_approved_ca}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

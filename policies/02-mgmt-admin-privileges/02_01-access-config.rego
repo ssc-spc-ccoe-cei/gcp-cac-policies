@@ -118,19 +118,23 @@ reply contains response if {
 # description: If non-privileged users have been assigned Org Admin rights, then NON-COMPLIANT
 reply contains response if {
   count(org_admin_role_non_priv_users_list[_]) > 0
+  count(group_contains_non_dedicated_org_admin_users) == 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("Non-privileged user(s) has been found to have the organizationAdmin role in [%v, validation %v]. Regular users found: [%v]", [required_name, validation_number, org_admin_role_non_priv_users_list])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Non-privileged user(s) has been found to have the organizationAdmin role in [%v, validation %v].", [required_name, validation_number])}
+  asset_name := {"asset_name": org_admin_role_non_priv_users_list}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
 # title: Policy - NON-COMPLIANT
 # description: If regular users have been assigned Org Admin rights, then NON-COMPLIANT
 reply contains response if {
+  count(org_admin_role_non_priv_users_list[_]) == 0
   count(group_contains_non_dedicated_org_admin_users) > 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Regular user(s) has been found to have the GCP Org Admins group in [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+  asset_name := {"asset_name": group_contains_non_dedicated_org_admin_users}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

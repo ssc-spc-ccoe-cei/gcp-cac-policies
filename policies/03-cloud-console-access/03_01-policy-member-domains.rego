@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 03 , Validation 01 - Check for Allowed Policy Member Domains
 # description: Check whether Allowed Policy Member Domains is implemented for Endpoint Management
-package policies.guardrail_03_01_domains
+package policies.guardrail_03_01_pmb
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -24,7 +24,6 @@ required_policy := "policies/iam.allowedPolicyMemberDomains"
 # title: CLIENT INPUT
 # description: list of GCP Org and/or Workspace Customer IDs
 # run `gcloud organization list` to find yours
-required_customer_ids := ["C03xxxx4x", "Abc123", "XYZ890"]
 env := opa.runtime().env
 # description: takes on the value of env var, GR03_01_CUSTOMER_IDS
 #              list of GCP Org and/or Workspace Customer IDs
@@ -92,6 +91,7 @@ reply contains response if {
 	count(contains_non_match) > 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-	msg := {"msg": sprintf("Items in policy allowed values of [%v] do NOT match the client provided list of %v.", [contains_non_match, required_customer_ids])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Items in policy allowed values do NOT match the client provided list of %v.", [required_customer_ids])}
+  asset_name := {"asset_name": contains_non_match}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

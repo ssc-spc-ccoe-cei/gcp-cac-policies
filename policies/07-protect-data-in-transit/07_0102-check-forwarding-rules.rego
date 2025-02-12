@@ -65,20 +65,6 @@ failing_assets := {asset |
 	insecure_open_ports(asset)
 }
 
-# METADATA
-# title: Firwall Rule with Broad Source Range - WARN
-# description: | 
-# Iterate through assets who have source range set too broad, and who
-# are allow rules (if any exist) and reply back WARN. Include the name of the asset
-# and the ports that it's configured for
-reply contains response if {
-	some asset in matching_assets
-	status := {"status": "WARNING"}
-	check := {"check_type": "RECOMMENDED"}
-	ports := asset.resource.data.portRange
-	msg := {"msg": sprintf("TCP Load Balancer/ForwardingRule combination detected using insecure port: [%v].", [ports])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
-}
 
 # METADATA
 # title: No Non-Compliant Firewall Rules Found - COMPLIANT
@@ -88,7 +74,22 @@ reply contains response if {
 reply contains response if {
 	count(failing_assets) == 0
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "RECOMMENDED"}
+	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "No TCP Load Balancer/ForwardingRule combination detected using insecure ports"}
+	response := object.union_n([guardrail, validation, status, msg, description, check])
+}
+
+# METADATA
+# title: Firwall Rule with Broad Source Range - WARN
+# description: | 
+# Iterate through assets who have source range set too broad, and who
+# are allow rules (if any exist) and reply back WARN. Include the name of the asset
+# and the ports that it's configured for
+reply contains response if {
+	some asset in matching_assets
+	status := {"status": "NON-COMPLIANT"}
+	check := {"check_type": "MANDATORY"}
+	ports := asset.resource.data.portRange
+	msg := {"msg": sprintf("TCP Load Balancer/ForwardingRule combination detected using insecure port: [%v].", [ports])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
