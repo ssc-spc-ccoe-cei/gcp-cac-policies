@@ -26,22 +26,22 @@ Naming format is `GR<GUARDRAIL_NUMBER>_<VALIDATION_NUMBER>_VARNAME`.  If the `VA
 
 |Variable | Description | Example|
 |:-|:-|:-|
-|GR01_03_ORG_ADMIN_GROUP_EMAIL|||
-|GR01_06_PRIVILEGED_USERS|||
-|GR01_06_REGULAR_USERS|||
-|GR02_01_ORG_ADMIN_GROUP_EMAIL|||
-|GR02_01_PRIVILEGED_USERS|||
-|GR02_01_REGULAR_USERS|||
-|GR02_08_ALLOWED_DOMAINS|||
-|GR02_08_DENY_DOMAINS|||
-|GR02_09_HAS_GUEST_USERS|||
-|GR02_10_HAS_GUEST_USERS|||
-|GR03_01_CUSTOMER_IDS|||
-|GR03_01_ALLOWED_IPS|||
-|GR05_01_SECURITY_CATEGORY_KEY|||
-|GR07_03_ALLOWED_CA_ISSUERS|||
-|GR11_04_ORG_ID|||
-|GR13_03_BREAKGLASS_USER_EMAIL|||
+|GR01_03_ORG_ADMIN_GROUP_EMAIL|Group email for org admin group|gcp-organization-admins@ssc.gc.ca|
+|GR01_06_PRIVILEGED_USERS|Comma-delimited list of privileged user accounts. Username/emails should be prefixed with `user:`|user:admin-user1@ssc.gc.ca,user:admin-user2@ssc.gc.ca,user:user3-admin@ssc.gc.ca|
+|GR01_06_REGULAR_USERS|Comma-delimited list of regular user accounts for for the privileged users. Username/emails should be prefixed with `user:`|user:reg-user1@123gccspm.gccspm.gc.ca,user:reg-user2@123cspmdev.onmicrosoft.com,user:some-user3@ssc.gc.ca|
+|GR02_01_ORG_ADMIN_GROUP_EMAIL|Group email for org admin group|gcp-organization-admins@ssc.gc.ca|
+|GR02_01_PRIVILEGED_USERS|Comma-delimited list of privileged user accounts. Username/emails should be prefixed with `user:`|user:admin-user1@ssc.gc.ca,user:admin-user2@ssc.gc.ca,user:user3-admin@ssc.gc.ca|
+|GR02_01_REGULAR_USERS|Comma-delimited list of regular user accounts for for the privileged users. Username/emails should be prefixed with `user:`|user:reg-user1@123gccspm.gccspm.gc.ca,user:reg-user2@123cspmdev.onmicrosoft.com,user:some-user3@ssc.gc.ca|
+|GR02_08_ALLOWED_DOMAINS|Comma-delimited list of allowed domains|ssc.gc.ca,gccspm.gc.ca|
+|GR02_08_DENY_DOMAINS|Comma-delimited list of denied domains|gmail.com,outlook.com,yahoo.com|
+|GR02_09_HAS_GUEST_USERS|Whether org has guest users|false|
+|GR02_10_HAS_GUEST_USERS|Whehter or has guest users|false|
+|GR03_01_CUSTOMER_IDS|Customer ID associated with domain. Obtain this with `gcloud organizations list`|C0a1b7d|
+|GR03_01_ALLOWED_IPS|Comma-delimited list of approved IPs|10.0.7.44,192.168.0.16|
+|GR05_01_SECURITY_CATEGORY_KEY||DATA_CLASSIFICATION|
+|GR07_03_ALLOWED_CA_ISSUERS|Comma-delimited list of approved CAs|Let's Encrypt,Verisign|
+|GR11_04_ORG_ID|GCP organization ID|1234567890|
+|GR13_03_BREAKGLASS_USER_EMAIL||breakglass@ssc.gc.ca|
 
 
 ## Output aggregate or individual?
