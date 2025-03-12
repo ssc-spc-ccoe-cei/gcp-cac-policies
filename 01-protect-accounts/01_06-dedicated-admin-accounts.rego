@@ -48,9 +48,13 @@ has_user_members(asset) if {
 has_user_members_in_org_admins_list(asset) if {
   binding = asset.iam_policy.bindings[_]
   binding.role == "roles/resourcemanager.organizationAdmin"
-  some member in binding.members
-  some user in required_privileged_users_list 
-  endswith(member, user)
+  every user in required_privileged_users_list {
+    some member in binding.members
+    endswith(user, member)
+  }
+#  some member in binding.members
+#  some user in required_privileged_users_list 
+#  endswith(member, user)
 }
 
 # description: Check if user is Org Admin AND is in the regular users list

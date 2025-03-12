@@ -1,7 +1,7 @@
 # METADATA
 # title: Guardrail 11, Validation 04 - Essential Contacts
 # description: Check for presence of required file(s) in Cloud Storage
-package policies.guardrail_11_04_files
+package policies.guardrail_11_04_contacts
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -58,7 +58,8 @@ reply contains response if {
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required number of Essential Contacts for Security detected for [%v, validation %v].", [required_name, validation_number])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+  asset_name := {"asset_name": contains_security_essentialcontacts}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA

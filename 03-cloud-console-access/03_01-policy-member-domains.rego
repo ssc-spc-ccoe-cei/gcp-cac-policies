@@ -13,8 +13,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "03"}
-validation := {"validation": "01a"}
-description := {"description": "Endpoint Management - Allowed Policy Member Domains"}
+validation := {"validation": "01"}
+description := {"description": "Endpoint Management - Allowed Policy Member Domains and User Source IP Constraints"}
 
 required_asset_type := "orgpolicy.googleapis.com/Policy"
 required_policy := "policies/iam.allowedPolicyMemberDomains"
@@ -89,9 +89,10 @@ reply contains response if {
 # description: If priveged user accounts are NOT dedicated Organization Admins then reply back NON-COMPLIANT
 reply contains response if {
 	count(contains_non_match) > 0
+  some non_match in contains_non_match
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Items in policy allowed values do NOT match the client provided list of %v.", [required_customer_ids])}
-  asset_name := {"asset_name": contains_non_match}
+  asset_name := {"asset_name": non_match}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

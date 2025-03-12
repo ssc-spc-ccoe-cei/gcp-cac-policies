@@ -83,7 +83,8 @@ reply contains response if {
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("IAM Member [%v] found with correct roles assigned.", [required_iam_member])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+  asset_name := {"asset_name": roles_required}
+	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
 }
 
 # METADATA
@@ -92,10 +93,9 @@ reply contains response if {
 # If missing roles are found, then reply back with which one that's missing individually
 reply contains response if {
 	count(missing_roles) > 0
-	some role in missing_roles
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("IAM Member [%v] missing required role.", [required_iam_member])}
-  asset_name := {"asset_name": role}
+  asset_name := {"asset_name": missing_roles}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

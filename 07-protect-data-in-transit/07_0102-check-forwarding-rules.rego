@@ -25,8 +25,8 @@ insecure_port_range := [
 
 # Metadata variables
 guardrail := {"guardrail": "07"}
-validation := {"validation": "0102b"}
-description := {"description": "Check for External Forwarding Rules "}
+validation := {"validation": "0102"}
+description := {"description": "Protection of Data-in-Transit"}
 
 # METADATA
 # description: Checks if asset matches required asset type

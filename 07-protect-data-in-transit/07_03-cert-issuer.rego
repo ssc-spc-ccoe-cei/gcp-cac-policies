@@ -66,9 +66,10 @@ reply contains response if {
 # description: If some certificates are NOT from approved CAs, then NON-COMPLIANT and report list
 reply contains response if {
   count(assets_with_non_approved_ca) > 0
+  some violating_cert in assets_with_non_approved_ca
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Certificates have been found to come from non-approved Certificate Authorities"}
-  asset_name := {"asset_name": assets_with_non_approved_ca}
+  asset_name := {"asset_name": violating_cert}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

@@ -20,10 +20,10 @@ description := {"description": "Global Admins count"}
 
 # METADATA
 # title: CLIENT INPUT
-# description: takes on the value of env var, GR01_03_DOMAIN
-#              i.e. export GR01_03_DOMAIN='ssc.gc.ca'
+# description: takes on the value of env var, GR01_03_ORG_ADMIN_GROUP_EMAIL
+#              i.e. export GR01_03_ORG_ADMIN_GROUP_EMAIL='gcp-organization-admins@ssc.gc.ca'
 env := opa.runtime().env
-required_domain := env["GR01_03_DOMAIN"]
+required_org_admin_group_email := env["GR01_03_ORG_ADMIN_GROUP_EMAIL"]
 
 
 # METADATA
@@ -42,7 +42,7 @@ is_correct_asset(asset) if {
 gcp_org_admin_members_list := {gcp_user_members |
   some asset in input.data
   is_correct_asset(asset)
-  asset.groupEmail == concat("@", ["gcp-organization-admins", required_domain])
+  asset.groupEmail == required_org_admin_group_email
   gcp_user_members := asset.members
 }
 

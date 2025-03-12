@@ -12,8 +12,8 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "05"}
-validation := {"validation": "01a"}
-description := {"description": "Data Location"}
+validation := {"validation": "01"}
+description := {"description": "Data Location Restriction Policy"}
 
 # List of allowed regions that assets must reside in
 allowed_regions := [
@@ -27,10 +27,6 @@ allowed_regions := [
 	"northamerica-northeast2-c",		
 ]
 
-trimmed_regions := [
-	"northamerica-northeast1",
-	"northamerica-northeast2",
-]
 
 required_tagged_asset_kind := "cloudresourcemanager#tagged#asset"
 
@@ -64,19 +60,48 @@ exempt_resources := [
 	"pubsub.googleapis.com/Topic",
 	"cloudbilling.googleapis.com/ProjectBillingInfo",
 	"cloudbilling.googleapis.com/BillingAccount",
+  "iam.googleapis.com/ServiceAccount",
+  "artifactregistry.googleapis.com/DockerImage",
+  "bigquery.googleapis.com/Table",
+  "cloudasset.googleapis.com/Feed",
+  "dataplex.googleapis.com/EntryGroup",
+  "essentialcontacts.googleapis.com/Contact",
+  "logging.googleapis.com/Settings",
+  "monitoring.googleapis.com/NotificationChannel",
+  "securitycenter.googleapis.com/ContainerThreatDetectionSettings",
+  "securitycenter.googleapis.com/MuteConfig",
+  "securitycentermanagement.googleapis.com/SecurityCenterService",
+  "storagetransfer.googleapis.com/TransferJob",
+]
+
+# METADATA
+# description: related to GR10.2, these are the jobs Cyber Defense deployed resorses to be exempt from GR5.1 
+# for project info, need to include project ID and project number as different services reference projects differently
+exempt_cbs_project_info := [
+  "projects/cbs-logging-for-gcp-5dc566bf4a/",
+  "projects/228662832372/",
+]
+
+exempt_cbs_resources := [
+  "functions/cbs-",
+  "services/cbs-",
+  "storage.googleapis.com/cbs-",
+  "subscriptions/eventarc-",
+  "subscriptions/cbs-",
+  "topics/cbs-",
 ]
 
 # METADATA
 # title: CLIENT INPUT
 env := opa.runtime().env
 # description: takes on the value of env var, GR05_01_SECURITY_CATEGORY_KEY
-#              i.e. export GR05_01_SECURITY_CATEGORY_KEY = 'SECURITY_CATEGORY'
-#              NOTE it is recommended you set the key to 'SECURITY_CATEGORY'
+#              i.e. export GR05_01_SECURITY_CATEGORY_KEY = 'DATA_CLASSIFICATION'
+#              NOTE it is recommended you set the key to 'DATA_CLASSIFICATION'
 required_security_category_key := env["GR05_01_SECURITY_CATEGORY_KEY"]
 
 # description: the following values for the required_security_category_key are exempt
-#              here, this is the tag value for the tag key, SECURITY_CATEGORY
-#              example: a GCS bucket tagged with SECURITY_CATEGORY: Protected A,
+#              here, this is the tag value for the tag key, DATA_CLASSIFICATION
+#              example: a GCS bucket tagged with DATA_CLASSIFICATION: Protected A,
 #                       is exempt from the policy (provided client also signs ICA)
 exempt_security_categories := ["Unclassified", "Protected A"]
 
@@ -85,40 +110,59 @@ exempt_security_categories := ["Unclassified", "Protected A"]
 # METADATA
 # title: HELPER FUNCTIONS
 # description: Ensure asset has location field, otherwise not region-based
-has_location_field(asset) if {
-	asset[location]
+has_resource_location_field(asset) if {
+	asset.resource.location
+  not asset.kind
+}
+
+# description: should not report on the individual Cloud Build step
+is_legacy_cloudbuild_build_step(asset) if {
+  not asset.kind
+  asset.asset_type == "cloudbuild.googleapis.com/Build"
+  asset.resource.data.options.logging == "LEGACY"
 }
 
 # description: Check if asset is exempt
 is_exempt_asset(asset) if {
 	asset.asset_type in exempt_resources
-  has_location_field(asset)
+}
+
+is_exempt_cbs_project(asset) if {
+  not asset.kind
+  some cbs_project in exempt_cbs_project_info
+  contains(asset.name, cbs_project)
+}
+
+is_exempt_cbs_asset(asset) if {
+  not asset.kind
+  some cbs_resource in exempt_cbs_resources
+	contains(asset.name, cbs_resource)
 }
 
 is_tagged_asset(asset) if {
     asset.kind == required_tagged_asset_kind
 }
 
-is_exempt_security_categories(asset) if {
-  has_location_field(asset)
+is_exempt_tagged_asset(asset) if {
   is_tagged_asset(asset)
   endswith(asset.tag_key, required_security_category_key)
   some value in exempt_security_categories
   endswith(asset.tag_value, value)
 }
 
+
 # description: Check if asset is in allowed location
-in_allowed_location(asset) if {
-  has_location_field(asset)
+in_allowed_resource_location(asset) if {
+  has_resource_location_field(asset)
 	asset.resource.location in allowed_regions
 }
 is_exempt_audit(asset) if {
-  has_location_field(asset)
+  has_resource_location_field(asset)
 	asset.resource.data.description == "Audit bucket"
 	asset.resource.location == "global"
 }
 is_exempt_default(asset) if {
-  has_location_field(asset)
+  has_resource_location_field(asset)
 	asset.resource.data.description == "Default bucket"
 	asset.resource.location == "global"
 }
@@ -127,28 +171,30 @@ is_exempt_default(asset) if {
 # METADATA
 # title: VALIDATION / DATA PROCESSING
 # description: Store assets that have a location field
-assets_with_location := {asset |
-	some asset in input.data
-	has_location_field(asset)
+assets_with_resource_location := {asset |
+  some asset in input.data
+  has_resource_location_field(asset)
 }
 
 # METADATA
 # description: Store the names assets that are not part of the exempt_resources list
-assets_not_exempt := {asset.name |
-	some asset in assets_with_location
-  has_location_field(asset)
+assets_resource_location_not_exempt := {asset.name |
+	some asset in assets_with_resource_location
+  not in_allowed_resource_location(asset)
+  not is_legacy_cloudbuild_build_step(asset)
+  not is_exempt_cbs_project(asset)
+  not is_exempt_cbs_asset(asset)
 	not is_exempt_asset(asset)
 	not is_exempt_default(asset)
 	not is_exempt_audit(asset)
 }
 
 # descripiton: Store the names of assets with valid exemption tags
-assets_with_exempt_security_categories := {asset.name |
+assets_resource_location_with_exempt_tags := {asset.name |
   some asset in input.data
-  has_location_field(asset)
-  is_exempt_security_categories(asset)
+  has_resource_location_field(asset)
+  is_exempt_tagged_asset(asset)
 }
-
 
 # METADATA
 # title: Policy COMPLIANT
@@ -157,11 +203,12 @@ assets_with_exempt_security_categories := {asset.name |
 # and the list of names that are
 # If the difference is an empty list, then COMPLIANT
 reply contains response if {
-  count(assets_not_exempt - assets_with_exempt_security_categories) == 0
+  count(assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags) == 0
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
-	msg := {"msg": "Assets are in found to be in accordance to the data location policy"}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": "Assets are in found to be in accordance to the data location policy and have appropriate tags where applicable."}
+  asset_name := {"asset_name": assets_resource_location_with_exempt_tags}
+	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
 }
 
 # description: | 
@@ -169,11 +216,12 @@ reply contains response if {
 # and the list of names that are
 # If the difference is NOT an empty list, then NON-COMPLIANT and report list
 reply contains response if {
-  count(assets_not_exempt - assets_with_exempt_security_categories) > 0
-  violating_assets := assets_not_exempt - assets_with_exempt_security_categories
+  count(assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags) > 0
+  violating_assets := assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags
+  some violating_asset in violating_assets
 	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
-	msg := {"msg": "Assets have been found to violate the data location policy"}
-  asset_name := {"asset_name": violating_assets}
+  msg := {"msg": "Asset has been found to violate the data location policy"}
+  asset_name := {"asset_name": violating_asset}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }

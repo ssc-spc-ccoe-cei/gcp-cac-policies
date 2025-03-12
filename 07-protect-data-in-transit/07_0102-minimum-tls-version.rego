@@ -12,7 +12,7 @@ import future.keywords.in
 
 # Metadata variables
 guardrail := {"guardrail": "07"}
-validation := {"validation": "0102a"}
+validation := {"validation": "0102"}
 description := {"description": "Protection of Data-in-Transit"}
 
 # Asset type requirement for both Regional and Global Load Balancers

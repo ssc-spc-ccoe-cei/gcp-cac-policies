@@ -1,7 +1,7 @@
 # METADATA
-# title: Guardrail 05, Validation 01 - Resource Location Restriction
-# description: Check for Resource Location Restriction Organization Policy.
-package policies.guardrail_05_01_restrict
+# title: Guardrail 09 - Enforce Public Access Prevention Org. Policy
+# description: Check for Enforce Public Access Prevention Organization Policy.
+package policies.guardrail_09_04_bucket
 
 # Import future keywords
 # More info here: https://www.openpolicyagent.org/docs/latest/policy-language/#future-keywords
@@ -10,24 +10,18 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
-
 # Metadata variables
-guardrail := {"guardrail": "05"}
-validation := {"validation": "01b"}
-description := {"description": "Data Location Restriction Policy"}
+guardrail := {"guardrail": "09"}
+validation := {"validation": "04"}
+description := {"description": "Storage Bucket Public Access Prevention"}
 
-# Asset type must match below
+# Asset type must be Policy
 required_asset_type := "orgpolicy.googleapis.com/Policy"
 
-# Org Policy must be gcp.resourceLocations
-required_policy := "policies/gcp.resourceLocations"
-
-# Org Policy value must match in:canada-locations
-required_value := "in:canada-locations"
-
+# Org Policy must be storage.publicAccessPrevention
+required_policy := "policies/storage.publicAccessPrevention"
 
 # METADATA
-# title: HELPER FUNCTIONS
 # description: Checks if asset is required type
 is_correct_asset(asset) if {
 	asset.asset_type == required_asset_type
@@ -40,11 +34,10 @@ is_correct_org_policy(asset) if {
 }
 
 # METADATA
-# description: Checks that only one value is set, and it matches required_value
+# title: Policy Enforced
+# description: Checks if Org Policy is enforced
 is_enforced(asset) if {
-	every value in asset.resource.data.spec.rules[0].values.allowedValues {
-		value == required_value
-	}
+	asset.resource.data.spec.rules[0].enforce == true
 }
 
 # METADATA
@@ -62,7 +55,7 @@ is_proj_level_policy(asset) if {
 }
 
 # METADATA
-# title: VALIDATION / DATA PROCESSING  
+# title: Check for Matching Assets
 # description: Check if Asset's type is Org Policy matching required_policy
 matching_assets := {asset |
 	some asset in input.data
@@ -106,7 +99,6 @@ non_enforced_proj_level_assets := {asset |
 	not is_enforced(asset)
 }
 
-
 # METADATA
 # title: Enforced Org Level Org Policy - COMPLIANT
 # description: |
@@ -131,22 +123,9 @@ reply contains response if {
 # NON-COMPLIANT and with name of asset
 reply contains response if {
 	some asset in non_enforced_org_level_assets
-	status := {"status": "WARN"}
+	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level and NOT enforced.", [required_policy])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
-}
-
-# METADATA
-# title: Enforced Project Level Org Policy - WARNING
-# Iterate through project level org policy asset(s) that are enforced
-# (if any exist). If yes to any then reply back WARNING and with name 
-# of asset(s)
-reply contains response if {
-	some asset in enforced_proj_level_assets
-	status := {"status": "NOT-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
-	msg := {"msg": sprintf("Organization Policy [%v] detected at Project level and enforced.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
@@ -158,7 +137,7 @@ reply contains response if {
 reply contains response if {
 	some asset in non_enforced_proj_level_assets
 	count(enforced_org_level_assets) > 0
-	status := {"status": "NOT-COMPLIANT"}
+	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] override detected at the Project level.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -172,7 +151,7 @@ reply contains response if {
 reply contains response if {
 	some asset in non_enforced_proj_level_assets
 	count(enforced_org_level_assets) == 0
-	status := {"status": "NOT-COMPLIANT"}
+	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Project level and NOT enforced.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
