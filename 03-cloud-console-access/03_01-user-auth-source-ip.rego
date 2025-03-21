@@ -25,7 +25,8 @@ env := opa.runtime().env
 # description: takes on the value of env var, GR03_01_ALLOWED_IPS
 #              i.e. export GR03_01_ALLOWED_IPS='10.0.0.7,192.168.1.134'
 required_allowed_ips := split(env["GR03_01_ALLOWED_IPS"], ",")
-
+# description: set to "true" if using federated users
+required_has_federated_users := env["GR03_01_HAS_FEDERATED_USERS"]
 
 # METADATA
 # title: HELPER FUNCTIONS
@@ -51,6 +52,15 @@ contains_non_approved_ip := {[asset.principalEmail, asset.sourceIp, asset.timest
 # title: Access Context Manager IP Restriction Policy - COMPLIANT
 # description: If IP restrictions provided to ACM, then reply back COMPLIANT
 reply contains response if {
+	required_has_federated_users == "true"
+	check := {"check_type": "MANDATORY"}
+	status := {"status": "COMPLIANT"}
+	msg := {"msg": "Users are federated users and this guardrail is handled by the IdP."}
+	response := object.union_n([guardrail, validation, status, msg, description, check])
+}
+
+reply contains response if {
+	required_has_federated_users == "false"
 	count(contains_non_approved_ip) == 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
@@ -62,6 +72,7 @@ reply contains response if {
 # title: Dedicated user accounts for administration - NON-COMPLIANT
 # description: If NO IP restrictions provided to ACM, then reply back NON-COMPLIANT
 reply contains response if {
+	required_has_federated_users == "false"
 	count(contains_non_approved_ip) > 0
   some violating_login in contains_non_approved_ip
 	check := {"check_type": "MANDATORY"}
