@@ -89,7 +89,7 @@ reply contains response if {
 
 reply contains response if {
 	required_has_federated_users == "false"
-	count(logs_in_tagged_project) == 0
+	count(logs_with_tagged_project) == 0
 	count(contains_non_approved_ip) == 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
@@ -99,7 +99,7 @@ reply contains response if {
 
 reply contains response if {
 	required_has_federated_users == "false"
-	count(logs_in_tagged_project) > 0
+	count(logs_with_tagged_project) > 0
 	count(contains_non_approved_ip) == 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
@@ -114,7 +114,7 @@ reply contains response if {
 # description: If NO IP restrictions provided to ACM, then reply back NON-COMPLIANT
 reply contains response if {
 	required_has_federated_users == "false"
-	count(logs_in_tagged_project) == 0
+	count(logs_with_tagged_project) == 0
 	count(contains_non_approved_ip) > 0
   some violating_login in contains_non_approved_ip
 	check := {"check_type": "MANDATORY"}
@@ -126,7 +126,7 @@ reply contains response if {
 
 reply contains response if {
 	required_has_federated_users == "false"
-	count(logs_in_tagged_project) > 0
+	count(logs_with_tagged_project) > 0
 	count(contains_non_approved_ip) > 0
   some violating_login in contains_non_approved_ip
 	check := {"check_type": "MANDATORY"}
