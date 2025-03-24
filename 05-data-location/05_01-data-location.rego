@@ -167,6 +167,33 @@ is_exempt_default(asset) if {
 	asset.resource.location == "global"
 }
 
+# METADATA
+# title: processing project profile overrides
+is_project_profile_tag(asset) if {
+	asset.kind = "cloudresourcemanager#tagged#project"
+	endswith(asset.tag_key, "PROJECT_PROFILE")
+}
+
+project_profile_details := {[asset.name, asset.tag_value] | 
+	some asset in input.data
+	is_project_profile_tag(asset)
+}
+
+asset_with_project_profile(asset) if {
+  is_tagged_asset(asset)
+  some tagged_project in project_profile_details
+  asset.parent == tagged_project[0]
+}
+
+project_profile_tag_value := {project_profile_details[_][1] | 
+  some asset in input.data
+  asset_with_project_profile(asset)
+}
+
+# description: tag value is PROJECT_ID/TAG_KEY/tag_value
+# here we're extracting just the project_id and tag_value
+project_id_and_profile := split(project_profile_tag_value[_], "/PROJECT_PROFILE/")
+
 
 # METADATA
 # title: VALIDATION / DATA PROCESSING
@@ -203,6 +230,7 @@ assets_resource_location_with_exempt_tags := {asset.name |
 # and the list of names that are
 # If the difference is an empty list, then COMPLIANT
 reply contains response if {
+  count(project_profile_tag_value) == 0
   count(assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags) == 0
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
@@ -211,11 +239,24 @@ reply contains response if {
 	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
 }
 
+reply contains response if {
+  count(project_profile_tag_value) > 0
+  count(assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags) == 0
+	status := {"status": "COMPLIANT"}
+	check := {"check_type": "MANDATORY"}
+	msg := {"msg": "Assets are in found to be in accordance to the data location policy and have appropriate tags where applicable."}
+  asset_name := {"asset_name": assets_resource_location_with_exempt_tags}
+  proj_parent := {"proj_parent": project_id_and_profile[0]}
+  proj_profile := {"proj_profile": project_id_and_profile[1]}
+	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check, proj_parent, proj_profile])
+}
+
 # description: | 
 # Find the difference between the list of asset names that are NOT exempt
 # and the list of names that are
 # If the difference is NOT an empty list, then NON-COMPLIANT and report list
 reply contains response if {
+  count(project_profile_tag_value) == 0
   count(assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags) > 0
   violating_assets := assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags
   some violating_asset in violating_assets
@@ -224,4 +265,18 @@ reply contains response if {
   msg := {"msg": "Asset has been found to violate the data location policy"}
   asset_name := {"asset_name": violating_asset}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+reply contains response if {
+  count(project_profile_tag_value) > 0
+  count(assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags) > 0
+  violating_assets := assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags
+  some violating_asset in violating_assets
+	status := {"status": "NON-COMPLIANT"}
+	check := {"check_type": "MANDATORY"}
+  msg := {"msg": "Asset has been found to violate the data location policy"}
+  asset_name := {"asset_name": violating_asset}
+  proj_parent := {"proj_parent": project_id_and_profile[0]}
+  proj_profile := {"proj_profile": project_id_and_profile[1]}
+	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check, proj_parent, proj_profile])
 }

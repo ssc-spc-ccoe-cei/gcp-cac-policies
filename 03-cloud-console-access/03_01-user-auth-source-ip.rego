@@ -39,6 +39,34 @@ is_allowed_ip(asset) if {
   asset.sourceIp in required_allowed_ips
 }
 
+
+# METADATA
+# title: processing project profile overrides
+is_project_profile_tag(asset) if {
+	asset.kind = "cloudresourcemanager#tagged#project"
+	endswith(asset.tag_key, "PROJECT_PROFILE")
+}
+
+project_profile_details := {asset.tag_value | 
+	some asset in input.data
+	is_project_profile_tag(asset)
+}
+
+# description: tag value is PROJECT_ID/TAG_KEY/tag_value
+# here we're extracting just the project_id and tag_value
+project_id_and_profile := split(project_profile_details[_], "/PROJECT_PROFILE/")
+
+logs_in_tagged_project(asset) if {
+	is_correct_asset_type(asset)
+	contains(asset.logName, project_id_and_profile[0])
+}
+
+logs_with_tagged_project := {asset.insertId |
+	some asset in input.data
+	logs_in_tagged_project(asset)
+}
+
+
 # METADATA
 # title: VALIDATION / DATA PROCESSING
 # description: Check for a NON MATCH between the provided list and the ipSubnetworks list in ACM policy
@@ -61,6 +89,7 @@ reply contains response if {
 
 reply contains response if {
 	required_has_federated_users == "false"
+	count(logs_in_tagged_project) == 0
 	count(contains_non_approved_ip) == 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
@@ -68,11 +97,24 @@ reply contains response if {
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
+reply contains response if {
+	required_has_federated_users == "false"
+	count(logs_in_tagged_project) > 0
+	count(contains_non_approved_ip) == 0
+	check := {"check_type": "MANDATORY"}
+	status := {"status": "COMPLIANT"}
+	msg := {"msg": "All users are connecting from approved IPs in the last 24hrs."}
+	proj_parent := {"proj_parent": project_id_and_profile[0]}
+	proj_profile := {"proj_profile": project_id_and_profile[1]}
+	response := object.union_n([guardrail, validation, status, msg, description, check, proj_parent, proj_profile])
+}
+
 # METADATA
 # title: Dedicated user accounts for administration - NON-COMPLIANT
 # description: If NO IP restrictions provided to ACM, then reply back NON-COMPLIANT
 reply contains response if {
 	required_has_federated_users == "false"
+	count(logs_in_tagged_project) == 0
 	count(contains_non_approved_ip) > 0
   some violating_login in contains_non_approved_ip
 	check := {"check_type": "MANDATORY"}
@@ -80,4 +122,18 @@ reply contains response if {
   msg := {"msg": sprintf("[%v] authentication instances found where user connected from non-approved source IP.", [count(contains_non_approved_ip)])}
   asset_name := {"asset_name": violating_login}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+reply contains response if {
+	required_has_federated_users == "false"
+	count(logs_in_tagged_project) > 0
+	count(contains_non_approved_ip) > 0
+  some violating_login in contains_non_approved_ip
+	check := {"check_type": "MANDATORY"}
+	status := {"status": "NON-COMPLIANT"}
+  msg := {"msg": sprintf("[%v] authentication instances found where user connected from non-approved source IP.", [count(contains_non_approved_ip)])}
+  asset_name := {"asset_name": violating_login}
+	proj_parent := {"proj_parent": project_id_and_profile[0]}
+	proj_profile := {"proj_profile": project_id_and_profile[1]}
+	response := object.union_n([guardrail, validation, status, msg, description, check, proj_parent, proj_profile])
 }

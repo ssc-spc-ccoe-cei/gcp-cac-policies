@@ -41,6 +41,32 @@ has_allowed_ca(asset) if {
   asset.issuer_org == ca
 }
 
+# METADATA
+# title: processing project profile overrides
+is_project_profile_tag(asset) if {
+	asset.kind = "cloudresourcemanager#tagged#project"
+	endswith(asset.tag_key, "PROJECT_PROFILE")
+}
+
+project_profile_details := {asset.tag_value | 
+	some asset in input.data
+	is_project_profile_tag(asset)
+}
+
+# description: tag value is PROJECT_ID/TAG_KEY/tag_value
+# here we're extracting just the project_id and tag_value
+project_id_and_profile := split(project_profile_details[_], "/PROJECT_PROFILE/")
+
+cert_in_tagged_project(asset) if {
+	is_correct_asset(asset)
+	contains(asset.name, project_id_and_profile[0])
+}
+
+certs_with_tagged_project := {asset.name |
+	some asset in input.data
+	cert_in_tagged_project(asset)
+}
+
 
 # METADATA
 # title: VALIDATION / DATA PROCESSING
@@ -56,6 +82,7 @@ assets_with_non_approved_ca := {asset.name |
 # title: Policy COMPLIANT
 # description: If all certificates are from approved CAs, then COMPLIANT
 reply contains response if {
+  count(certs_with_tagged_project) == 0
   count(assets_with_non_approved_ca) == 0
 	status := {"status": "COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
@@ -63,8 +90,20 @@ reply contains response if {
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
+reply contains response if {
+  count(certs_with_tagged_project) > 0
+  count(assets_with_non_approved_ca) == 0
+	status := {"status": "COMPLIANT"}
+	check := {"check_type": "MANDATORY"}
+	msg := {"msg": "Certificates are in found to be from approved Certificate Authorities"}
+  proj_parent := {"proj_parent": project_id_and_profile[0]}
+  proj_profile := {"proj_profile": project_id_and_profile[1]}
+	response := object.union_n([guardrail, validation, status, msg, description, check, proj_parent, proj_profile])
+}
+
 # description: If some certificates are NOT from approved CAs, then NON-COMPLIANT and report list
 reply contains response if {
+  count(certs_with_tagged_project) == 0
   count(assets_with_non_approved_ca) > 0
   some violating_cert in assets_with_non_approved_ca
 	status := {"status": "NON-COMPLIANT"}
@@ -72,4 +111,17 @@ reply contains response if {
 	msg := {"msg": "Certificates have been found to come from non-approved Certificate Authorities"}
   asset_name := {"asset_name": violating_cert}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+reply contains response if {
+  count(certs_with_tagged_project) > 0
+  count(assets_with_non_approved_ca) > 0
+  some violating_cert in assets_with_non_approved_ca
+	status := {"status": "NON-COMPLIANT"}
+	check := {"check_type": "MANDATORY"}
+	msg := {"msg": "Certificates have been found to come from non-approved Certificate Authorities"}
+  asset_name := {"asset_name": violating_cert}
+  proj_parent := {"proj_parent": project_id_and_profile[0]}
+  proj_profile := {"proj_profile": project_id_and_profile[1]}
+	response := object.union_n([guardrail, validation, status, msg, description, check, proj_parent, proj_profile])
 }
