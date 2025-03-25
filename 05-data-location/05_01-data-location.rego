@@ -61,6 +61,8 @@ exempt_resources := [
 	"cloudbilling.googleapis.com/ProjectBillingInfo",
 	"cloudbilling.googleapis.com/BillingAccount",
   "iam.googleapis.com/ServiceAccount",
+  "binaryauthorization.googleapis.com/Attestor",
+  "binaryauthorization.googleapis.com/Policy",
   "artifactregistry.googleapis.com/DockerImage",
   "bigquery.googleapis.com/Table",
   "cloudasset.googleapis.com/Feed",
