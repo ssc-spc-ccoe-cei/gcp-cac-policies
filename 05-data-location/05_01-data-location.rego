@@ -41,6 +41,7 @@ exempt_resources := [
   "cloudresourcemanager.googleapis.com/Folder",
   "cloudresourcemanager.googleapis.com/Project",
   "cloudresourcemanager.googleapis.com/TagBinding",
+  "cloudresourcemanager.googleapis.com/TagKey",
   "cloudresourcemanager.googleapis.com/TagValue",
   "orgpolicy.googleapis.com/Policy",
 	"compute.googleapis.com/Firewall",
