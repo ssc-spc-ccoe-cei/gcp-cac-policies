@@ -71,3 +71,61 @@ reply contains response if {
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 ```
+
+## Misc. Rego Tips & Tricks
+
+### Convert list to set
+```
+list_to_set(list) := {set |
+  set := list
+}
+```
+
+### Combine 2 lists and turn into a set
+```
+combined_members := {combined_set |
+  temp_list := array.concat(list1[_], list2[_])
+  combined_set := list_to_set(temp_list[_])
+}
+```
+
+### Flatten a list of lists and turn into a set
+```
+combined_members := {combined_set |
+  user_list := list_of_lists
+  every item in user_list {
+    is_array(item)  # ensure every item in user_list is also a list
+  }
+  # inner_array is the list of items of the main list (user_list)
+  # item is the items of inner_array
+  flattened_list := [item | inner_array := user_list[_]; item := inner_array[_]]
+  combined_set := list_to_set(flattened_list[_])
+}
+```
+
+### Environment Variables with OPA
+OPA can read env vars as inputs:
+- [examples](https://www.openpolicyagent.org/docs/v0.70.0/policy-reference/#pre-signed-request-example)
+
+#### List variables
+What if you need to pass a list as a variable?
+
+Suppose you want ot set `variable := ["item1", "item2", "item3"]`
+
+You can't do:
+```
+export MY_VARIABLE = '["item1", "item2", "item3"]'
+
+variable = opa.runtime()["env"]["MY_VARIABLE"]
+```
+Because even though it may come out the same, it's a string instead of a list.  If you try to put `[]` around a string value, it will add extra escape backslashes `\\` in there and you still won't get what you want.
+
+What you want to do here is actually use the [`string.split`](https://www.openpolicyagent.org/docs/v0.70.0/policy-reference/#builtin-strings-split) built-in function to split a non-quoted, comma-delimited string (which produces a list output)
+
+```
+export MY_VARIABLE ='item1,item2,item3'
+
+variable := string.split(opa.runtime()["env"]["MY_VARIABLE"], ",")
+````
+
+The output is alread a list where the items are double-quoted, so you get the `["item1", "item2", "item3"]` that you wanted!
