@@ -25,7 +25,7 @@ description := {"description": "Network Architecture with Appropriate Segmentati
 # description: Number of files that need to be present for compliance
 required_file_count := 1
 # description: filename should begin with "01_APPROVAL" but can have different suffix and file type
-required_approval_filename := "01_APPROVAL"
+required_approval_filename := "GUARDRAIL_APPROVAL"
 
 
 # METADATA
@@ -45,10 +45,10 @@ validation_files_list := {file |
 }
 
 contains_approval if {
-  count(validation_files_list) >= required_file_count + 1
+  count(validation_files_list) >= required_file_count
   some asset in input.data
   some file in asset.files
-  startswith(file, concat("/", [required_name, "validations", required_approval_filename]))
+  startswith(file, required_approval_filename)
 }
 
 

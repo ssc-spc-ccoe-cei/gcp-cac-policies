@@ -80,10 +80,10 @@ reply contains response if {
 }
 
 # METADATA
-# title: Firwall Rule with Broad Source Range - WARN
+# title: Firwall Rule with Broad Source Range - NON-COMPLIANT
 # description: | 
 # Iterate through assets who have source range set too broad, and who
-# are allow rules (if any exist) and reply back WARN. Include the name of the asset
+# are allow rules (if any exist) and reply back NON-COMPLIANT. Include the name of the asset
 # and the ports that it's configured for
 reply contains response if {
 	some asset in matching_assets

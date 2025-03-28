@@ -24,7 +24,7 @@ description := {"description": "Non-organizational Users"}
 # title: CLIENT INPUT
 # description: Number of files that need to be present for compliance
 required_file_count := 1
-required_approval_filename := "09_APPROVAL"
+required_approval_filename := "GUARDRAIL_APPROVAL"
 
 env := opa.runtime().env
 # description: set to "true" if there are guest users
@@ -48,10 +48,10 @@ validation_files_list := {file |
 }
 
 contains_approval if {
-  count(validation_files_list) >= required_file_count + 1
+  count(validation_files_list) >= required_file_count
   some asset in input.data
   some file in asset.files
-  startswith(file, concat("/", [required_name, "validations", required_approval_filename]))
+  startswith(file, required_approval_filename)
 }
 
 

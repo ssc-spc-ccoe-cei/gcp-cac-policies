@@ -131,16 +131,16 @@ reply contains response if {
 # NON-COMPLIANT and with name of asset
 reply contains response if {
 	some asset in non_enforced_org_level_assets
-	status := {"status": "WARN"}
+	status := {"status": "NON-COMPLIANT"}
 	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level and NOT enforced.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
-# title: Enforced Project Level Org Policy - WARNING
+# title: Enforced Project Level Org Policy - NON-COMPLIANT
 # Iterate through project level org policy asset(s) that are enforced
-# (if any exist). If yes to any then reply back WARNING and with name 
+# (if any exist). If yes to any then reply back NON-COMPLIANT and with name 
 # of asset(s)
 reply contains response if {
 	some asset in enforced_proj_level_assets
@@ -165,7 +165,7 @@ reply contains response if {
 }
 
 # METADATA
-# title: Not Enforced Project Level Org Policy & No Enforced Org Level Policy- WARNING
+# title: Not Enforced Project Level Org Policy & No Enforced Org Level Policy- NON-COMPLIANT
 # Iterate through project level policy asset(s) that are enforced
 # (if any exist) and also check if an org level org policy that is NOT enforced
 # exists. If both exist then reply back NON-COMPLIANT and with name of asset(s)

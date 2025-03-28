@@ -275,10 +275,10 @@ reply contains response if {
 }
 
 # METADATA
-# title: Internal LB using Default SSL Policy - WARN
+# title: Internal LB using Default SSL Policy - NON-COMPLIANT
 # description: | 
 # Iterate through internal LBs (if any exist) and check if they're using the 
-# GCP Default SSL policy. If yes, reply back WARN and include the name of the LB
+# GCP Default SSL policy. If yes, reply back NON-COMPLIANT and include the name of the LB
 reply contains response if {
 	some asset in int_target_proxy_assets
 	is_using_default_ssl_policy(asset)
@@ -292,7 +292,7 @@ reply contains response if {
 # title: Internal LB using Invalid SSL Policy - NON-COMPLIANT
 # description: | 
 # Iterate through internal LBs (if any exist) and check if the SSL policy they're
-# using is invlid. If yes, reply back WARN and include the name of the LB 
+# using is invlid. If yes, reply back NON-COMPLIANT and include the name of the LB 
 # and the SSL policy it's using
 reply contains response if {
 	some asset in int_target_proxy_assets

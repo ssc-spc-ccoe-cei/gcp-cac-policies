@@ -144,7 +144,7 @@ reply contains response if {
 }
 
 # METADATA
-# title: Not Enforced Project Level Org Policy & No Enforced Org Level Policy- WARNING
+# title: Not Enforced Project Level Org Policy & No Enforced Org Level Policy- NON-COMPLIANT
 # Iterate through project level policy asset(s) that are enforced
 # (if any exist) and also check if an org level org policy that is NOT enforced
 # exists. If both exist then reply back NON-COMPLIANT and with name of asset(s)

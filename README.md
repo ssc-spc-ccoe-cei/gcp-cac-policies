@@ -73,6 +73,13 @@ reply contains response if {
 ```
 
 ## Misc. Rego Tips & Tricks
+To run OPA server in debug mode:
+```
+opa run --server \
+  --log-level debug
+  ...
+  ...
+```
 
 ### Convert list to set
 ```

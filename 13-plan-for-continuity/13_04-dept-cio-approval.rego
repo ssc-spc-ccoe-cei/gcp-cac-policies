@@ -18,7 +18,7 @@ validation_number := "04"
 # No upload required here: document should be uploaded in GR13.1
 required_file_count := 0
 # description: filename should begin with "04_APPROVAL" but can have different suffix and file type
-required_approval_filename := "04_APPROVAL"
+required_approval_filename := "GUARDRAIL_APPROVAL"
 
 # Metadata variables
 guardrail := {"guardrail": "13"}
@@ -38,10 +38,10 @@ validation_files_list := {file |
 }
 
 contains_approval if {
-  count(validation_files_list) >= required_file_count + 1
+  count(validation_files_list) >= required_file_count
   some asset in input.data
   some file in asset.files
-  startswith(file, concat("/", [required_name, "validations", required_approval_filename]))
+  startswith(file, required_approval_filename)
 }
 
 

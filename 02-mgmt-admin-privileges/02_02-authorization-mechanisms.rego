@@ -26,7 +26,7 @@ description := {"description": "Authorization Mechanisms"}
 required_file_count := 3
 # description: filename should begin with "02_APPROVAL" but can have different suffix and file type
 env := opa.runtime().env
-required_approval_filename := "02_APPROVAL"
+required_approval_filename := "GUARDRAIL_APPROVAL"
 
 
 # METADATA
@@ -46,10 +46,10 @@ validation_files_list := {file |
 }
 
 contains_approval if {
-  count(validation_files_list) >= required_file_count + 1
+  count(validation_files_list) >= required_file_count
   some asset in input.data
   some file in asset.files
-  startswith(file, concat("/", [required_name, "validations", required_approval_filename]))
+  startswith(file, required_approval_filename)
 }
 
 
