@@ -72,6 +72,41 @@ reply contains response if {
 }
 ```
 
+# Local OPA testing
+This next section contains some documentation about how I conduct local policy testing as well as other tips & tricks I've picked up in my policy-writing journey
+
+- Instructions on download OPA can be found [here](https://www.openpolicyagent.org/docs/v0.70.0/#1-download-opa)
+- I usually create a function in my `~/.zshrc` or `~/.bashrc` file to reduce the number of commands I would have to run as part of setup:
+```
+localopa() {
+  export GR01_03_DOMAIN="example.com"
+  export GR01_03_ORG_ADMIN_GROUP_EMAIL="gcp-organization-admins@example.com"
+  ...
+  ...
+  # POPULATE YOUR ENV VARS HERE
+  ...
+  ...
+
+  head -5 $1
+  /usr/local/bin/opa run --server --addr localhost:8181 --disable-telemetry $1
+}
+```
+
+- example execution:
+```
+localopa 03_01-user-auth-source-ip.rego
+```
+
+As part of the output, I output the first few lines of the policy file I'm trying to load because I want to see the `package policies.guardrail_xx_xx_xxx` line.
+
+You need to change the OPA server's endpoint depending on your package name.  The endpoint URL will be `localhost:8181/v1/data/policies/guardrail_xx_xx_xxx`
+
+Once you have your input file, pass its contents to your local OPA server with a `curl` command:
+```
+curl localhost:8181/v1/data/policies/guardrail_03_01_userip/reply -d @INPUT_FILE.json
+```
+
+
 ## Misc. Rego Tips & Tricks
 To run OPA server in debug mode:
 ```
