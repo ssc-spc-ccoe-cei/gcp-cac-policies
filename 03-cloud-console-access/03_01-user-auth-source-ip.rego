@@ -54,26 +54,35 @@ project_profile_details := {asset.tag_value |
 
 # description: tag value is PROJECT_ID/TAG_KEY/tag_value
 # here we're extracting just the project_id and tag_value
-project_id_and_profile := split(project_profile_details[_], "/PROJECT_PROFILE/")
-
-logs_in_tagged_project(asset) if {
-	is_correct_asset_type(asset)
-	contains(asset.logName, project_id_and_profile[0])
+project_id_and_profile_list := {[project_id_and_profile[0], project_id_and_profile[1]] |
+	some entry in project_profile_details
+	project_id_and_profile := split(entry, "/PROJECT_PROFILE/")
 }
 
-logs_with_tagged_project := {asset.insertId |
+logs_with_tagged_project := {[asset.logName, proj_id_profile[0], proj_id_profile[1]] |
 	some asset in input.data
-	logs_in_tagged_project(asset)
+	is_correct_asset_type(asset)
+	some proj_id_profile in project_id_and_profile_list
+	contains(asset.logName, proj_id_profile[0])
 }
 
 
 # METADATA
 # title: VALIDATION / DATA PROCESSING
 # description: Check for a NON MATCH between the provided list and the ipSubnetworks list in ACM policy
-contains_non_approved_ip := {[asset.principalEmail, asset.sourceIp, asset.timestamp] |
+contains_non_approved_ip := {[asset.insertId, asset.principalEmail, asset.sourceIp, asset.timestamp] |
   some asset in input.data
   is_correct_asset_type(asset)
   not is_allowed_ip(asset)
+}
+
+# [logName, insertId, principalEmail, sourceIp, timestamp, proj_parent, proj_profile]
+tagged_project_contains_non_approved_ip := {[asset.logName, asset.insertId, asset.principalEmail, asset.sourceIp, asset.timestamp, proj_id_profile[0], proj_id_profile[1]] |
+  some asset in input.data
+  is_correct_asset_type(asset)
+  not is_allowed_ip(asset)
+  some proj_id_profile in project_id_and_profile_list
+  contains(asset.logName, proj_id_profile[0])
 }
 
 # METADATA
@@ -89,24 +98,11 @@ reply contains response if {
 
 reply contains response if {
 	required_has_federated_users == "false"
-	count(logs_with_tagged_project) == 0
 	count(contains_non_approved_ip) == 0
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "All users are connecting from approved IPs in the last 24hrs."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
-}
-
-reply contains response if {
-	required_has_federated_users == "false"
-	count(logs_with_tagged_project) > 0
-	count(contains_non_approved_ip) == 0
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "COMPLIANT"}
-	msg := {"msg": "All users are connecting from approved IPs in the last 24hrs."}
-	proj_parent := {"proj_parent": project_id_and_profile[0]}
-	proj_profile := {"proj_profile": project_id_and_profile[1]}
-	response := object.union_n([guardrail, validation, status, msg, description, check, proj_parent, proj_profile])
 }
 
 # METADATA
@@ -116,24 +112,24 @@ reply contains response if {
 	required_has_federated_users == "false"
 	count(logs_with_tagged_project) == 0
 	count(contains_non_approved_ip) > 0
-  some violating_login in contains_non_approved_ip
+	some violating_login in contains_non_approved_ip
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-  msg := {"msg": sprintf("[%v] authentication instances found where user connected from non-approved source IP.", [count(contains_non_approved_ip)])}
-  asset_name := {"asset_name": violating_login}
+  	msg := {"msg": sprintf("[%v] authentication instances found where user connected from non-approved source IP.", [count(contains_non_approved_ip)])}
+  	asset_name := {"asset_name": violating_login}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 reply contains response if {
 	required_has_federated_users == "false"
 	count(logs_with_tagged_project) > 0
-	count(contains_non_approved_ip) > 0
-  some violating_login in contains_non_approved_ip
+	count(tagged_project_contains_non_approved_ip) > 0
+	some violating_login in tagged_project_contains_non_approved_ip
 	check := {"check_type": "MANDATORY"}
 	status := {"status": "NON-COMPLIANT"}
-  msg := {"msg": sprintf("[%v] authentication instances found where user connected from non-approved source IP.", [count(contains_non_approved_ip)])}
-  asset_name := {"asset_name": violating_login}
-	proj_parent := {"proj_parent": project_id_and_profile[0]}
-	proj_profile := {"proj_profile": project_id_and_profile[1]}
-	response := object.union_n([guardrail, validation, status, msg, description, check, proj_parent, proj_profile])
+	msg := {"msg": sprintf("[%v] authentication instances found where user connected from non-approved source IP.", [count(tagged_project_contains_non_approved_ip)])}
+	asset_name := {"asset_name": [violating_login[1], violating_login[2], violating_login[3], violating_login[4]]}	# [insertId, principalEmail, sourceIp, timestamp]
+	proj_parent := {"proj_parent": violating_login[5]}
+	proj_profile := {"proj_profile": violating_login[6]}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check, proj_parent, proj_profile])
 }

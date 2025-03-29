@@ -18,7 +18,10 @@ validation_number := "02"
 
 required_asset_type := "monitoring.googleapis.com/AlertPolicy"
 
-required_alert_filter := "protoPayload.authenticationInfo.principalEmail = \"breakglass@ssc.gc.ca\""
+env := opa.runtime().env
+required_emergency_account_email := env["GR13_02_BREAKGLASS_USER_EMAIL"]
+required_alert_filter := concat("", ["protoPayload.authenticationInfo.principalEmail = \"", required_emergency_account_email, "\""])
+
 
 # Metadata variables
 guardrail := {"guardrail": "13"}
