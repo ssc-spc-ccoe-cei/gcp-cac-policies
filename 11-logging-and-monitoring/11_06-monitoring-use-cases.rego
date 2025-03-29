@@ -23,7 +23,7 @@ validation_number := "06"
 # title: CLIENT INPUT
 # Number of files that need to be present for compliance
 required_file_count := 3
-# description: filename should begin with "06_APPROVAL" but can have different suffix and file type
+# description: filename should begin with "GUARDRAIL_APPROVAL" but can have different suffix and file type
 required_approval_filename := "GUARDRAIL_APPROVAL"
 
 

@@ -19,7 +19,7 @@ validation_number := "03"
 # This validation is to ensure the network architecture and cloud deployment guide makes use of provider features
 # There is no "NON-COMPLIANT" status that comes out of this as it builds on 8.1 and 8.2
 required_file_count := 0
-# description: filename should begin with "03_APPROVAL" but can have different suffix and file type
+# description: filename should begin with "GUARDRAIL_APPROVAL" but can have different suffix and file type
 required_approval_filename := "GUARDRAIL_APPROVAL"
 
 # Metadata variables

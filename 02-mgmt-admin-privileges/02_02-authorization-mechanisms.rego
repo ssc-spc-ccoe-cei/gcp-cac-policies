@@ -23,8 +23,10 @@ description := {"description": "Authorization Mechanisms"}
 # METADATA
 # title: CLIENT INPUT
 # description: Number of files that need to be present for compliance
+# it is estimated that at least 3 files will be required to provide sufficient evidence for what is being asked
+# if the situation changes, adjust the file count accordingly
 required_file_count := 3
-# description: filename should begin with "02_APPROVAL" but can have different suffix and file type
+# description: filename should begin with "GUARDRAIL_APPROVAL" but can have different suffix and file type
 env := opa.runtime().env
 required_approval_filename := "GUARDRAIL_APPROVAL"
 
