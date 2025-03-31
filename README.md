@@ -41,6 +41,7 @@ Naming format is `GR<GUARDRAIL_NUMBER>_<VALIDATION_NUMBER>_VARNAME`.  If the `VA
 |GR05_01_SECURITY_CATEGORY_KEY||DATA_CLASSIFICATION|
 |GR07_03_ALLOWED_CA_ISSUERS|Comma-delimited list of approved CAs|Let's Encrypt,Verisign|
 |GR11_04_ORG_ID|GCP organization ID|1234567890|
+|GR13_02_BREAKGLASS_USER_EMAIL||breakglass@ssc.gc.ca|
 |GR13_03_BREAKGLASS_USER_EMAIL||breakglass@ssc.gc.ca|
 
 
