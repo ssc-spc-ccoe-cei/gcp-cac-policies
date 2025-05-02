@@ -25,7 +25,7 @@ roles_required := [
 required_asset_type := "cloudresourcemanager.googleapis.com/Organization"
 
 # IAM member to look for
-required_iam_member := "group:cloudbrokeringservices@ssc-cloud.canada.ca"
+required_iam_member := "user:gcxm163-cloud-brokering-service-b-billing-admin@ent.cloud-nuage.canada.ca"
 
 
 # METADATA

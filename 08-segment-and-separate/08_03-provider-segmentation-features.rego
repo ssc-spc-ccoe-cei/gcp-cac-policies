@@ -36,7 +36,7 @@ is_correct_name(asset) if {
 validation_files_list := {file |
   some asset in input.data
   some file in asset.files
-  startswith(file, concat("/", [required_name, "validations", validation_number]))
+  startswith(file, concat("/", [required_name, "evidence", validation_number]))
 }
 
 contains_approval if {
