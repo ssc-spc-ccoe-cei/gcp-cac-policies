@@ -42,7 +42,7 @@ is_correct_name(asset) if {
 contains_approval if {
   some asset in input.data
   some file in asset.files
-  startswith(file, concat("/", [required_guardrail_check, "validations", required_approval_filename]))
+  startswith(file, concat("/", [required_guardrail_check, "evidence", required_approval_filename]))
 }
 
 
