@@ -18,7 +18,7 @@ description := {"description": "Enterprise Monitoring Accounts"}
 # IAM Roles required
 roles_required := [
 	"roles/resourcemanager.organizationViewer",
-	"roles/billing.admin",
+	"roles/billing.admin"
 ]
 
 # Required asset_type
