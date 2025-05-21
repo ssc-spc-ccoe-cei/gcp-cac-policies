@@ -38,8 +38,7 @@ is_correct_asset(asset) if {
 # METADATA
 # description: Check is member matchs IAM member to look for
 is_correct_member(binding) if {
-	found := binding.members[_] == required_iam_member
-	print("Checking IAM Member in binding:", binding.members, "Result:", found)
+	binding.members[_] == required_iam_member
 }
 
 # METADATA
