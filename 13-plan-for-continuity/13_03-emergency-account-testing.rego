@@ -30,7 +30,7 @@ required_asset_kind := "logging#breakglass#auth"
 env := opa.runtime().env
 # description: takes on the value of env var, GR13_03_BREAKGLASS_USER_EMAIL
 #              breakglass account email -- i.e. GR13_03_BREAKGLASS_USER_EMAIL="breakglass@ssc.gc.ca"
-required_emergency_account_email := env["GR13_03_BREAKGLASS_USER_EMAIL"]
+required_emergency_account_email := env["BREAKGLASS_USER_EMAIL"]
 
 
 # METADATA
