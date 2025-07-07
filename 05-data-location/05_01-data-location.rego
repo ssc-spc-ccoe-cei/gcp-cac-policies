@@ -75,6 +75,7 @@ exempt_resources := [
   "securitycenter.googleapis.com/MuteConfig",
   "securitycentermanagement.googleapis.com/SecurityCenterService",
   "storagetransfer.googleapis.com/TransferJob",
+  "dns.googleapis.com/ResourceRecordSet",
 ]
 
 # METADATA
