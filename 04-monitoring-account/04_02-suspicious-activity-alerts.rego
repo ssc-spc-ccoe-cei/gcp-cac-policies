@@ -11,6 +11,9 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Name of files data object to look for
 required_name := "guardrail-04"
 validation_number := "02"
@@ -20,6 +23,9 @@ compliant_dependency := "05"
 guardrail := {"guardrail": "04"}
 validation := {"validation": "02"}
 description := {"description": "Suspicious Activity Alerts"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # description: GR04_02 is dependent on GR01_05, so we're checking for GR01_05's compliance status
 required_guardrail_check := "guardrail-01"
@@ -67,7 +73,6 @@ contains_approval if {
 reply contains response if {
   count(validation_files_list) >= required_file_count
   contains_approval
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required suspicious activity alerts compliant for [%v, validation %v] as Guardrail 01, Validation 05 is also compliant.", [required_name, validation_number])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -79,7 +84,6 @@ reply contains response if {
 reply contains response if {
   count(validation_files_list) >= required_file_count
   not contains_approval
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "PENDING"}
 	msg := {"msg": sprintf("Required suspicious activity alerts PENDING for [%v, validation %v] as Guardrail 01, missing aproval file. Validation 05 is also PENDING.", [required_name, validation_number])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -90,8 +94,7 @@ reply contains response if {
 # description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT 
 reply contains response if {
   count(validation_files_list) < required_file_count
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Required suspicious activity alerts for [%v, validation %v] NOT detected. Please confirm Guardrail 01, Validation 05 is compliant.", [required_name, validation_number])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

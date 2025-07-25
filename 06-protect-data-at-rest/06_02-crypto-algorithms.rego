@@ -10,11 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "06"}
 validation := {"validation": "02"}
 description := {"description": "Cryptographic Algorithms"}
 
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # description: this validation has an automatic pass
@@ -26,7 +31,6 @@ default allow = true
 reply contains response if {
   allow = true
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "GCP uses approved or betterr cryptographic algorithms."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

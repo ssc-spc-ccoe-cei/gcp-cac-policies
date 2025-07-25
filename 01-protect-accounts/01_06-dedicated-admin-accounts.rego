@@ -10,10 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "01"}
 validation := {"validation": "06"}
 description := {"description": "Dedicated Admin accounts"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 required_asset_type := "cloudresourcemanager.googleapis.com/Organization"
 
@@ -82,7 +88,6 @@ contains_dedicated_org_admin_users := {asset |
 # description: If priveged user accounts are dedicated Organization Admins then reply back COMPLIANT
 reply contains response if {
 	count(contains_dedicated_org_admin_users) > 0
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Dedicated Organization Admin users detected."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -93,8 +98,7 @@ reply contains response if {
 # description: If priveged user accounts are NOT dedicated Organization Admins then reply back NON-COMPLIANT
 reply contains response if {
 	count(contains_dedicated_org_admin_users) == 0
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Dedicated Organization Admin users NOT detected."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

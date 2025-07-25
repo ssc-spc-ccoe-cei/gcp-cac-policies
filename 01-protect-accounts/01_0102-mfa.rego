@@ -10,6 +10,9 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Name of files data object to look for
 required_name := "guardrail-01"
 validation_number := "01 & 02"
@@ -19,6 +22,8 @@ guardrail := {"guardrail": "01"}
 validation := {"validation": "0102"}
 description := {"description": "MFA Enforcement"}
 
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # title: HELPER FUNCTIONS
@@ -55,7 +60,6 @@ mfa_not_enforced_set := {combined_set |
 # description: If MFA is enforced user all users, then COMPLIANT
 reply contains response if {
   count(mfa_not_enforced_users_list) == 0
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required MFA Enforcement policy detected for users in [%v, validation %v].", [required_name, validation_number])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -67,8 +71,7 @@ reply contains response if {
 reply contains response if {
   count(mfa_not_enforced_users_list) > 0
   some violating_user in mfa_not_enforced_set
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Required MFA Enforcement policy NOT detected for user(s) in [%v, validation %v]", [required_name, validation_number])}
   asset_name := {"asset_name": violating_user}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

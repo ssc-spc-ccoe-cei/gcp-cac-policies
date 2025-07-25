@@ -10,11 +10,17 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 
 # Metadata variables
 guardrail := {"guardrail": "01"}
 validation := {"validation": "04"}
 description := {"description": "User account Monitoring and Auditing"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # Log name to check for
 required_log_name := "cloudaudit.googleapis.com%2Factivity"
@@ -47,7 +53,6 @@ contains_workspace_logs := {asset |
 # description: If audit logs are found with correct name then reply back COMPLIANT
 reply contains response if {
 	count(contains_workspace_logs) > 0
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Google Workspace Audit Logs at Organization-level detected."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -58,8 +63,7 @@ reply contains response if {
 # description: If audit logs are NOT found with correct name then reply back NON-COMPLIANT
 reply contains response if {
 	count(contains_workspace_logs) == 0
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Google Workspace Audit Logs at Organization-level NOT detected."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

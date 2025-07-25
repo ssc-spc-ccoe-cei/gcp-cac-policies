@@ -10,11 +10,17 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 
 # Metadata variables
 guardrail := {"guardrail": "03"}
 validation := {"validation": "01"}
 description := {"description": "Endpoint Management - Allowed Policy Member Domains and User Source IP Constraints"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 required_asset_type := "orgpolicy.googleapis.com/Policy"
 required_policy := "policies/iam.allowedPolicyMemberDomains"
@@ -78,7 +84,6 @@ contains_non_match := {asset.resource.data.spec.rules[_].values.allowedValues[_]
 # description: If priveged user accounts are dedicated Organization Admins then reply back COMPLIANT
 reply contains response if {
 	count(contains_non_match) == 0
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Policy Member Domains configuration detected."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -90,8 +95,7 @@ reply contains response if {
 reply contains response if {
 	count(contains_non_match) > 0
   some non_match in contains_non_match
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Items in policy allowed values do NOT match the client provided list of %v.", [required_customer_ids])}
   asset_name := {"asset_name": non_match}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

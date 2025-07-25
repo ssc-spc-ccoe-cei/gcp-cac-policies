@@ -10,10 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "03"}
 validation := {"validation": "01"}
 description := {"description": "Endpoint Management - Allowed Policy Member Domains and User Source IP Constraints"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 required_asset_kind:= "logging#user#auth"
 
@@ -90,7 +96,6 @@ tagged_project_contains_non_approved_ip := {[asset.logName, asset.insertId, asse
 # description: If IP restrictions provided to ACM, then reply back COMPLIANT
 reply contains response if {
 	required_has_federated_users == "true"
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Users are federated users and this guardrail is handled by the IdP."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -99,7 +104,6 @@ reply contains response if {
 reply contains response if {
 	required_has_federated_users == "false"
 	count(contains_non_approved_ip) == 0
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "All users are connecting from approved IPs in the last 24hrs."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -113,8 +117,7 @@ reply contains response if {
 	count(logs_with_tagged_project) == 0
 	count(contains_non_approved_ip) > 0
 	some violating_login in contains_non_approved_ip
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
   	msg := {"msg": sprintf("[%v] authentication instances found where user connected from non-approved source IP.", [count(contains_non_approved_ip)])}
   	asset_name := {"asset_name": violating_login}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
@@ -125,8 +128,7 @@ reply contains response if {
 	count(logs_with_tagged_project) > 0
 	count(tagged_project_contains_non_approved_ip) > 0
 	some violating_login in tagged_project_contains_non_approved_ip
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("[%v] authentication instances found where user connected from non-approved source IP.", [count(tagged_project_contains_non_approved_ip)])}
 	asset_name := {"asset_name": [violating_login[1], violating_login[2], violating_login[3], violating_login[4]]}	# [insertId, principalEmail, sourceIp, timestamp]
 	proj_parent := {"proj_parent": violating_login[5]}

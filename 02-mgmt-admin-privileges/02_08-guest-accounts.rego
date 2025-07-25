@@ -9,6 +9,9 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Name of files data object to look for
 required_name := "guardrail-02"
 validation_number := "08"
@@ -18,6 +21,8 @@ guardrail := {"guardrail": "02"}
 validation := {"validation": "08"}
 description := {"description": "Guest User Access"}
 
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # description: CLIENT INPUT
@@ -90,7 +95,6 @@ denied_guests_set := {combined_set |
 # description: If guests are from approved/allowed domains, then COMPLIANT
 reply contains response if {
   count(unauthorized_guests_set) + count(denied_guests_set) == 0
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("No unauthorized guest users have been detected for [%v, validation %v].", [required_name, validation_number])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -103,8 +107,7 @@ reply contains response if {
   count(unauthorized_guests_set) + count(denied_guests_set) > 0
   combined_set := unauthorized_guests_set | denied_guests_set
   some violating_user in combined_set
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Unauthorized guest users were detected for [%v, validation %v]", [required_name, validation_number])}
   asset_name := {"asset_name": violating_user}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

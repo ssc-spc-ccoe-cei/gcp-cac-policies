@@ -9,6 +9,9 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Name of files data object to look for
 required_name := "guardrail-01"
 validation_number := "03"
@@ -17,6 +20,9 @@ validation_number := "03"
 guardrail := {"guardrail": "01"}
 validation := {"validation": "03"}
 description := {"description": "Global Admins count"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # title: CLIENT INPUT
@@ -67,7 +73,6 @@ combined_members_set := {combined_set |
 reply contains response if {
   count(combined_members_set) >= 2
   count(combined_members_set) <= 5
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Valid number of Org Admins found for [%v, validation %v]. [%v] Org Admins were found.", [required_name, validation_number, count(combined_members_set)])}
   asset_name := {"asset_name": combined_members_set}
@@ -79,8 +84,7 @@ reply contains response if {
 # description: If too few Global/Org Admins detected, then NON-COMPLIANT
 reply contains response if {
   count(combined_members_set) < 2
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Less than 2 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v]. [%v] were found.", [required_name, validation_number, count(combined_members_set)])}
   asset_name := {"asset_name": combined_members_set}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
@@ -91,8 +95,7 @@ reply contains response if {
 # description: If too many Global/Org Admins detected, then NON-COMPLIANT
 reply contains response if {
   count(combined_members_set) > 5
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("More than 5 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v]. [%v] were found.", [required_name, validation_number, count(combined_members_set)])}
   asset_name := {"asset_name": combined_members_set}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

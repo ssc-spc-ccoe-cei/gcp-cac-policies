@@ -51,8 +51,7 @@ Naming format is `GR<GUARDRAIL_NUMBER>_<VALIDATION_NUMBER>_VARNAME`.  If the `VA
 reply contains response if {
   count(assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags) > 0
   violating_assets := assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
   msg := {"msg": sprintf("[%v] assets have been found to violate the data location policy", [count(violating_assets)])}
   asset_name := {"asset_name": violating_assets}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
@@ -65,8 +64,7 @@ reply contains response if {
   count(assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags) > 0
   violating_assets := assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags
   some violating_asset in violating_assets
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
   msg := {"msg": sprintf("[%v] assets have been found to violate the data location policy", [count(violating_assets)])}
   asset_name := {"asset_name": violating_asset}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

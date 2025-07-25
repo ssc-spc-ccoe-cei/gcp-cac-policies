@@ -10,10 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "05"}
 validation := {"validation": "01"}
 description := {"description": "Data Location Restriction Policy"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # List of allowed regions that assets must reside in
 allowed_regions := [
@@ -282,7 +288,6 @@ reply contains response if {
   count(project_profile_tag_value) == 0
   count(violating_assets_names) == 0
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Assets are in found to be in accordance to the data location policy and have appropriate tags where applicable."}
   asset_name := {"asset_name": assets_resource_location_with_exempt_tags}
 	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
@@ -295,8 +300,7 @@ reply contains response if {
 reply contains response if {
   count(violating_assets_with_no_tagged_project) > 0
   some violating_asset in violating_assets_with_no_tagged_project
-	status := {"status": "NON-COMPLIANT"}
-  check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
   msg := {"msg": "Asset has been found to violate the data location policy"}
   asset_name := {"asset_name": violating_asset}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
@@ -305,8 +309,7 @@ reply contains response if {
 reply contains response if {
   count(violating_assets_with_tagged_project) > 0
   some violating_asset in violating_assets_with_tagged_project
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
   msg := {"msg": "Asset has been found to violate the data location policy"}
   asset_name := {"asset_name": violating_asset[0]}
   proj_parent := {"proj_parent": violating_asset[1]}
