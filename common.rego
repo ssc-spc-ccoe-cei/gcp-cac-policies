@@ -41,34 +41,25 @@ profile_enforcement := {
 }
 
 # This function looks up the enforcement level for a given guardrail number.
-# If the guardrail number is found as recommended based on the profile, set the check type to RECOMMENDED.
-set_check_type(guardrail_number) := {
-"check_type": "RECOMMENDED",
-} if {
+# It will dynamically set the check_type value based on the profile_enforcement map.
+# Returns REQUIRED if the guardrail is required, otherwise returns RECOMMENDED if guardrail is recommended.
+set_check_type(guardrail_number) := result {
+    # Check if profile has guardrail as required
+    profile_enforcement[profile].required[guardrail_number]
+    result := {"check_type": "REQUIRED"}
+} else := result {
+    # Check if profile has guardrail as recommended
     profile_enforcement[profile].recommended[guardrail_number]
+    result := {"check_type": "RECOMMENDED"}
 }
 
 # This function looks up the enforcement level for a given guardrail number.
-# If the guardrail number is found as required based on the profile, set the check type to REQUIRED.
-set_check_type(guardrail_number) := {
-"check_type": "REQUIRED",
-} if {
+# It will dynamically set the status value based on the profile_enforcement map.
+# Returns NON-COMPLIANT if the guardrail is required, otherwise returns WARN if guardrail is recommended.
+set_status(guardrail_number) := result {
     profile_enforcement[profile].required[guardrail_number]
-}
-
-# This function looks up the status for a given guardrail number.
-# If the guardrail number is found as recommended based on the profile, set the status to WARN.
-set_status(guardrail_number) := {
-"status": "WARN"
-} if {
+    result := {"status": "NON-COMPLIANT"}
+} else := result {
     profile_enforcement[profile].recommended[guardrail_number]
+    result := {"status": "WARN"}
 }
-
-# This function looks up the status for a given guardrail number.
-# If the guardrail number is found as required based on the profile, set the status to NON-COMPLIANT.
-set_status(guardrail_number) := {
-"status": "NON-COMPLIANT"
-} if {
-    profile_enforcement[profile].required[guardrail_number]
-}
-
