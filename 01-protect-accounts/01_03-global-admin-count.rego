@@ -27,45 +27,34 @@ check := common.set_check_type(guardrail.guardrail)
 # METADATA
 # title: CLIENT INPUT
 # description: takes on the value of env var, GR01_03_ORG_ADMIN_GROUP_EMAIL
-#              i.e. export GR01_03_ORG_ADMIN_GROUP_EMAIL='gcp-organization-admins@ssc.gc.ca'
+# i.e. export GR01_03_ORG_ADMIN_GROUP_EMAIL='gcp-organization-admins@ssc.gc.ca'
 env := opa.runtime().env
 required_org_admin_group_email := env["GR01_03_ORG_ADMIN_GROUP_EMAIL"]
-
-
-# METADATA
-# title: HELPER FUNCTIONS
-list_to_set(list) := {set | 
-   set := list  # items are unique in a set  
-}
 
 is_correct_asset(asset) if {
   asset.kind == "cloudidentity#groups#membership"
 }
 
-
 # METADATA
 # title: VALIDATION / DATA PROCESSING
-gcp_org_admin_members_list := {gcp_user_members |
+gcp_org_admin_members_list := { member |
   some asset in input.data
   is_correct_asset(asset)
   asset.groupEmail == required_org_admin_group_email
-  gcp_user_members := asset.members
+  some member in asset.members
 }
 
-iam_org_admin_members_list := {user_members |
+iam_org_admin_members_list := { member |
   some asset in input.data
   bindings := asset.iam_policy.bindings
   some binding in bindings
   binding.role == "roles/resourcemanager.organizationAdmin"
-  members := binding.members 
-  user_members := [user | user := members[_]; startswith(user, "user:")]
+  some user in binding.members
+  startswith(user, "user:")
+  member := user
 }
 
-combined_members_set := {combined_set |
-  temp_list := array.concat(gcp_org_admin_members_list[_], iam_org_admin_members_list[_])
-  combined_set := list_to_set(temp_list[_])
-}
-
+combined_members_set := gcp_org_admin_members_list | iam_org_admin_members_list
 
 # METADATA
 # title: Global Admins Policy - COMPLIANT
