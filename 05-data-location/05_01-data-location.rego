@@ -41,41 +41,73 @@ exempt_resources := [
   "cloudresourcemanager.googleapis.com/TagBinding",
   "cloudresourcemanager.googleapis.com/TagKey",
   "cloudresourcemanager.googleapis.com/TagValue",
+
   "orgpolicy.googleapis.com/Policy",
-	"compute.googleapis.com/Firewall",
-	"compute.googleapis.com/FirewallPolicy",
-	"compute.googleapis.com/Route",
-	"compute.googleapis.com/Network",
-	"compute.googleapis.com/Subnetwork",
-	"compute.googleapis.com/Project",
-	"compute.googleapis.com/GlobalAddress",
-	"compute.googleapis.com/GlobalForwardingRule",
-	"cloudkms.googleapis.com/CryptoKey",
-	"cloudkms.googleapis.com/KeyRing",
-	"cloudkms.googleapis.com/CryptoKeyVersion",
-	"serviceusage.googleapis.com/Service",
-	"secretmanager.googleapis.com/SecretVersion",
-	"secretmanager.googleapis.com/Secret",
-	"logging.googleapis.com/LogSink",
-	"monitoring.googleapis.com/AlertPolicy",
-	"pubsub.googleapis.com/Topic",
-	"cloudbilling.googleapis.com/ProjectBillingInfo",
-	"cloudbilling.googleapis.com/BillingAccount",
+
+  "compute.googleapis.com/Firewall",
+  "compute.googleapis.com/FirewallPolicy",
+  "compute.googleapis.com/Route",
+  "compute.googleapis.com/Network",
+  "compute.googleapis.com/Subnetwork",
+  "compute.googleapis.com/Project",
+  "compute.googleapis.com/GlobalAddress",
+  "compute.googleapis.com/GlobalForwardingRule",
+  "compute.googleapis.com/HttpHealthCheck",
+
+  "cloudkms.googleapis.com/CryptoKey",
+  "cloudkms.googleapis.com/KeyRing",
+  "cloudkms.googleapis.com/CryptoKeyVersion",
+
+  "serviceusage.googleapis.com/Service",
+
+  "secretmanager.googleapis.com/SecretVersion",
+  "secretmanager.googleapis.com/Secret",
+
+  "logging.googleapis.com/LogSink",
+
+  "monitoring.googleapis.com/AlertPolicy",
+  "monitoring.googleapis.com/NotificationChannel",
+  "monitoring.googleapis.com/Dashboard",
+
+  "pubsub.googleapis.com/Topic",
+  "pubsub.googleapis.com/Subscription",
+
+  "cloudbilling.googleapis.com/ProjectBillingInfo",
+  "cloudbilling.googleapis.com/BillingAccount",
+
   "iam.googleapis.com/ServiceAccount",
+
   "binaryauthorization.googleapis.com/Attestor",
   "binaryauthorization.googleapis.com/Policy",
+
   "artifactregistry.googleapis.com/DockerImage",
+
   "bigquery.googleapis.com/Table",
+
   "cloudasset.googleapis.com/Feed",
+
   "dataplex.googleapis.com/EntryGroup",
+
   "essentialcontacts.googleapis.com/Contact",
+
   "logging.googleapis.com/Settings",
-  "monitoring.googleapis.com/NotificationChannel",
+
   "securitycenter.googleapis.com/ContainerThreatDetectionSettings",
   "securitycenter.googleapis.com/MuteConfig",
+  "securitycenter.googleapis.com/EventThreatDetectionSettings",
+  "securitycenter.googleapis.com/WebSecurityScannerSettings",
+  "securitycenter.googleapis.com/SecurityHealthAnalyticsSettings",
+
   "securitycentermanagement.googleapis.com/SecurityCenterService",
+  "securitycentermanagement.googleapis.com/EventThreatDetectionCustomModule",
+
   "storagetransfer.googleapis.com/TransferJob",
+  
   "dns.googleapis.com/ResourceRecordSet",
+  "dns.googleapis.com/ResponsePolicyRule",
+  "dns.googleapis.com/ResponsePolicy",
+
+  "networkconnectivity.googleapis.com/PolicyBasedRoute"
 ]
 
 # METADATA
