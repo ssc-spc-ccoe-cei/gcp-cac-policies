@@ -21,10 +21,13 @@ validation_number := "02"
 
 required_asset_type := "monitoring.googleapis.com/AlertPolicy"
 
+# METADATA
+# title: CLIENT INPUT
 env := opa.runtime().env
-required_emergency_account_email := env["GR13_02_BREAKGLASS_USER_EMAIL"]
-required_alert_filter := concat("", ["protoPayload.authenticationInfo.principalEmail = \"", required_emergency_account_email, "\""])
-
+# description: takes on the value of env var, BREAKGLASS_USER_EMAILS
+#              which contains a JSON array of breakglass account emails
+#              i.e. BREAKGLASS_USER_EMAILS='["breakglass1@example.com","breakglass2@example.com"]'
+required_emergency_account_emails := json.unmarshal(env["BREAKGLASS_USER_EMAILS"])
 
 # Metadata variables
 guardrail := {"guardrail": "13"}
@@ -40,24 +43,46 @@ is_correct_asset(asset) if {
 	asset.asset_type == required_asset_type
 }
 
-has_user_auth_alert(asset) if {
-  filter = asset.resource.data.conditions[_].conditionMatchedLog.filter
-  contains(filter, required_alert_filter)
+# METADATA
+# description: Check if an email is covered by an alert filter
+# This function checks if a given email is included in an alert filter
+email_covered_by_filter(email, filter) if {
+  email_pattern := sprintf("protoPayload.authenticationInfo.principalEmail=\"%s\"", [email])
+  contains(filter, email_pattern)
 }
 
-contains_user_auth_alert := {asset |
+# METADATA
+# description: Check if an alert has filters for any of the required emails
+has_emergency_account_alert(asset) if {
+  filter := asset.resource.data.conditions[_].conditionMatchedLog.filter
+  some email in required_emergency_account_emails
+  email_covered_by_filter(email, filter)
+}
+
+# METADATA
+# title: Track which emails have alerts configured
+emails_with_alerts contains email if {
+  some email in required_emergency_account_emails
   some asset in input.data
   is_correct_asset(asset)
-  has_user_auth_alert(asset)
+  filter := asset.resource.data.conditions[_].conditionMatchedLog.filter
+  email_covered_by_filter(email, filter)
+}
+
+# METADATA
+# title: Track which emails are missing alerts
+emails_missing_alerts contains email if {
+  some email in required_emergency_account_emails
+  not emails_with_alerts[email]
 }
 
 # METADATA
 # title: Emergency Account Alerting Policy - COMPLIANT
 # description: If validation/evidence file count meets miniumum AND has approval, then COMPLIANT
 reply contains response if {
-  count(contains_user_auth_alert) > 0
+  count(emails_missing_alerts) == 0
   status := {"status": "COMPLIANT"}
-  msg := {"msg": sprintf("Required Emergency Account alert(s) for [%v, validation %v] detected.", [required_name, validation_number])}
+  msg := {"msg": sprintf("Required Emergency Account alerts for all accounts %v detected for [%v, validation %v].", [required_emergency_account_emails, required_name, validation_number])}
   response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
@@ -65,8 +90,8 @@ reply contains response if {
 # title: Policy - NON-COMPLIANT
 # description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT
 reply contains response if {
-  count(contains_user_auth_alert) == 0
+  count(emails_missing_alerts) > 0
 	status := common.set_status(guardrail.guardrail)
-	msg := {"msg": sprintf("Required Emergency Account alert(s) for [%v, validation %v] NOT detected.", [required_name, validation_number])}
+  msg := {"msg": sprintf("Required Emergency Account alerts missing for accounts %v in [%v, validation %v].", [emails_missing_alerts, required_name, validation_number])}
   response := object.union_n([guardrail, validation, status, msg, description, check])
 }
