@@ -9,6 +9,9 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Name of files data object to look for
 required_name := "guardrail-01"
 validation_number := "03"
@@ -18,48 +21,40 @@ guardrail := {"guardrail": "01"}
 validation := {"validation": "03"}
 description := {"description": "Global Admins count"}
 
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
+
 # METADATA
 # title: CLIENT INPUT
 # description: takes on the value of env var, GR01_03_ORG_ADMIN_GROUP_EMAIL
-#              i.e. export GR01_03_ORG_ADMIN_GROUP_EMAIL='gcp-organization-admins@ssc.gc.ca'
+# i.e. export GR01_03_ORG_ADMIN_GROUP_EMAIL='gcp-organization-admins@ssc.gc.ca'
 env := opa.runtime().env
 required_org_admin_group_email := env["GR01_03_ORG_ADMIN_GROUP_EMAIL"]
-
-
-# METADATA
-# title: HELPER FUNCTIONS
-list_to_set(list) := {set | 
-   set := list  # items are unique in a set  
-}
 
 is_correct_asset(asset) if {
   asset.kind == "cloudidentity#groups#membership"
 }
 
-
 # METADATA
 # title: VALIDATION / DATA PROCESSING
-gcp_org_admin_members_list := {gcp_user_members |
+gcp_org_admin_members_list := { member |
   some asset in input.data
   is_correct_asset(asset)
   asset.groupEmail == required_org_admin_group_email
-  gcp_user_members := asset.members
+  some member in asset.members
 }
 
-iam_org_admin_members_list := {user_members |
+iam_org_admin_members_list := { member |
   some asset in input.data
   bindings := asset.iam_policy.bindings
   some binding in bindings
   binding.role == "roles/resourcemanager.organizationAdmin"
-  members := binding.members 
-  user_members := [user | user := members[_]; startswith(user, "user:")]
+  some user in binding.members
+  startswith(user, "user:")
+  member := user
 }
 
-combined_members_set := {combined_set |
-  temp_list := array.concat(gcp_org_admin_members_list[_], iam_org_admin_members_list[_])
-  combined_set := list_to_set(temp_list[_])
-}
-
+combined_members_set := gcp_org_admin_members_list | iam_org_admin_members_list
 
 # METADATA
 # title: Global Admins Policy - COMPLIANT
@@ -67,7 +62,6 @@ combined_members_set := {combined_set |
 reply contains response if {
   count(combined_members_set) >= 2
   count(combined_members_set) <= 5
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Valid number of Org Admins found for [%v, validation %v]. [%v] Org Admins were found.", [required_name, validation_number, count(combined_members_set)])}
   asset_name := {"asset_name": combined_members_set}
@@ -79,8 +73,7 @@ reply contains response if {
 # description: If too few Global/Org Admins detected, then NON-COMPLIANT
 reply contains response if {
   count(combined_members_set) < 2
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Less than 2 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v]. [%v] were found.", [required_name, validation_number, count(combined_members_set)])}
   asset_name := {"asset_name": combined_members_set}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
@@ -91,8 +84,7 @@ reply contains response if {
 # description: If too many Global/Org Admins detected, then NON-COMPLIANT
 reply contains response if {
   count(combined_members_set) > 5
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("More than 5 Organization Admins found.  There should be at least 2, and no more than 5 for [%v, validation %v]. [%v] were found.", [required_name, validation_number, count(combined_members_set)])}
   asset_name := {"asset_name": combined_members_set}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

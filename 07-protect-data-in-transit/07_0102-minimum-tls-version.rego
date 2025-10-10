@@ -10,10 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "07"}
 validation := {"validation": "0102"}
 description := {"description": "Protection of Data-in-Transit"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # Asset type requirement for both Regional and Global Load Balancers
 required_lb_asset_types := ["compute.googleapis.com/ForwardingRule", "compute.googleapis.com/GlobalForwardingRule"]
@@ -192,8 +198,7 @@ invalid_profile_ssl_policies := {asset |
 reply contains response if {
 	some asset in invalid_version_ssl_policies
 	asset_min_tls_version := asset.resource.data.minTlsVersion
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("SSL Policy with invalid Minimum TLS Version set. Correct: [%v]. Detected: [%v].", [required_min_tls_version, asset_min_tls_version])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -207,8 +212,7 @@ reply contains response if {
 reply contains response if {
 	some asset in invalid_profile_ssl_policies
 	asset_ssl_policy_profile := asset.resource.data.profile
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("SSL Policy with invalid Profile set. Correct: [%v]. Detected: [%v].", [required_ssl_policy_profiles, asset_ssl_policy_profile])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -221,7 +225,6 @@ reply contains response if {
 reply contains response if {
 	some asset in valid_ssl_policies
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("SSL Policy with valid Profile set [%v] and valid Min. TLS set [%v] detected.", [required_ssl_policy_profiles, required_min_tls_version])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -234,8 +237,7 @@ reply contains response if {
 reply contains response if {
 	some asset in ext_target_proxy_assets
 	is_using_default_ssl_policy(asset)
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "External HTTPS Load Balancer using [GCP Default] SSL Policy."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -250,8 +252,7 @@ reply contains response if {
 	some asset in ext_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	not is_using_valid_ssl_policy(policy_name)
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "External HTTPS Load Balancer using invalid SSL Policy."}
   asset_name := {"asset_name": policy_name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
@@ -268,7 +269,6 @@ reply contains response if {
 	policy_name := asset.resource.data.sslPolicy
 	is_using_valid_ssl_policy(policy_name)
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "External HTTPS Load Balancer using valid SSL Policy."}
   asset_name := {"asset_name": policy_name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
@@ -282,8 +282,7 @@ reply contains response if {
 reply contains response if {
 	some asset in int_target_proxy_assets
 	is_using_default_ssl_policy(asset)
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Internal HTTPS Load Balancer using [GCP Default] SSL Policy."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -298,8 +297,7 @@ reply contains response if {
 	some asset in int_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	not is_using_valid_ssl_policy(policy_name)
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Internal HTTPS Load Balancer using invalid SSL Policy."}
   asset_name := {"asset_name": policy_name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
@@ -316,7 +314,6 @@ reply contains response if {
 	policy_name := asset.resource.data.sslPolicy
 	is_using_valid_ssl_policy(policy_name)
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Internal HTTPS Load Balancer using valid SSL Policy."}
   asset_name := {"asset_name": policy_name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

@@ -10,6 +10,9 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 
 # Name of files data object to look for
 required_name := "guardrail-13"
@@ -27,6 +30,9 @@ required_alert_filter := concat("", ["protoPayload.authenticationInfo.principalE
 guardrail := {"guardrail": "13"}
 validation := {"validation": "02"}
 description := {"description": "Emergency Account alerts"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # description: Check if asset's name matches what's required
@@ -50,7 +56,6 @@ contains_user_auth_alert := {asset |
 # description: If validation/evidence file count meets miniumum AND has approval, then COMPLIANT
 reply contains response if {
   count(contains_user_auth_alert) > 0
-  check := {"check_type": "MANDATORY"}
   status := {"status": "COMPLIANT"}
   msg := {"msg": sprintf("Required Emergency Account alert(s) for [%v, validation %v] detected.", [required_name, validation_number])}
   response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -61,8 +66,7 @@ reply contains response if {
 # description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT
 reply contains response if {
   count(contains_user_auth_alert) == 0
-  check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Required Emergency Account alert(s) for [%v, validation %v] NOT detected.", [required_name, validation_number])}
   response := object.union_n([guardrail, validation, status, msg, description, check])
 }

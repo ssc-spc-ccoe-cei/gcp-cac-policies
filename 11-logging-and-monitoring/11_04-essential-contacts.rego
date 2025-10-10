@@ -10,11 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "11"}
 validation := {"validation": "04"}
 description := {"description": "Essential Contacts"}
 
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # Name of files data object to look for
 required_name := "guardrail-11"
@@ -55,7 +60,6 @@ contains_security_essentialcontacts := {asset.email |
 # description: If essential contacts are in SECURITY category AND meets minimum count, then COMPLIANT
 reply contains response if {
   count(contains_security_essentialcontacts) >= required_security_contacts_count 
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required number of Essential Contacts for Security detected for [%v, validation %v].", [required_name, validation_number])}
   asset_name := {"asset_name": contains_security_essentialcontacts}
@@ -67,8 +71,7 @@ reply contains response if {
 # description: If insufficient essential contacts are in SECURITY category OR does not meets minimum count, then NON-COMPLIANT
 reply contains response if {
   count(contains_security_essentialcontacts) < required_security_contacts_count
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Required number of Essential Contacts for Security NOT detected for [%v, validation %v]. [%v] were found.", [required_name, validation_number, count(contains_security_essentialcontacts)])}
   asset_name := {"asset_name": contains_security_essentialcontacts}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

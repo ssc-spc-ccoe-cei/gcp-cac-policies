@@ -10,11 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "11"}
 validation := {"validation": "05"}
 description := {"description": "Ensure that logs are collected in an appropriate timezone"}
 
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # description: this validation has an automatic pass
@@ -26,7 +31,6 @@ default allow = true
 reply contains response if {
   allow = true
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "GCP logs are always collected in UTC time."}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

@@ -9,6 +9,9 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Name of files data object to look for
 required_name := "guardrail-02"
 validation_number := "01"
@@ -18,6 +21,8 @@ guardrail := {"guardrail": "02"}
 validation := {"validation": "01"}
 description := {"description": "Access Configuration and Policies"}
 
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # title: CLIENT INPUT
@@ -81,8 +86,7 @@ regular_user_w_org_admin_role := combined_org_admin_set & required_regular_users
 
 
 #reply contains response if {
-#	check := {"check_type": "MANDATORY"}
-#	status := {"status": "DEBUG"}
+##	status := {"status": "DEBUG"}
 	#msg := {"msg": sprintf("count: [%v], group_contains_non_dedicated_org_admin_users: [%v].", [count(group_contins_non_dedicated_org_admin_users), group_contains_non_dedicated_org_admin_users])}
 	#msg := {"msg": sprintf("count: [%v], iam_org_admin_role_users_list: [%v].", [count(iam_org_admin_role_users_list[_]), iam_org_admin_role_users_list[_]])}
 	#msg := {"msg": sprintf("count: [%v], workspace_org_admin_group_users_list: [%v].", [count(workspace_org_admin_group_users_list[_]), workspace_org_admin_group_users_list[_]])}
@@ -99,7 +103,6 @@ reply contains response if {
   #count(group_contains_non_dedicated_org_admin_users) == 0
 #  count(org_admin_role_priv_users_list[_]) > 0
   count(regular_user_w_org_admin_role) == 0
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("No regular users have been detected to be assigned Org Admin rights in [%v, validation %v].", [required_name, validation_number])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -112,8 +115,7 @@ reply contains response if {
   #count(org_admin_role_reg_users_list[_]) > 0
   count(regular_user_w_org_admin_role) > 0
   #count(group_contains_non_dedicated_org_admin_users) == 0
-	check := {"check_type": "MANDATORY"}
-	status := {"status": "NON-COMPLIANT"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("[%v] regular user(s) has been found to have the organizationAdmin role in [%v, validation %v].", [count(regular_user_w_org_admin_role), required_name, validation_number])}
   asset_name := {"asset_name": regular_user_w_org_admin_role}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

@@ -10,10 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "04"}
 validation := {"validation": "01"}
 description := {"description": "Enterprise Monitoring Accounts"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # IAM Roles required
 roles_required := [
@@ -81,7 +87,6 @@ missing_roles := [role |
 reply contains response if {
 	count(missing_roles) == 0
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("IAM Member [%v] found with correct roles assigned.", [required_iam_member])}
   asset_name := {"asset_name": roles_required}
 	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
@@ -93,8 +98,7 @@ reply contains response if {
 # If missing roles are found, then reply back with which one that's missing individually
 reply contains response if {
 	count(missing_roles) > 0
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("IAM Member [%v] missing required role.", [required_iam_member])}
   asset_name := {"asset_name": missing_roles}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])

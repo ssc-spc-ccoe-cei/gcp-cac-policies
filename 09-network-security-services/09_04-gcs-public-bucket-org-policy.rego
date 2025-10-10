@@ -10,10 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "09"}
 validation := {"validation": "04"}
 description := {"description": "Storage Bucket Public Access Prevention"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # Asset type must be Policy
 required_asset_type := "orgpolicy.googleapis.com/Policy"
@@ -110,7 +116,6 @@ reply contains response if {
 	some asset in enforced_org_level_assets
 	count(non_enforced_proj_level_assets) == 0
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level and enforced.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -123,8 +128,7 @@ reply contains response if {
 # NON-COMPLIANT and with name of asset
 reply contains response if {
 	some asset in non_enforced_org_level_assets
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level and NOT enforced.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -137,8 +141,7 @@ reply contains response if {
 reply contains response if {
 	some asset in non_enforced_proj_level_assets
 	count(enforced_org_level_assets) > 0
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Organization Policy [%v] override detected at the Project level.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -151,8 +154,7 @@ reply contains response if {
 reply contains response if {
 	some asset in non_enforced_proj_level_assets
 	count(enforced_org_level_assets) == 0
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Project level and NOT enforced.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -163,8 +165,7 @@ reply contains response if {
 reply contains response if {
 	count(enforced_org_level_assets) == 0
 	count(non_enforced_org_level_assets) == 0
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Organization Policy [%v] NOT detected at the Organization Level.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }

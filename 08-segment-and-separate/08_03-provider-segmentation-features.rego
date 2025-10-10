@@ -10,6 +10,9 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Name of files data object to look for
 required_name := "guardrail-08"
 validation_number := "03"
@@ -26,6 +29,9 @@ required_approval_filename := "GUARDRAIL_APPROVAL"
 guardrail := {"guardrail": "08"}
 validation := {"validation": "03"}
 description := {"description": "Provider Segmentation Features"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # description: Check if asset's name matches what's required
@@ -53,7 +59,6 @@ contains_approval if {
 reply contains response if {
   count(validation_files_list) >= required_file_count
   contains_approval
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Required Provider Segmentation Feature usage Approval file for [%v, validation %v] detected.", [required_name, validation_number])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
@@ -65,7 +70,6 @@ reply contains response if {
 reply contains response if {
   count(validation_files_list) >= required_file_count
   not contains_approval
-	check := {"check_type": "MANDATORY"}
 	status := {"status": "PENDING"}
 	msg := {"msg": sprintf("Required Provider Segmentation Feature usage Approval for [%v, validation %v] NOT detected.", [required_name, validation_number])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])

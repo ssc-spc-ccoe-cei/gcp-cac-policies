@@ -10,6 +10,9 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Asset type must be Policy
 required_asset_type := "compute.googleapis.com/ForwardingRule"
 
@@ -27,6 +30,9 @@ insecure_port_range := [
 guardrail := {"guardrail": "07"}
 validation := {"validation": "0102"}
 description := {"description": "Protection of Data-in-Transit"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # description: Checks if asset matches required asset type
@@ -74,7 +80,6 @@ failing_assets := {asset |
 reply contains response if {
 	count(failing_assets) == 0
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "No TCP Load Balancer/ForwardingRule combination detected using insecure ports"}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -87,8 +92,7 @@ reply contains response if {
 # and the ports that it's configured for
 reply contains response if {
 	some asset in matching_assets
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	ports := asset.resource.data.portRange
 	msg := {"msg": sprintf("TCP Load Balancer/ForwardingRule combination detected using insecure port: [%v].", [ports])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])

@@ -10,10 +10,16 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
+# Import common functions
+import data.policies.common
+
 # Metadata variables
 guardrail := {"guardrail": "07"}
 validation := {"validation": "03"}
 description := {"description": "Certificates from Approved CA Issuers"}
+
+# Set check type based on profile and guardrail number
+check := common.set_check_type(guardrail.guardrail)
 
 required_asset_kind := "certificatemanager#certificate#issuer"
 
@@ -85,7 +91,6 @@ reply contains response if {
   count(certs_with_tagged_project) == 0
   count(assets_with_non_approved_ca) == 0
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Certificates are in found to be from approved Certificate Authorities"}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -94,7 +99,6 @@ reply contains response if {
   count(certs_with_tagged_project) > 0
   count(assets_with_non_approved_ca) == 0
 	status := {"status": "COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
 	msg := {"msg": "Certificates are in found to be from approved Certificate Authorities"}
   proj_parent := {"proj_parent": project_id_and_profile[0]}
   proj_profile := {"proj_profile": project_id_and_profile[1]}
@@ -106,8 +110,7 @@ reply contains response if {
   count(certs_with_tagged_project) == 0
   count(assets_with_non_approved_ca) > 0
   some violating_cert in assets_with_non_approved_ca
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Certificates have been found to come from non-approved Certificate Authorities"}
   asset_name := {"asset_name": violating_cert}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
@@ -117,8 +120,7 @@ reply contains response if {
   count(certs_with_tagged_project) > 0
   count(assets_with_non_approved_ca) > 0
   some violating_cert in assets_with_non_approved_ca
-	status := {"status": "NON-COMPLIANT"}
-	check := {"check_type": "MANDATORY"}
+	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Certificates have been found to come from non-approved Certificate Authorities"}
   asset_name := {"asset_name": violating_cert}
   proj_parent := {"proj_parent": project_id_and_profile[0]}
