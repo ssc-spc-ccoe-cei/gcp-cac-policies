@@ -43,11 +43,11 @@ profile_enforcement := {
 # This function looks up the enforcement level for a given guardrail number.
 # It will dynamically set the check_type value based on the profile_enforcement map.
 # Returns REQUIRED if the guardrail is required, otherwise returns RECOMMENDED if guardrail is recommended.
-set_check_type(guardrail_number) := result {
+set_check_type(guardrail_number) := result if {
     # Check if profile has guardrail as required
     profile_enforcement[profile].required[guardrail_number]
     result := {"check_type": "REQUIRED"}
-} else := result {
+} else := result if {
     # Check if profile has guardrail as recommended
     profile_enforcement[profile].recommended[guardrail_number]
     result := {"check_type": "RECOMMENDED"}
@@ -56,10 +56,10 @@ set_check_type(guardrail_number) := result {
 # This function looks up the enforcement level for a given guardrail number.
 # It will dynamically set the status value based on the profile_enforcement map.
 # Returns NON-COMPLIANT if the guardrail is required, otherwise returns WARN if guardrail is recommended.
-set_status(guardrail_number) := result {
+set_status(guardrail_number) := result if {
     profile_enforcement[profile].required[guardrail_number]
     result := {"status": "NON-COMPLIANT"}
-} else := result {
+} else := result if {
     profile_enforcement[profile].recommended[guardrail_number]
     result := {"status": "WARN"}
 }

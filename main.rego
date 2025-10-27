@@ -11,6 +11,6 @@ import future.keywords.contains
 # description: |
 # Running query against this rule will iterate through all existing policies.
 # Allows your query to be 'data.main.guardrail'
-guardrail contains response {
+guardrail contains response if {
 	data.policies[_].reply[response]
 }
