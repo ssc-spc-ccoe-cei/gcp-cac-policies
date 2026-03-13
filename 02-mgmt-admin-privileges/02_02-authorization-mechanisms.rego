@@ -26,68 +26,11 @@ description := {"description": "Authorization Mechanisms"}
 check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
-# title: CLIENT INPUT
-# description: Number of files that need to be present for compliance
-# it is estimated that at least 3 files will be required to provide sufficient evidence for what is being asked
-# if the situation changes, adjust the file count accordingly
-required_file_count := 3
-# description: filename should begin with "GUARDRAIL_APPROVAL" but can have different suffix and file type
-env := opa.runtime().env
-required_approval_filename := "GUARDRAIL_APPROVAL"
-
-
-# METADATA
-# title: HELPER FUNCTIONS
-# description: Check if asset's name matches what's required
-is_correct_name(asset) if {
-	asset.name = required_name
-}
-
-
-# METADATA
-# title: VALIDATION / DATA PROCESSING
-validation_files_list := {file |
-  some asset in input.data
-  some file in asset.files
-  startswith(file, concat("/", [required_name, "evidence", validation_number]))
-}
-
-contains_approval if {
-  count(validation_files_list) >= required_file_count
-  some asset in input.data
-  some file in asset.files
-  startswith(file, required_approval_filename)
-}
-
-
-# METADATA
-# title: Privileged Account Management Plan - COMPLIANT
-# description: If validation/evidence file count meets miniumum AND has approval, then COMPLIANT
+# title: Policy AUTO COMPLIANT
+# description: This policy is auto compliant.
 reply contains response if {
-  count(validation_files_list) >= required_file_count
-  contains_approval
 	status := {"status": "COMPLIANT"}
-	msg := {"msg": sprintf("Required Access Authorization Mechanisms file(s) AND Approval file for [%v, validation %v] detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
-}
-
-# METADATA
-# title: Policy - PENDING
-# description: If validation/evidence file count meets miniumum, but not approval, then PENDING 
-reply contains response if {
-  count(validation_files_list) >= required_file_count
-  not contains_approval
-	status := {"status": "PENDING"}
-	msg := {"msg": sprintf("Required Access Authorization Mechanisms file(s) for [%v, validation %v] detected. Approval file NOT detected.", [required_name, validation_number])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
-}
-
-# METADATA
-# title: Policy - NON-COMPLIANT
-# description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT 
-reply contains response if {
-  count(validation_files_list) < required_file_count
-	status := common.set_status(guardrail.guardrail)
-	msg := {"msg": sprintf("Required Access Authorization Mechanisms file(s) for [%v, validation %v] NOT detected. Only the following was found: [%v]", [required_name, validation_number, validation_files_list])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": "Compliance with this guardrail is contingent upon ICA."}
+	asset_name := {"asset_name": "N/A"}
+	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
 }
