@@ -27,74 +27,12 @@ description := {"description": "Suspicious Activity Alerts"}
 # Set check type based on profile and guardrail number
 check := common.set_check_type(guardrail.guardrail)
 
-# description: GR04_02 is dependent on GR01_05, so we're checking for GR01_05's compliance status
-required_guardrail_check := "guardrail-01"
-
-
 # METADATA
-# title: CLIENT INPUT
-# description: there is NO client input required here as it should already exist for GR1.5
-required_file_count := 1
-required_approval_filename := "GUARDRAIL_APPROVAL"
-
-# METADATA
-# title: HELPER FUNCTIONS
-# description: Check if asset's name matches what's required
-is_correct_name(asset) if {
-	asset.name = required_guardrail_check
-}
-
-# METADATA
-# title: VALIDATION / DATA PROCESSING
-validation_files_list := {file |
-  some asset in input.data
-  some file in asset.files
-  startswith(file, concat("/", [required_guardrail_check, "evidence", compliant_dependency]))
-}
-
-
-
-# METADATA
-# title: VALIDATION / DATA PROCESSING
-# description: checking GR01_05 for approval file
-contains_approval if {
-  count(validation_files_list) >= required_file_count
-  some asset in input.data
-  some file in asset.files
-  startswith(file, required_approval_filename)
-}
-
-
-
-
-# METADATA
-# title: Suspicious Activity Alerts Policy - COMPLIANT
-# description: If GR01_05 is compliant, then COMPLIANT
+# title: Policy AUTO COMPLIANT
+# description: This policy is auto compliant.
 reply contains response if {
-  count(validation_files_list) >= required_file_count
-  contains_approval
 	status := {"status": "COMPLIANT"}
-	msg := {"msg": sprintf("Required suspicious activity alerts compliant for [%v, validation %v] as Guardrail 01, Validation 05 is also compliant.", [required_name, validation_number])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
-}
-
-# METADATA
-# title: Policy - PENDING
-# description: If validation/evidence file count meets miniumum, but not approval, then PENDING 
-reply contains response if {
-  count(validation_files_list) >= required_file_count
-  not contains_approval
-	status := {"status": "PENDING"}
-	msg := {"msg": sprintf("Required suspicious activity alerts PENDING for [%v, validation %v] as Guardrail 01, missing aproval file. Validation 05 is also PENDING.", [required_name, validation_number])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
-}
-
-# METADATA
-# title: Policy - NON-COMPLIANT
-# description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT 
-reply contains response if {
-  count(validation_files_list) < required_file_count
-	status := common.set_status(guardrail.guardrail)
-	msg := {"msg": sprintf("Required suspicious activity alerts for [%v, validation %v] NOT detected. Please confirm Guardrail 01, Validation 05 is compliant.", [required_name, validation_number])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": "Compliance with this guardrail is contingent upon ICA."}
+	asset_name := {"asset_name": "N/A"}
+	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
 }

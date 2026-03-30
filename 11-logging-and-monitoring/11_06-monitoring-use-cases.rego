@@ -28,7 +28,7 @@ validation_number := "06"
 # METADATA
 # title: CLIENT INPUT
 # Number of files that need to be present for compliance
-required_file_count := 3
+required_file_count := 1
 # description: filename should begin with "GUARDRAIL_APPROVAL" but can have different suffix and file type
 required_approval_filename := "GUARDRAIL_APPROVAL"
 
