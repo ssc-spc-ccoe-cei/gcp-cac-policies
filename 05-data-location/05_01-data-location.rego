@@ -66,6 +66,8 @@ exempt_resources := [
 
   "serviceusage.googleapis.com/Service",
 
+  "servicenetworking.googleapis.com/networks/VPCnetworks",
+
   "secretmanager.googleapis.com/SecretVersion",
   "secretmanager.googleapis.com/Secret",
 
@@ -82,6 +84,7 @@ exempt_resources := [
   "cloudbilling.googleapis.com/BillingAccount",
 
   "iam.googleapis.com/ServiceAccount",
+  "iam.googleapis.com/workloadIdentityPool",
 
   "binaryauthorization.googleapis.com/Attestor",
   "binaryauthorization.googleapis.com/Policy",
@@ -97,6 +100,7 @@ exempt_resources := [
   "essentialcontacts.googleapis.com/Contact",
 
   "logging.googleapis.com/Settings",
+  "logging.googleapis.com/RecentQuery",
 
   "securitycenter.googleapis.com/ContainerThreatDetectionSettings",
   "securitycenter.googleapis.com/MuteConfig",
@@ -113,7 +117,9 @@ exempt_resources := [
   "dns.googleapis.com/ResponsePolicyRule",
   "dns.googleapis.com/ResponsePolicy",
 
-  "networkconnectivity.googleapis.com/PolicyBasedRoute"
+  "networkconnectivity.googleapis.com/PolicyBasedRoute",
+
+  "networkmanagement.googleapis.com/connectivityTest"
 ]
 
 # METADATA
