@@ -18,10 +18,9 @@ required_name := "guardrail-08"
 validation_number := "03"
 
 # Number of files that need to be present for compliance
-# There is nothing to upload for this validation
 # This validation is to ensure the network architecture and cloud deployment guide makes use of provider features
 # There is no "NON-COMPLIANT" status that comes out of this as it builds on 8.1 and 8.2
-required_file_count := 0
+required_file_count := 1
 # description: filename should begin with "GUARDRAIL_APPROVAL" but can have different suffix and file type
 required_approval_filename := "GUARDRAIL_APPROVAL"
 
