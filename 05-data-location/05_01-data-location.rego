@@ -163,8 +163,9 @@ has_resource_location_field(asset) if {
   not asset.kind
 }
 
-has_resource_parent_field(asset) if {
-	asset.resource.parent
+# description: Check if asset has ancestors field (used for project matching)
+has_ancestors_field(asset) if {
+  asset.ancestors
   not asset.kind
 }
 
@@ -208,11 +209,13 @@ in_allowed_resource_location(asset) if {
   has_resource_location_field(asset)
 	asset.resource.location in allowed_regions
 }
+
 is_exempt_audit(asset) if {
   has_resource_location_field(asset)
 	asset.resource.data.description == "Audit bucket"
 	asset.resource.location == "global"
 }
+
 is_exempt_default(asset) if {
   has_resource_location_field(asset)
 	asset.resource.data.description == "Default bucket"
@@ -220,137 +223,127 @@ is_exempt_default(asset) if {
 }
 
 # METADATA
-# title: processing project profile overrides
+# title: Consolidated Exemption Check
+# description: Single entry point for all exemption checks. Asset is exempt if any condition matches.
+is_exempt(asset) if {
+  is_exempt_asset(asset)
+}
+
+is_exempt(asset) if {
+  is_legacy_cloudbuild_build_step(asset)
+}
+
+is_exempt(asset) if {
+  is_exempt_cbs_project(asset)
+}
+
+is_exempt(asset) if {
+  is_exempt_cbs_asset(asset)
+}
+
+is_exempt(asset) if {
+  is_exempt_default(asset)
+}
+
+is_exempt(asset) if {
+  is_exempt_audit(asset)
+}
+
+is_exempt(asset) if {
+  asset.name in assets_with_exempt_tags
+}
+
+# description: processing project profile overrides
 is_project_profile_tag(asset) if {
   asset.kind == "cloudresourcemanager#tagged#project"
   endswith(asset.tag_key, "PROJECT_PROFILE")
 }
 
+# description: Extract project_number and tag_value from tagged projects
+# Result: [project_number, tag_value]
 project_profile_details := {[asset.project_number, asset.tag_value] |
   some asset in input.data
   is_project_profile_tag(asset)
 }
 
-asset_with_project_profile(asset) if {
-  some tagged_project in project_profile_details
-  contains(tagged_project[1], asset.resource.parent)
-}
-
-# description: tag value is PROJECT_ID/TAG_KEY/TAG_VALUE
-# here we're extracting just project_id and tag_value
-project_id_and_profile_list := {[entry[0], project_id_and_profile[0], project_id_and_profile[1]] |  # [project_number, project_id, tag_value]
+# description: Extract project_number and profile_level
+# Result: [project_number, profile_level]
+project_id_and_profile_list := {[project_number, profile_level] |
   some entry in project_profile_details
-  project_id_and_profile := split(entry[1], "/PROJECT_PROFILE/")
+  project_number := entry[0]
+  parts := split(entry[1], "/")
+  profile_level := array.reverse(parts)[0]
 }
 
-asset_filtered_data := {[asset.name, asset.asset_type, asset.resource.parent, asset.resource.location] |
-  some asset in input.data
-  has_resource_location_field(asset)
-  has_resource_parent_field(asset)
-}
-
-asset_with_tagged_project := {[filtered_asset[0], proj_id_profile[1], proj_id_profile[2]] | # [name, project_id, tag_value]
-  some filtered_asset in asset_filtered_data
+# description: Check if asset belongs to a tagged project
+is_in_tagged_project(asset) if {
+  has_ancestors_field(asset)
   some proj_id_profile in project_id_and_profile_list
-  contains(filtered_asset[2], proj_id_profile[0])
+  proj_id_profile[0] in asset.ancestors
 }
 
-project_profile_tag_value := {project_profile_details[_] |
+# description: Names of assets with valid exemption tags (from tagged asset records)
+assets_with_exempt_tags := {asset.name |
   some asset in input.data
-  asset_with_project_profile(asset)
-}
-
-
-# METADATA
-# title: VALIDATION / DATA PROCESSING
-# description: Store assets that have a location field
-assets_with_resource_location := {asset |
-  some asset in input.data
-  has_resource_location_field(asset)
-}
-
-# METADATA
-# description: Store the names assets that are not part of the exempt_resources list
-assets_resource_location_not_exempt := {asset.name |
-	some asset in assets_with_resource_location
-  not in_allowed_resource_location(asset)
-  not is_legacy_cloudbuild_build_step(asset)
-  not is_exempt_cbs_project(asset)
-  not is_exempt_cbs_asset(asset)
-	not is_exempt_asset(asset)
-	not is_exempt_default(asset)
-	not is_exempt_audit(asset)
-}
-
-# descripiton: Store the names of assets with valid exemption tags
-assets_resource_location_with_exempt_tags := {asset.name |
-  some asset in input.data
-  has_resource_location_field(asset)
   is_exempt_tagged_asset(asset)
 }
 
-violating_assets_names := assets_resource_location_not_exempt - assets_resource_location_with_exempt_tags
+# description: Set of violating assets (not in allowed location and not exempt)
+violating_assets := {asset |
+  some asset in input.data
+  has_resource_location_field(asset)
+  not in_allowed_resource_location(asset)
+  not is_exempt(asset)
+}
 
-asset_with_tagged_project := {[filtered_asset[0], proj_id_profile[1], proj_id_profile[2]] | # [name, project_id, tag_value]
-  some filtered_asset in asset_filtered_data
+# description: Violating assets that belong to tagged projects
+# Result: [asset, project_number, profile_level]
+violating_assets_with_tagged_project := {[asset, proj_id_profile[0], proj_id_profile[1]] |
+  some asset in violating_assets
+  has_ancestors_field(asset)
   some proj_id_profile in project_id_and_profile_list
-  contains(filtered_asset[2], proj_id_profile[0])
+  proj_id_profile[0] in asset.ancestors
 }
 
-# description: violating assets that have tagged project
-# [name, project_id, tag_value]
-violating_assets_with_tagged_project := {[violating_asset, asset_tagged_project[1], asset_tagged_project[2]] |
-  some asset_tagged_project in asset_with_tagged_project
-  some violating_asset in violating_assets_names
-  asset_tagged_project[0] == violating_asset
+# description: Violating assets NOT in tagged projects (use global profile)
+violating_assets_without_tagged_project := {asset |
+  some asset in violating_assets
+  not is_in_tagged_project(asset)
 }
-
-# description: ONLY the asset names of violating assets that have tagged project
-violating_assets_names_with_tagged_project := {violating_asset |
-  some asset_tagged_project in asset_with_tagged_project
-  some violating_asset in violating_assets_names
-  asset_tagged_project[0] == violating_asset
-}
-
-# list of violating assets - list of violating assets that have tagged project = list of violating assets WITHOUT tagged project
-violating_assets_with_no_tagged_project := violating_assets_names - violating_assets_names_with_tagged_project
-
 
 # METADATA
 # title: Policy COMPLIANT
-# description: | 
-# Find the difference between the list of asset names that are NOT exempt
-# and the list of names that are
-# If the difference is an empty list, then COMPLIANT
+# description: If no violating assets, then COMPLIANT
 reply contains response if {
-  count(project_profile_tag_value) == 0
-  count(violating_assets_names) == 0
-	status := {"status": "COMPLIANT"}
-	msg := {"msg": "Assets are in found to be in accordance to the data location policy and have appropriate tags where applicable."}
-  asset_name := {"asset_name": assets_resource_location_with_exempt_tags}
-	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
+  count(violating_assets) == 0
+  status := {"status": "COMPLIANT"}
+  msg := {"msg": "Assets are in found to be in accordance to the data location policy and have appropriate tags where applicable."}
+  asset_name := {"asset_name": assets_with_exempt_tags}
+  response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
 }
 
-# description: | 
-# Find the difference between the list of asset names that are NOT exempt
-# and the list of names that are
-# If the difference is NOT an empty list, then NON-COMPLIANT and report list
+# METADATA
+# title: NON-COMPLIANT - violating assets in non-tagged projects (use global profile)
 reply contains response if {
-  count(violating_assets_with_no_tagged_project) > 0
-  some violating_asset in violating_assets_with_no_tagged_project
-	status := common.set_status(guardrail.guardrail)
+  count(violating_assets_without_tagged_project) > 0
+  some asset in violating_assets_without_tagged_project
+  status := common.set_status(guardrail.guardrail)
   msg := {"msg": "Asset has been found to violate the data location policy"}
-  asset_name := {"asset_name": violating_asset}
-	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+  asset_name := {"asset_name": asset.name}
+  response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
+# METADATA
+# title: NON-COMPLIANT - violating assets in tagged projects (use override profile)
 reply contains response if {
   count(violating_assets_with_tagged_project) > 0
   some violating_asset in violating_assets_with_tagged_project
-	status := common.set_status(guardrail.guardrail)
+  override_profile := violating_asset[2]   # violating_asset structure: [asset, project_number, profile_level]
+  status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+  check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
   msg := {"msg": "Asset has been found to violate the data location policy"}
-  asset_name := {"asset_name": violating_asset[0]}
+  asset_name := {"asset_name": violating_asset[0].name}
   proj_parent := {"proj_parent": violating_asset[1]}
-  proj_profile := {"proj_profile": violating_asset[2]}
-	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check, proj_parent, proj_profile])
+  proj_profile := {"proj_profile": override_profile}
+  response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
 }
