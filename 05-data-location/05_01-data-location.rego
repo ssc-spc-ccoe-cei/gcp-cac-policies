@@ -123,8 +123,9 @@ exempt_resources := [
 ]
 
 # METADATA
-# description: related to GR10.2, these are the jobs Cyber Defense deployed resorses to be exempt from GR5.1 
-# for project info, need to include project ID and project number as different services reference projects differently
+# description: |
+#   related to GR10.2, these are the jobs Cyber Defense deployed resorses to be exempt from GR5.1 
+#   for project info, need to include project ID and project number as different services reference projects differently
 exempt_cbs_project_info := [
   "projects/cbs-logging-for-gcp-5dc566bf4a/",
   "projects/228662832372/",
@@ -142,15 +143,18 @@ exempt_cbs_resources := [
 # METADATA
 # title: CLIENT INPUT
 env := opa.runtime().env
-# description: takes on the value of env var, GR05_01_SECURITY_CATEGORY_KEY
-#              i.e. export GR05_01_SECURITY_CATEGORY_KEY = 'DATA_CLASSIFICATION'
-#              NOTE it is recommended you set the key to 'DATA_CLASSIFICATION'
+
+# METADATA
+# description: |
+#   takes on the value of env var, GR05_01_SECURITY_CATEGORY_KEY
+#   i.e. export GR05_01_SECURITY_CATEGORY_KEY = 'DATA_CLASSIFICATION'
+#   NOTE it is recommended you set the key to 'DATA_CLASSIFICATION'
 required_security_category_key := env["GR05_01_SECURITY_CATEGORY_KEY"]
 
-# description: the following values for the required_security_category_key are exempt
-#              here, this is the tag value for the tag key, DATA_CLASSIFICATION
-#              example: a GCS bucket tagged with DATA_CLASSIFICATION: Protected A,
-#                       is exempt from the policy (provided client also signs ICA)
+# METADATA
+# description: |
+#   the following values for the required_security_category_key are exempt.
+#   Example: a GCS bucket tagged with DATA_CLASSIFICATION: Protected A is exempt.
 exempt_security_categories := ["Unclassified", "Protected A"]
 
 
@@ -163,12 +167,14 @@ has_resource_location_field(asset) if {
   not asset.kind
 }
 
+# METADATA
 # description: Check if asset has ancestors field (used for project matching)
 has_ancestors_field(asset) if {
   asset.ancestors
   not asset.kind
 }
 
+# METADATA
 # description: should not report on the individual Cloud Build step
 is_legacy_cloudbuild_build_step(asset) if {
   not asset.kind
@@ -176,6 +182,7 @@ is_legacy_cloudbuild_build_step(asset) if {
   asset.resource.data.options.logging == "LEGACY"
 }
 
+# METADATA
 # description: Check if asset is exempt
 is_exempt_asset(asset) if {
 	asset.asset_type in exempt_resources
@@ -253,12 +260,14 @@ is_exempt(asset) if {
   asset.name in assets_with_exempt_tags
 }
 
+# METADATA
 # description: processing project profile overrides
 is_project_profile_tag(asset) if {
   asset.kind == "cloudresourcemanager#tagged#project"
   endswith(asset.tag_key, "PROJECT_PROFILE")
 }
 
+# METADATA
 # description: Extract project_number and tag_value from tagged projects
 # Result: [project_number, tag_value]
 project_profile_details := {[asset.project_number, asset.tag_value] |
@@ -266,6 +275,7 @@ project_profile_details := {[asset.project_number, asset.tag_value] |
   is_project_profile_tag(asset)
 }
 
+# METADATA
 # description: Extract project_number and profile_level
 # Result: [project_number, profile_level]
 project_id_and_profile_list := {[project_number, profile_level] |
@@ -275,6 +285,7 @@ project_id_and_profile_list := {[project_number, profile_level] |
   profile_level := array.reverse(parts)[0]
 }
 
+# METADATA
 # description: Check if asset belongs to a tagged project
 is_in_tagged_project(asset) if {
   has_ancestors_field(asset)
@@ -282,12 +293,14 @@ is_in_tagged_project(asset) if {
   proj_id_profile[0] in asset.ancestors
 }
 
+# METADATA
 # description: Names of assets with valid exemption tags (from tagged asset records)
 assets_with_exempt_tags := {asset.name |
   some asset in input.data
   is_exempt_tagged_asset(asset)
 }
 
+# METADATA
 # description: Set of violating assets (not in allowed location and not exempt)
 violating_assets := {asset |
   some asset in input.data
@@ -296,6 +309,7 @@ violating_assets := {asset |
   not is_exempt(asset)
 }
 
+# METADATA
 # description: Violating assets that belong to tagged projects
 # Result: [asset, project_number, profile_level]
 violating_assets_with_tagged_project := {[asset, proj_id_profile[0], proj_id_profile[1]] |
@@ -305,6 +319,7 @@ violating_assets_with_tagged_project := {[asset, proj_id_profile[0], proj_id_pro
   proj_id_profile[0] in asset.ancestors
 }
 
+# METADATA
 # description: Violating assets NOT in tagged projects (use global profile)
 violating_assets_without_tagged_project := {asset |
   some asset in violating_assets

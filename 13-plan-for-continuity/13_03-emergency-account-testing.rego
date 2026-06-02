@@ -33,9 +33,10 @@ required_asset_kind := "logging#breakglass#auth"
 # METADATA
 # title: CLIENT INPUT
 env := opa.runtime().env
-# description: takes on the value of env var, BREAKGLASS_USER_EMAILS
-#              which containns a JSON array of breakglass account emails
-#              i.e. BREAKGLASS_USER_EMAILS=["breakglass1@example.com","breakglass2@example.com"]
+# description: |
+#   takes on the value of env var, BREAKGLASS_USER_EMAILS
+#   which containns a JSON array of breakglass account emails
+#   i.e. BREAKGLASS_USER_EMAILS=["breakglass1@example.com","breakglass2@example.com"]
 required_emergency_account_emails := json.unmarshal(env["GR13_03_BREAKGLASS_USER_EMAILS"])
 
 

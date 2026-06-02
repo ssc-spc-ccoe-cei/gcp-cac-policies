@@ -74,8 +74,8 @@ is_internal_lb(asset) if {
 
 # METADATA
 # description: |
-# Check if proxy is being used by any of the loadbalancers contained
-# in the loadbalancers variable.
+#   Check if proxy is being used by any of the loadbalancers contained
+#   in the loadbalancers variable.
 is_target(proxy, loadbalancers) if {
 	proxy.resource.data.selfLink == loadbalancers[_].resource.data.target
 }
@@ -94,16 +94,16 @@ is_required_tls_profile(asset) if {
 
 # METADATA
 # description: |
-# If GCP Default SSL policy is being used, it won't show up
-# in asset inventory. Therefore, we can check for the lack of
-# sslPolicy key and assume it's being used if not present
+#   If GCP Default SSL policy is being used, it won't show up
+#   in asset inventory. Therefore, we can check for the lack of
+#   sslPolicy key and assume it's being used if not present
 is_using_default_ssl_policy(asset) if {
 	not asset.resource.data.sslPolicy
 }
 
 # description: |
-# Check for the policy's name in variable containing all
-# the valid SSL policies. If found, then policy is valid
+#   Check for the policy's name in variable containing all
+#   the valid SSL policies. If found, then policy is valid
 is_using_valid_ssl_policy(policy_name) if {
 	policy_name == valid_ssl_policies[_].resource.data.selfLink
 }
@@ -192,9 +192,9 @@ invalid_profile_ssl_policies := {asset |
 # METADATA
 # title: SSL Policy Invalid Minimum TLS - NON-COMPLIANT
 # description: | 
-# Iterate through SSL policies with invalid min. TLS set (if any exist)
-# and reply back NON-COMPLIANT. Include the name of the asset and the
-# current min. TLS version it's set with
+#   Iterate through SSL policies with invalid min. TLS set (if any exist)
+#   and reply back NON-COMPLIANT. Include the name of the asset and the
+#   current min. TLS version it's set with
 reply contains response if {
 	some asset in invalid_version_ssl_policies
 	asset_min_tls_version := asset.resource.data.minTlsVersion
@@ -206,9 +206,9 @@ reply contains response if {
 # METADATA
 # title: SSL Policy Invalid Profile - NON-COMPLIANT
 # description: | 
-# Iterate through SSL policies with invalid profile set (if any exist)
-# and reply back NON-COMPLIANT. Include the name of the asset and the
-# current profile it's set with
+#   Iterate through SSL policies with invalid profile set (if any exist)
+#   and reply back NON-COMPLIANT. Include the name of the asset and the
+#   current profile it's set with
 reply contains response if {
 	some asset in invalid_profile_ssl_policies
 	asset_ssl_policy_profile := asset.resource.data.profile
@@ -219,9 +219,9 @@ reply contains response if {
 
 # METADATA
 # title: SSL Policy Valid - COMPLIANT
-# description: | 
-# Iterate through SSL policies with valid profile and min. TLS
-# set (if any exist) and reply back COMPLIANT. Include the name of the asset
+# description: |
+#   Iterate through SSL policies with valid profile and min. TLS
+#   set (if any exist) and reply back COMPLIANT. Include the name of the asset
 reply contains response if {
 	some asset in valid_ssl_policies
 	status := {"status": "COMPLIANT"}
@@ -232,8 +232,8 @@ reply contains response if {
 # METADATA
 # title: External LB using Default SSL Policy - NON-COMPLIANT
 # description: | 
-# Iterate through external LBs (if any exist) and check if they're using the 
-# GCP Default SSL policy. If yes, reply back NON-COMPLIANT and include the name of the LB
+#   Iterate through external LBs (if any exist) and check if they're using the 
+#   GCP Default SSL policy. If yes, reply back NON-COMPLIANT and include the name of the LB
 reply contains response if {
 	some asset in ext_target_proxy_assets
 	is_using_default_ssl_policy(asset)
@@ -245,9 +245,9 @@ reply contains response if {
 # METADATA
 # title: External LB using Invalid SSL Policy - NON-COMPLIANT
 # description: | 
-# Iterate through external LBs (if any exist) and check if the SSL policy they're
-# using is invalid. If yes, reply back NON-COMPLIANT and include the name of the LB 
-# and the SSL policy it's using
+#   Iterate through external LBs (if any exist) and check if the SSL policy they're
+#   using is invalid. If yes, reply back NON-COMPLIANT and include the name of the LB 
+#   and the SSL policy it's using
 reply contains response if {
 	some asset in ext_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
@@ -261,9 +261,9 @@ reply contains response if {
 # METADATA
 # title: External LB using Valid SSL Policy - Compliant
 # description: | 
-# Iterate through external LBs (if any exist) and check if the SSL policy they're
-# using is valid. If yes, reply back COMPLIANT and include the name of the LB 
-# and the SSL policy it's using
+#   Iterate through external LBs (if any exist) and check if the SSL policy they're
+#   using is valid. If yes, reply back COMPLIANT and include the name of the LB 
+#   and the SSL policy it's using
 reply contains response if {
 	some asset in ext_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
@@ -276,9 +276,9 @@ reply contains response if {
 
 # METADATA
 # title: Internal LB using Default SSL Policy - NON-COMPLIANT
-# description: | 
-# Iterate through internal LBs (if any exist) and check if they're using the 
-# GCP Default SSL policy. If yes, reply back NON-COMPLIANT and include the name of the LB
+# description: |
+#   Iterate through internal LBs (if any exist) and check if they're using the 
+#   GCP Default SSL policy. If yes, reply back NON-COMPLIANT and include the name of the LB
 reply contains response if {
 	some asset in int_target_proxy_assets
 	is_using_default_ssl_policy(asset)
@@ -289,10 +289,10 @@ reply contains response if {
 
 # METADATA
 # title: Internal LB using Invalid SSL Policy - NON-COMPLIANT
-# description: | 
-# Iterate through internal LBs (if any exist) and check if the SSL policy they're
-# using is invlid. If yes, reply back NON-COMPLIANT and include the name of the LB 
-# and the SSL policy it's using
+# description: |
+#   Iterate through internal LBs (if any exist) and check if the SSL policy they're
+#   using is invlid. If yes, reply back NON-COMPLIANT and include the name of the LB 
+#   and the SSL policy it's using
 reply contains response if {
 	some asset in int_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
@@ -305,10 +305,10 @@ reply contains response if {
 
 # METADATA
 # title: Internal LB using Valid SSL Policy - Compliant
-# description: | 
-# Iterate through internal LBs (if any exist) and check if the SSL policy they're
-# using is valid. If yes, reply back COMPLIANT and include the name of the LB 
-# and the SSL policy it's using
+# description: |
+#   Iterate through internal LBs (if any exist) and check if the SSL policy they're
+#   using is valid. If yes, reply back COMPLIANT and include the name of the LB 
+#   and the SSL policy it's using
 reply contains response if {
 	some asset in int_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy

@@ -108,10 +108,10 @@ non_enforced_proj_level_assets := {asset |
 # METADATA
 # title: Enforced Org Level Org Policy - COMPLIANT
 # description: |
-# Iterate through org level org policy assets that are enforced 
-# (if any exist). Check that no project level org policies
-# that are not enforced exist. If yes to all then reply back 
-# COMPLIANT and with name of asset
+#   Iterate through org level org policy assets that are enforced 
+#   (if any exist). Check that no project level org policies
+#   that are not enforced exist. If yes to all then reply back 
+#   COMPLIANT and with name of asset
 reply contains response if {
 	some asset in enforced_org_level_assets
 	count(non_enforced_proj_level_assets) == 0
@@ -123,9 +123,9 @@ reply contains response if {
 # METADATA
 # title: Not Enforced Org Level Org Policy - NON-COMPLIANT
 # description: |
-# Iterate through org level org policy assets that are NOT
-# enforced(if any exist). If any exist then reply back 
-# NON-COMPLIANT and with name of asset
+#   Iterate through org level org policy assets that are NOT
+#   enforced(if any exist). If any exist then reply back 
+#   NON-COMPLIANT and with name of asset
 reply contains response if {
 	some asset in non_enforced_org_level_assets
 	status := common.set_status(guardrail.guardrail)
@@ -135,9 +135,10 @@ reply contains response if {
 
 # METADATA
 # title: Not Enforced Project Level Org Policy & Enforced Org Level Policy - NON-COMPLIANT
-# Iterate through project level policy asset(s) that are NOT enforced
-# (if any exist) and also check if an org level org policy that IS enforced
-# exists. If both exist then reply back NON-COMPLIANT and with name of asset(s)
+# description: |
+#   Iterate through project level policy asset(s) that are NOT enforced
+#   (if any exist) and also check if an org level org policy that IS enforced
+#   exists. If both exist then reply back NON-COMPLIANT and with name of asset(s)
 reply contains response if {
 	some asset in non_enforced_proj_level_assets
 	count(enforced_org_level_assets) > 0
@@ -148,9 +149,10 @@ reply contains response if {
 
 # METADATA
 # title: Not Enforced Project Level Org Policy & No Enforced Org Level Policy- NON-COMPLIANT
-# Iterate through project level policy asset(s) that are enforced
-# (if any exist) and also check if an org level org policy that is NOT enforced
-# exists. If both exist then reply back NON-COMPLIANT and with name of asset(s)
+# description: |
+#   Iterate through project level policy asset(s) that are enforced
+#   (if any exist) and also check if an org level org policy that is NOT enforced
+#   exists. If both exist then reply back NON-COMPLIANT and with name of asset(s)
 reply contains response if {
 	some asset in non_enforced_proj_level_assets
 	count(enforced_org_level_assets) == 0

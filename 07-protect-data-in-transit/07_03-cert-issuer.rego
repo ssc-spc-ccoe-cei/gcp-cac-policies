@@ -26,8 +26,9 @@ required_asset_kind := "certificatemanager#certificate#issuer"
 
 # METADATA
 # title: CLIENT INPUT
-# description: List of approved CAs
-#required_allowed_ca_issuers_list := ["Let's Encrypt" , "Verisign"]
+# description: |
+#   List of approved CAs
+#   i.e. required_allowed_ca_issuers_list := ["Let's Encrypt" , "Verisign"]
 env := opa.runtime().env
 # description: takes on the value of env var, GR07_03_ALLOWED_CA_ISSUERS
 #              i.e. export GR07_03_ALLOWED_CA_ISSUERS="Let's Encrypt,Verisign"
@@ -59,8 +60,10 @@ project_profile_details := {asset.tag_value |
 	is_project_profile_tag(asset)
 }
 
-# description: tag value is PROJECT_ID/TAG_KEY/tag_value
-# here we're extracting just the project_id and tag_value
+# METADATA
+# description: |
+#   tag value is PROJECT_ID/TAG_KEY/tag_value
+#   here we're extracting just the project_id and tag_value
 project_id_and_profile := split(project_profile_details[_], "/PROJECT_PROFILE/")
 
 cert_in_tagged_project(asset) if {
@@ -105,6 +108,8 @@ reply contains response if {
 	response := object.union_n([guardrail, validation, status, msg, description, check, proj_parent, proj_profile])
 }
 
+# METADATA
+# title: Policy NON-COMPLIANT
 # description: If some certificates are NOT from approved CAs, then NON-COMPLIANT and report list
 reply contains response if {
   count(certs_with_tagged_project) == 0

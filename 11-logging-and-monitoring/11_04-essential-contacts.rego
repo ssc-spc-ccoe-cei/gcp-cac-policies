@@ -27,8 +27,9 @@ validation_number := "04"
 
 # Number of files that need to be present for compliance
 required_security_contacts_count := 2
-# description: takes on the value of env var, GR11_04_ORG_ID
-#              i.e. export GR11_04_ORG_ID='1234567890'
+# description: |
+#   takes on the value of env var, GR11_04_ORG_ID
+#   i.e. export GR11_04_ORG_ID='1234567890'
 env := opa.runtime().env
 required_org_id := env["GR11_04_ORG_ID"]
 

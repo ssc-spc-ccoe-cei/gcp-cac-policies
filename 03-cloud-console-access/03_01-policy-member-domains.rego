@@ -28,13 +28,17 @@ required_policy := "policies/iam.allowedPolicyMemberDomains"
 
 # METADATA
 # title: CLIENT INPUT
-# description: list of GCP Org and/or Workspace Customer IDs
-# run `gcloud organization list` to find yours
+# description: |
+#   list of GCP Org and/or Workspace Customer IDs
+#   run `gcloud organization list` to find yours
 env := opa.runtime().env
-# description: takes on the value of env var, GR03_01_CUSTOMER_IDS
-#              list of GCP Org and/or Workspace Customer IDs
-#              run `gcloud organization list` to find yours
-#              i.e. export GR03_01_CUSTOMER_IDS='C03xxxx4x,Abc123,XYZ890'
+
+# METADATA
+# description: |
+#   takes on the value of env var, GR03_01_CUSTOMER_IDS
+#   list of GCP Org and/or Workspace Customer IDs
+#   run `gcloud organization list` to find yours
+#   i.e. export GR03_01_CUSTOMER_IDS='C03xxxx4x,Abc123,XYZ890'
 required_customer_ids := split(env["GR03_01_CUSTOMER_IDS"], ",")
 
 
@@ -50,9 +54,11 @@ is_org_policy(asset) if {
 	split(asset.name, "/")[3] == "organizations"
 }
 
-# description: Check if for every element in the policy's allowed values list,
-# it matches an element in the client provided list
-# AND the corollary must also be true
+# METADATA
+# description: |
+#   Check if for every element in the policy's allowed values list,
+#   it matches an element in the client provided list
+#   AND the corollary must also be true
 has_allowed_customer_ids(asset) if {
   values = asset.resource.data.spec.rules[_].values
   count(values.allowedValues) != 0
@@ -68,8 +74,7 @@ has_allowed_customer_ids(asset) if {
 
 
 # METADATA
-# title: VALIDATION / DATA PROCESSING
-# title: Check for existence of Workspace logs
+# title: VALIDATION / DATA PROCESSING - Check for existence of Workspace logs
 # description: Check for a NON MATCH between the provided list and the allowedValues list in policy
 contains_non_match := {asset.resource.data.spec.rules[_].values.allowedValues[_] |
   some asset in input.data
