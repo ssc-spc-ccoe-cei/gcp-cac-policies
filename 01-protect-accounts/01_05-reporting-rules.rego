@@ -29,7 +29,10 @@ check := common.set_check_type(guardrail.guardrail)
 # title: CLIENT INPUT
 # description: Number of files that need to be present for compliance
 required_file_count := 1
-# description: filename should begin with "GUARDRAIL_APPROVAL" but can have different suffix and file type
+
+# METADATA
+# description: |
+#   filename should begin with "GUARDRAIL_APPROVAL" but can have different suffix and file type
 required_approval_filename := "GUARDRAIL_APPROVAL"
 
 
@@ -43,12 +46,16 @@ is_correct_name(asset) if {
 
 # METADATA
 # title: VALIDATION / DATA PROCESSING
+# description: Compiles a list of validation/evidence files found in GCS
 validation_files_list := {file |
   some asset in input.data
   some file in asset.files
   startswith(file, concat("/", [required_name, "evidence", validation_number]))
 }
 
+# METADATA
+# title: Check for Approval
+# description: Verifies if the required number of files exist and an approval file is present
 contains_approval if {
   count(validation_files_list) >= required_file_count
   some asset in input.data

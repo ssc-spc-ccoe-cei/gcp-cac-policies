@@ -28,19 +28,28 @@ required_asset_kind:= "logging#user#auth"
 # title: CLIENT INPUT
 # description: list of allowed IPs
 env := opa.runtime().env
-# description: takes on the value of env var, GR03_01_ALLOWED_IPS
-#              i.e. export GR03_01_ALLOWED_IPS='10.0.0.7,192.168.1.134'
+
+# METADATA
+# description: |
+#   takes on the value of env var, GR03_01_ALLOWED_IPS
+#   i.e. export GR03_01_ALLOWED_IPS='10.0.0.7,192.168.1.134'
 required_allowed_ips := split(env["GR03_01_ALLOWED_IPS"], ",")
+
+# METADATA
 # description: set to "true" if using federated users
 required_has_federated_users := env["GR03_01_HAS_FEDERATED_USERS"]
 
 # METADATA
 # title: HELPER FUNCTIONS
-# description: Checks if asset's type matches what's required
+# description: |
+#   Checks if asset's type matches what's required.
+#   Specifically looks for user authentication logs.
 is_correct_asset_type(asset) if {
 	asset.kind == required_asset_kind
 }
 
+# METADATA
+# description: Verifies if the asset's source IP is in the allowed list
 is_allowed_ip(asset) if {
   asset.sourceIp in required_allowed_ips
 }
@@ -48,23 +57,30 @@ is_allowed_ip(asset) if {
 
 # METADATA
 # title: processing project profile overrides
+# description: Identifies project tags used for profile overrides
 is_project_profile_tag(asset) if {
 	asset.kind = "cloudresourcemanager#tagged#project"
 	endswith(asset.tag_key, "PROJECT_PROFILE")
 }
 
+# METADATA
+# description: Extracts tag values from projects tagged for profile overrides
 project_profile_details := {asset.tag_value | 
 	some asset in input.data
 	is_project_profile_tag(asset)
 }
 
-# description: tag value is PROJECT_ID/TAG_KEY/tag_value
-# here we're extracting just the project_id and tag_value
+# METADATA
+# description: |
+#   tag value is PROJECT_ID/TAG_KEY/tag_value
+#   here we're extracting just the project_id and tag_value
 project_id_and_profile_list := {[project_id_and_profile[0], project_id_and_profile[1]] |
 	some entry in project_profile_details
 	project_id_and_profile := split(entry, "/PROJECT_PROFILE/")
 }
 
+# METADATA
+# description: Matches logs with projects that have specific profile tags
 logs_with_tagged_project := {[asset.logName, proj_id_profile[0], proj_id_profile[1]] |
 	some asset in input.data
 	is_correct_asset_type(asset)
@@ -82,7 +98,10 @@ contains_non_approved_ip := {[asset.insertId, asset.principalEmail, asset.source
   not is_allowed_ip(asset)
 }
 
-# [logName, insertId, principalEmail, sourceIp, timestamp, proj_parent, proj_profile]
+# METADATA
+# description: |
+#   Filters for non-approved IPs within tagged projects
+#   [logName, insertId, principalEmail, sourceIp, timestamp, proj_parent, proj_profile]
 tagged_project_contains_non_approved_ip := {[asset.logName, asset.insertId, asset.principalEmail, asset.sourceIp, asset.timestamp, proj_id_profile[0], proj_id_profile[1]] |
   some asset in input.data
   is_correct_asset_type(asset)

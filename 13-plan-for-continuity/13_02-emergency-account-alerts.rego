@@ -44,8 +44,9 @@ is_correct_asset(asset) if {
 }
 
 # METADATA
-# description: Check if an email is covered by an alert filter
-# This function checks if a given email is included in an alert filter
+# description: |
+#    Check if an email is covered by an alert filter
+#    This function checks if a given email is included in an alert filter
 email_covered_by_filter(email, filter) if {
   email_pattern := sprintf("protoPayload.authenticationInfo.principalEmail=\"%s\"", [email])
   contains(filter, email_pattern)

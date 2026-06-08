@@ -63,3 +63,32 @@ set_status(guardrail_number) := result if {
     profile_enforcement[profile].recommended[guardrail_number]
     result := {"status": "WARN"}
 }
+
+# Helper function to extract the profile level from a tag value.
+# Tag value format: "ORG_ID/PROJECT_PROFILE/LEVEL" (e.g., "779217891544/PROJECT_PROFILE/1")
+# Returns the profile level as a string (e.g., "1")
+extract_profile_from_tag(tag_value) := profile_level if {
+    parts := split(tag_value, "/")
+    count(parts) >= 3
+    profile_level := array.reverse(parts)[0]
+}
+
+# Version of set_check_type that accepts a specific profile level.
+# Use this when a resource belongs to a project with a profile override tag.
+set_check_type_for_profile(guardrail_number, profile_level) := result if {
+    profile_enforcement[profile_level].required[guardrail_number]
+    result := {"check_type": "REQUIRED"}
+} else := result if {
+    profile_enforcement[profile_level].recommended[guardrail_number]
+    result := {"check_type": "RECOMMENDED"}
+}
+
+# Version of set_status that accepts a specific profile level.
+# Use this when a resource belongs to a project with a profile override tag.
+set_status_for_profile(guardrail_number, profile_level) := result if {
+    profile_enforcement[profile_level].required[guardrail_number]
+    result := {"status": "NON-COMPLIANT"}
+} else := result if {
+    profile_enforcement[profile_level].recommended[guardrail_number]
+    result := {"status": "WARN"}
+}

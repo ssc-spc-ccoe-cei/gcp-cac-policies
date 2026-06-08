@@ -64,8 +64,8 @@ matching_assets := {asset |
 # METADATA
 # title: Check for Failing Assets
 # description: |
-# Store assets who have a source range set that's too broad
-# and who's rule type is allow
+#   Store assets who have a source range set that's too broad
+#   and who's rule type is allow
 failing_assets := {asset |
 	some asset in matching_assets
 	insecure_open_ports(asset)
@@ -75,8 +75,8 @@ failing_assets := {asset |
 # METADATA
 # title: No Non-Compliant Firewall Rules Found - COMPLIANT
 # description: |
-# If no firewall rules found that have too broad a source range set are found, then
-# reply back COMPLIANT
+#   If no firewall rules found that have too broad a source range set are found, then
+#   reply back COMPLIANT
 reply contains response if {
 	count(failing_assets) == 0
 	status := {"status": "COMPLIANT"}
@@ -87,9 +87,9 @@ reply contains response if {
 # METADATA
 # title: Firwall Rule with Broad Source Range - NON-COMPLIANT
 # description: | 
-# Iterate through assets who have source range set too broad, and who
-# are allow rules (if any exist) and reply back NON-COMPLIANT. Include the name of the asset
-# and the ports that it's configured for
+#   Iterate through assets who have source range set too broad, and who
+#   are allow rules (if any exist) and reply back NON-COMPLIANT. Include the name of the asset
+#   and the ports that it's configured for
 reply contains response if {
 	some asset in matching_assets
 	status := common.set_status(guardrail.guardrail)

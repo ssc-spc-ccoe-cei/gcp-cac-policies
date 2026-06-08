@@ -1,4 +1,5 @@
-# METADATA title: Guardrail 01, Validation 03 - Global Admin count
+# METADATA
+# title: Guardrail 01, Validation 03 - Global Admin count
 # description: Check for global admin count
 package policies.guardrail_01_03_accounts
 
@@ -26,17 +27,22 @@ check := common.set_check_type(guardrail.guardrail)
 
 # METADATA
 # title: CLIENT INPUT
-# description: takes on the value of env var, GR01_03_ORG_ADMIN_GROUP_EMAIL
-# i.e. export GR01_03_ORG_ADMIN_GROUP_EMAIL='gcp-organization-admins@ssc.gc.ca'
+# description: |
+#   takes on the value of env var, GR01_03_ORG_ADMIN_GROUP_EMAIL
+#   i.e. export GR01_03_ORG_ADMIN_GROUP_EMAIL='gcp-organization-admins@ssc.gc.ca'
 env := opa.runtime().env
 required_org_admin_group_email := env["GR01_03_ORG_ADMIN_GROUP_EMAIL"]
 
+# METADATA
+# title: HELPER FUNCTIONS
+# description: Checks if asset is a Cloud Identity group membership
 is_correct_asset(asset) if {
   asset.kind == "cloudidentity#groups#membership"
 }
 
 # METADATA
 # title: VALIDATION / DATA PROCESSING
+# description: Compiles a list of organization administrators from Cloud Identity and IAM
 gcp_org_admin_members_list := { member |
   some asset in input.data
   is_correct_asset(asset)
