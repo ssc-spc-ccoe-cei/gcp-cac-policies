@@ -42,8 +42,8 @@ is_correct_asset(asset) if {
 }
 
 has_security_notification(asset) if {
-  notification_categories = asset.notificationCategorySubscriptions[_]
-  contains(notification_categories, "SECURITY")
+  notification_category := asset.notificationCategorySubscriptions[_]
+  notification_category in {"SECURITY", "ALL"}
 }
 
 
@@ -58,7 +58,7 @@ contains_security_essentialcontacts := {asset.email |
 
 # METADATA
 # title: Essential Contacts Policy - COMPLIANT
-# description: If essential contacts are in SECURITY category AND meets minimum count, then COMPLIANT
+# description: If essential contacts are in SECURITY or ALL category AND meets minimum count, then COMPLIANT
 reply contains response if {
   count(contains_security_essentialcontacts) >= required_security_contacts_count 
 	status := {"status": "COMPLIANT"}
@@ -69,7 +69,7 @@ reply contains response if {
 
 # METADATA
 # title: Policy - NON-COMPLIANT
-# description: If insufficient essential contacts are in SECURITY category OR does not meets minimum count, then NON-COMPLIANT
+# description: If insufficient essential contacts are in SECURITY or ALL category, then NON-COMPLIANT
 reply contains response if {
   count(contains_security_essentialcontacts) < required_security_contacts_count
 	status := common.set_status(guardrail.guardrail)
