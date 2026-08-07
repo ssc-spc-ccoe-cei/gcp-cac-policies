@@ -252,7 +252,8 @@ reply contains response if {
 	asset_min_tls_version := asset.resource.data.minTlsVersion
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("SSL Policy with invalid Minimum TLS Version set. Correct: [%v]. Detected: [%v].", [required_min_tls_version, asset_min_tls_version])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
@@ -267,7 +268,8 @@ reply contains response if {
 	asset_custom_features := object.get(asset.resource.data, "customFeatures", [])
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("SSL Policy with invalid Profile or CUSTOM cipher features. Allowed predefined profiles: [%v]. CUSTOM profiles must contain only approved features: [%v]. Detected profile: [%v]. Detected CUSTOM features: [%v].", [required_ssl_policy_profiles, required_custom_ssl_policy_features, asset_ssl_policy_profile, asset_custom_features])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
@@ -294,7 +296,8 @@ reply contains response if {
 	is_using_default_ssl_policy(asset)
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "External HTTPS Load Balancer using [GCP Default] SSL Policy."}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
@@ -340,7 +343,8 @@ reply contains response if {
 	is_using_default_ssl_policy(asset)
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Internal HTTPS Load Balancer using [GCP Default] SSL Policy."}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
