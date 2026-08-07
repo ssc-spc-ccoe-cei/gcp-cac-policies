@@ -18,6 +18,11 @@ import data.policies.common
 required_name := "guardrail-13"
 validation_number := "02"
 
+# Number of evidence files that need to be present when alerts cannot be detected
+required_file_count := 1
+
+# Filename should begin with "GUARDRAIL_APPROVAL" but can have a different suffix and file type
+required_approval_filename := "GUARDRAIL_APPROVAL"
 
 required_asset_type := "monitoring.googleapis.com/AlertPolicy"
 
@@ -78,9 +83,25 @@ emails_missing_alerts contains email if {
 }
 
 # METADATA
+# title: Track uploaded evidence files
+validation_files_list := {file |
+  some asset in input.data
+  some file in asset.files
+  startswith(file, concat("/", [required_name, "evidence", validation_number]))
+}
+
+contains_approval if {
+  count(validation_files_list) >= required_file_count
+  some asset in input.data
+  some file in asset.files
+  startswith(file, required_approval_filename)
+}
+
+# METADATA
 # title: Emergency Account Alerting Policy - COMPLIANT
-# description: If validation/evidence file count meets miniumum AND has approval, then COMPLIANT
+# description: If all required emergency accounts have alerts and no evidence file is present, then COMPLIANT
 reply contains response if {
+  count(validation_files_list) < required_file_count
   count(emails_missing_alerts) == 0
   status := {"status": "COMPLIANT"}
   msg := {"msg": sprintf("Required Emergency Account alerts for all accounts %v detected for [%v, validation %v].", [required_emergency_account_emails, required_name, validation_number])}
@@ -88,11 +109,34 @@ reply contains response if {
 }
 
 # METADATA
+# title: Emergency Account Alerting Evidence - COMPLIANT
+# description: If the required evidence file count is met and approval is present, then COMPLIANT
+reply contains response if {
+  count(validation_files_list) >= required_file_count
+  contains_approval
+  status := {"status": "COMPLIANT"}
+  msg := {"msg": sprintf("Evidence file and Approval file detected for [%v, validation %v]; Required Emergency Account alerts exist outside of Google Cloud.", [required_name, validation_number])}
+  response := object.union_n([guardrail, validation, status, msg, description, check])
+}
+
+# METADATA
+# title: Emergency Account Alerting Evidence - PENDING
+# description: If the required evidence file count is met but approval is absent, then PENDING
+reply contains response if {
+  count(validation_files_list) >= required_file_count
+  not contains_approval
+  status := {"status": "PENDING"}
+  msg := {"msg": sprintf("Evidence file detected for [%v, validation %v]; Required Emergency Account alerts exist outside of Google Cloud. Approval file NOT detected.", [required_name, validation_number])}
+  response := object.union_n([guardrail, validation, status, msg, description, check])
+}
+
+# METADATA
 # title: Policy - NON-COMPLIANT
-# description: If validation/evidence file count does NOT  miniumum, then NON-COMPLIANT
+# description: If alerts are missing and the required evidence file count is not met, then NON-COMPLIANT
 reply contains response if {
   count(emails_missing_alerts) > 0
-	status := common.set_status(guardrail.guardrail)
-  msg := {"msg": sprintf("Required Emergency Account alerts missing for accounts %v in [%v, validation %v].", [emails_missing_alerts, required_name, validation_number])}
+  count(validation_files_list) < required_file_count
+  status := common.set_status(guardrail.guardrail)
+  msg := {"msg": sprintf("Required Emergency Account alerts are missing for accounts %v and no evidence file was detected for [%v, validation %v].", [emails_missing_alerts, required_name, validation_number])}
   response := object.union_n([guardrail, validation, status, msg, description, check])
 }
