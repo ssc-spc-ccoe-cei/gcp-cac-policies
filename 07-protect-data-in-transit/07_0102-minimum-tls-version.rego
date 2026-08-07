@@ -283,7 +283,8 @@ reply contains response if {
 	asset_ssl_policy_profile := asset.resource.data.profile
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("SSL Policy with valid Profile [%v] and valid Min. TLS [%v] detected.", [asset_ssl_policy_profile, required_min_tls_version])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
