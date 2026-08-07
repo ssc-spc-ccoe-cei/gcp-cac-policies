@@ -39,8 +39,16 @@ required_ssl_policy_asset_type := "compute.googleapis.com/SslPolicy"
 # Required minimum TLS version
 required_min_tls_version := "TLS_1_2"
 
-# Required SSL Policy profiles
-required_ssl_policy_profiles := ["RESTRICTED", "MODERN"]
+# Required predefined SSL Policy profiles
+required_ssl_policy_profiles := ["RESTRICTED", "MODERN", "FIPS_202205"]
+
+# CSE-recommended TLS 1.2 cipher suites supported by GCP CUSTOM SSL policies
+required_custom_ssl_policy_features := {
+	"TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+	"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+	"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+	"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+}
 
 # METADATA
 # description: Checks if asset matches required load balancer asset type
@@ -87,9 +95,20 @@ is_required_mintls_version(asset) if {
 }
 
 # METADATA
-# description: Check if profile used is in required_ssl_policy_profile list
+# description: Check if a supported predefined profile is used
 is_required_tls_profile(asset) if {
 	asset.resource.data.profile == required_ssl_policy_profiles[_]
+}
+
+# METADATA
+# description: Check if a CUSTOM profile contains only CSE-recommended TLS 1.2 cipher suites
+is_required_tls_profile(asset) if {
+	asset.resource.data.profile == "CUSTOM"
+	custom_features := asset.resource.data.customFeatures
+	count(custom_features) > 0
+	every feature in custom_features {
+		feature in required_custom_ssl_policy_features
+	}
 }
 
 # METADATA
@@ -166,7 +185,7 @@ ssl_policy_assets := {asset |
 
 # METADATA
 # title: Check for valid SSL Policy
-# description: Check if SSL Policy Asset is set with correct min. TLS version and profile
+# description: Check if SSL Policy Asset is set with correct min. TLS version, profile, and custom features
 valid_ssl_policies := {asset |
 	some asset in ssl_policy_assets
 	is_required_mintls_version(asset)
@@ -183,15 +202,48 @@ invalid_version_ssl_policies := {asset |
 
 # METADATA
 # title: Check for Invalid Profile
-# description: Check if SSL Policy Asset is not set with correct profile
+# description: Check if SSL Policy Asset is not set with a supported profile and custom features
 invalid_profile_ssl_policies := {asset |
 	some asset in ssl_policy_assets
 	not is_required_tls_profile(asset)
 }
 
 # METADATA
+# title: Check for Failing Assets
+# description: Suppress COMPLIANT replies whenever any SSL policy or in-scope target proxy fails
+failing_assets contains asset if {
+	some asset in invalid_version_ssl_policies
+}
+
+failing_assets contains asset if {
+	some asset in invalid_profile_ssl_policies
+}
+
+failing_assets contains asset if {
+	some asset in ext_target_proxy_assets
+	is_using_default_ssl_policy(asset)
+}
+
+failing_assets contains asset if {
+	some asset in ext_target_proxy_assets
+	policy_name := asset.resource.data.sslPolicy
+	not is_using_valid_ssl_policy(policy_name)
+}
+
+failing_assets contains asset if {
+	some asset in int_target_proxy_assets
+	is_using_default_ssl_policy(asset)
+}
+
+failing_assets contains asset if {
+	some asset in int_target_proxy_assets
+	policy_name := asset.resource.data.sslPolicy
+	not is_using_valid_ssl_policy(policy_name)
+}
+
+# METADATA
 # title: SSL Policy Invalid Minimum TLS - NON-COMPLIANT
-# description: | 
+# description: |
 #   Iterate through SSL policies with invalid min. TLS set (if any exist)
 #   and reply back NON-COMPLIANT. Include the name of the asset and the
 #   current min. TLS version it's set with
@@ -205,15 +257,16 @@ reply contains response if {
 
 # METADATA
 # title: SSL Policy Invalid Profile - NON-COMPLIANT
-# description: | 
+# description: |
 #   Iterate through SSL policies with invalid profile set (if any exist)
 #   and reply back NON-COMPLIANT. Include the name of the asset and the
 #   current profile it's set with
 reply contains response if {
 	some asset in invalid_profile_ssl_policies
 	asset_ssl_policy_profile := asset.resource.data.profile
+	asset_custom_features := object.get(asset.resource.data, "customFeatures", [])
 	status := common.set_status(guardrail.guardrail)
-	msg := {"msg": sprintf("SSL Policy with invalid Profile set. Correct: [%v]. Detected: [%v].", [required_ssl_policy_profiles, asset_ssl_policy_profile])}
+	msg := {"msg": sprintf("SSL Policy with invalid Profile or CUSTOM cipher features. Allowed predefined profiles: [%v]. CUSTOM profiles must contain only approved features: [%v]. Detected profile: [%v]. Detected CUSTOM features: [%v].", [required_ssl_policy_profiles, required_custom_ssl_policy_features, asset_ssl_policy_profile, asset_custom_features])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
@@ -223,16 +276,18 @@ reply contains response if {
 #   Iterate through SSL policies with valid profile and min. TLS
 #   set (if any exist) and reply back COMPLIANT. Include the name of the asset
 reply contains response if {
+	count(failing_assets) == 0
 	some asset in valid_ssl_policies
+	asset_ssl_policy_profile := asset.resource.data.profile
 	status := {"status": "COMPLIANT"}
-	msg := {"msg": sprintf("SSL Policy with valid Profile set [%v] and valid Min. TLS set [%v] detected.", [required_ssl_policy_profiles, required_min_tls_version])}
+	msg := {"msg": sprintf("SSL Policy with valid Profile [%v] and valid Min. TLS [%v] detected.", [asset_ssl_policy_profile, required_min_tls_version])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
 # METADATA
 # title: External LB using Default SSL Policy - NON-COMPLIANT
-# description: | 
-#   Iterate through external LBs (if any exist) and check if they're using the 
+# description: |
+#   Iterate through external LBs (if any exist) and check if they're using the
 #   GCP Default SSL policy. If yes, reply back NON-COMPLIANT and include the name of the LB
 reply contains response if {
 	some asset in ext_target_proxy_assets
@@ -244,9 +299,9 @@ reply contains response if {
 
 # METADATA
 # title: External LB using Invalid SSL Policy - NON-COMPLIANT
-# description: | 
+# description: |
 #   Iterate through external LBs (if any exist) and check if the SSL policy they're
-#   using is invalid. If yes, reply back NON-COMPLIANT and include the name of the LB 
+#   using is invalid. If yes, reply back NON-COMPLIANT and include the name of the LB
 #   and the SSL policy it's using
 reply contains response if {
 	some asset in ext_target_proxy_assets
@@ -254,30 +309,31 @@ reply contains response if {
 	not is_using_valid_ssl_policy(policy_name)
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "External HTTPS Load Balancer using invalid SSL Policy."}
-  asset_name := {"asset_name": policy_name}
+	asset_name := {"asset_name": policy_name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
 # title: External LB using Valid SSL Policy - Compliant
-# description: | 
+# description: |
 #   Iterate through external LBs (if any exist) and check if the SSL policy they're
-#   using is valid. If yes, reply back COMPLIANT and include the name of the LB 
+#   using is valid. If yes, reply back COMPLIANT and include the name of the LB
 #   and the SSL policy it's using
 reply contains response if {
+	count(failing_assets) == 0
 	some asset in ext_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	is_using_valid_ssl_policy(policy_name)
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "External HTTPS Load Balancer using valid SSL Policy."}
-  asset_name := {"asset_name": policy_name}
+	asset_name := {"asset_name": policy_name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
 # title: Internal LB using Default SSL Policy - NON-COMPLIANT
 # description: |
-#   Iterate through internal LBs (if any exist) and check if they're using the 
+#   Iterate through internal LBs (if any exist) and check if they're using the
 #   GCP Default SSL policy. If yes, reply back NON-COMPLIANT and include the name of the LB
 reply contains response if {
 	some asset in int_target_proxy_assets
@@ -291,7 +347,7 @@ reply contains response if {
 # title: Internal LB using Invalid SSL Policy - NON-COMPLIANT
 # description: |
 #   Iterate through internal LBs (if any exist) and check if the SSL policy they're
-#   using is invlid. If yes, reply back NON-COMPLIANT and include the name of the LB 
+#   using is invlid. If yes, reply back NON-COMPLIANT and include the name of the LB
 #   and the SSL policy it's using
 reply contains response if {
 	some asset in int_target_proxy_assets
@@ -299,7 +355,7 @@ reply contains response if {
 	not is_using_valid_ssl_policy(policy_name)
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Internal HTTPS Load Balancer using invalid SSL Policy."}
-  asset_name := {"asset_name": policy_name}
+	asset_name := {"asset_name": policy_name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
@@ -307,14 +363,15 @@ reply contains response if {
 # title: Internal LB using Valid SSL Policy - Compliant
 # description: |
 #   Iterate through internal LBs (if any exist) and check if the SSL policy they're
-#   using is valid. If yes, reply back COMPLIANT and include the name of the LB 
+#   using is valid. If yes, reply back COMPLIANT and include the name of the LB
 #   and the SSL policy it's using
 reply contains response if {
+	count(failing_assets) == 0
 	some asset in int_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	is_using_valid_ssl_policy(policy_name)
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Internal HTTPS Load Balancer using valid SSL Policy."}
-  asset_name := {"asset_name": policy_name}
+	asset_name := {"asset_name": policy_name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
