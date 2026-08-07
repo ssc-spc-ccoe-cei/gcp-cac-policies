@@ -257,17 +257,31 @@ reply contains response if {
 }
 
 # METADATA
-# title: SSL Policy Invalid Profile - NON-COMPLIANT
+# title: SSL Policy Invalid Predefined Profile - NON-COMPLIANT
 # description: |
-#   Iterate through SSL policies with invalid profile set (if any exist)
-#   and reply back NON-COMPLIANT. Include the name of the asset and the
-#   current profile it's set with
+#   Iterate through non-CUSTOM SSL policies with an invalid profile set (if any exist)
+#   and reply back NON-COMPLIANT with the allowed and detected profiles.
 reply contains response if {
 	some asset in invalid_profile_ssl_policies
 	asset_ssl_policy_profile := asset.resource.data.profile
+	asset_ssl_policy_profile != "CUSTOM"
+	status := common.set_status(guardrail.guardrail)
+	msg := {"msg": sprintf("SSL Policy with invalid Profile set. Allowed predefined profiles: %v. Detected profile: [%v].", [required_ssl_policy_profiles, asset_ssl_policy_profile])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+# METADATA
+# title: SSL Policy Invalid CUSTOM Features - NON-COMPLIANT
+# description: |
+#   Iterate through CUSTOM SSL policies with invalid cipher features (if any exist)
+#   and reply back NON-COMPLIANT with the allowed and detected features.
+reply contains response if {
+	some asset in invalid_profile_ssl_policies
+	asset.resource.data.profile == "CUSTOM"
 	asset_custom_features := object.get(asset.resource.data, "customFeatures", [])
 	status := common.set_status(guardrail.guardrail)
-	msg := {"msg": sprintf("SSL Policy with invalid Profile or CUSTOM cipher features. Allowed predefined profiles: [%v]. CUSTOM profiles must contain only approved features: [%v]. Detected profile: [%v]. Detected CUSTOM features: [%v].", [required_ssl_policy_profiles, required_custom_ssl_policy_features, asset_ssl_policy_profile, asset_custom_features])}
+	msg := {"msg": sprintf("SSL Policy with invalid CUSTOM cipher features. CUSTOM profiles must contain only approved features: %v. Detected CUSTOM features: %v.", [required_custom_ssl_policy_features, asset_custom_features])}
 	asset_name := {"asset_name": asset.name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
