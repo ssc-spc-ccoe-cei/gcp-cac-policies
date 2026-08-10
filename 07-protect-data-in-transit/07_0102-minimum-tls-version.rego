@@ -287,16 +287,32 @@ reply contains response if {
 }
 
 # METADATA
-# title: SSL Policy Valid - COMPLIANT
+# title: SSL Policy Valid Predefined Profile - COMPLIANT
 # description: |
-#   Iterate through SSL policies with valid profile and min. TLS
-#   set (if any exist) and reply back COMPLIANT. Include the name of the asset
+#   Iterate through SSL policies with a valid predefined profile and min. TLS
+#   set (if any exist) and reply back COMPLIANT.
 reply contains response if {
 	count(failing_assets) == 0
 	some asset in valid_ssl_policies
 	asset_ssl_policy_profile := asset.resource.data.profile
+	asset_ssl_policy_profile != "CUSTOM"
 	status := {"status": "COMPLIANT"}
-	msg := {"msg": sprintf("SSL Policy with valid Profile [%v] and valid Min. TLS [%v] detected.", [asset_ssl_policy_profile, required_min_tls_version])}
+	msg := {"msg": sprintf("SSL Policy with valid predefined Profile [%v] and required Min. TLS [%v] detected.", [asset_ssl_policy_profile, required_min_tls_version])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+# METADATA
+# title: SSL Policy Valid CUSTOM Features - COMPLIANT
+# description: |
+#   Iterate through CUSTOM SSL policies with approved cipher features and min. TLS
+#   set (if any exist) and reply back COMPLIANT.
+reply contains response if {
+	count(failing_assets) == 0
+	some asset in valid_ssl_policies
+	asset.resource.data.profile == "CUSTOM"
+	status := {"status": "COMPLIANT"}
+	msg := {"msg": sprintf("SSL Policy with CUSTOM profile, approved cipher features, and required Min. TLS [%v] detected.", [required_min_tls_version])}
 	asset_name := {"asset_name": asset.name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
