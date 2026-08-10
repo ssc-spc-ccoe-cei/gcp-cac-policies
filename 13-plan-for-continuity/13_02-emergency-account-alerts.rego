@@ -1,6 +1,6 @@
 # METADATA
 # title: Guardrail 13, Validation 02 - Emergency Account alerts
-# description: Check for presence of Log-based Alerts for Breakglass account usage
+# description: Check for alerting for Breakglass account usage
 package policies.guardrail_13_02_alerts
 
 # Import future keywords
@@ -25,6 +25,8 @@ required_file_count := 1
 required_approval_filename := "GUARDRAIL_APPROVAL"
 
 required_asset_type := "monitoring.googleapis.com/AlertPolicy"
+required_scc_asset_type := "securitycentermanagement.googleapis.com/EventThreatDetectionCustomModule"
+required_scc_module_type := "CONFIGURABLE_BREAKGLASS_ACCOUNT_USED"
 
 # METADATA
 # title: CLIENT INPUT
@@ -46,6 +48,19 @@ check := common.set_check_type(guardrail.guardrail)
 # description: Check if asset's name matches what's required
 is_correct_asset(asset) if {
 	asset.asset_type == required_asset_type
+  asset.resource.data.enabled == true
+}
+
+# METADATA
+# description: |
+#   Check for an enabled, organization-resident SCC Event Threat Detection
+#   custom module that detects break-glass account usage. Folder- and
+#   project-resident modules do not provide organization-wide coverage.
+is_organization_scc_breakglass_module(asset) if {
+  asset.asset_type == required_scc_asset_type
+  asset.resource.data.type == required_scc_module_type
+  asset.resource.data.enablementState == "ENABLED"
+  startswith(asset.resource.data.name, "organizations/")
 }
 
 # METADATA
@@ -73,6 +88,15 @@ emails_with_alerts contains email if {
   is_correct_asset(asset)
   filter := asset.resource.data.conditions[_].conditionMatchedLog.filter
   email_covered_by_filter(email, filter)
+}
+
+# METADATA
+# title: Track emails covered by organization-level SCC break-glass modules
+emails_with_alerts contains email if {
+  some email in required_emergency_account_emails
+  some asset in input.data
+  is_organization_scc_breakglass_module(asset)
+  email in asset.resource.data.config.accounts
 }
 
 # METADATA
@@ -136,7 +160,7 @@ reply contains response if {
 reply contains response if {
   count(emails_missing_alerts) > 0
   count(validation_files_list) < required_file_count
-  status := common.set_status(guardrail.guardrail)
+	status := common.set_status(guardrail.guardrail)
   msg := {"msg": sprintf("Required Emergency Account alerts are missing for accounts %v and no evidence file was detected for [%v, validation %v].", [emails_missing_alerts, required_name, validation_number])}
   response := object.union_n([guardrail, validation, status, msg, description, check])
 }
