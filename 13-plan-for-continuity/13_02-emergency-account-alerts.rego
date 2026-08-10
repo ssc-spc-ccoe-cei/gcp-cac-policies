@@ -48,6 +48,7 @@ check := common.set_check_type(guardrail.guardrail)
 # description: Check if asset's name matches what's required
 is_correct_asset(asset) if {
 	asset.asset_type == required_asset_type
+  asset.resource.data.enabled == true
 }
 
 # METADATA
