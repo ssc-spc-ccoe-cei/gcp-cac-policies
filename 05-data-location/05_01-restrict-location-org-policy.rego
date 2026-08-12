@@ -149,7 +149,7 @@ reply contains response if {
 #   of asset(s)
 reply contains response if {
 	some asset in enforced_proj_level_assets
-	status := {"status": "NOT-COMPLIANT"}
+	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at Project level and enforced.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -163,7 +163,7 @@ reply contains response if {
 reply contains response if {
 	some asset in non_enforced_proj_level_assets
 	count(enforced_org_level_assets) > 0
-	status := {"status": "NOT-COMPLIANT"}
+	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Organization Policy [%v] override detected at the Project level.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
@@ -177,7 +177,7 @@ reply contains response if {
 reply contains response if {
 	some asset in non_enforced_proj_level_assets
 	count(enforced_org_level_assets) == 0
-	status := {"status": "NOT-COMPLIANT"}
+	status := {"status": "NON-COMPLIANT"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Project level and NOT enforced.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
