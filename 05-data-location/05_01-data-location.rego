@@ -119,7 +119,7 @@ exempt_resources := [
 
   "networkconnectivity.googleapis.com/PolicyBasedRoute",
 
-  "networkmanagement.googleapis.com/connectivityTests",
+  "networkmanagement.googleapis.com/ConnectivityTest",
   "discoveryengine.googleapis.com/Collection",
   "iam.googleapis.com/OauthClient",
   "iam.googleapis.com/OauthClientCredential",
