@@ -33,7 +33,7 @@ env := opa.runtime().env
 # description: |
 #   takes on the value of env var, GR03_01_ALLOWED_IPS
 #   i.e. export GR03_01_ALLOWED_IPS='10.0.0.7,192.168.1.134'
-required_allowed_ips := split(env["GR03_01_ALLOWED_IPS"], ",")
+required_allowed_ips := split(env["GR03_01_ALLOWED_CIDRS"], ",")
 
 # METADATA
 # description: set to "true" if using federated users
