@@ -119,7 +119,24 @@ exempt_resources := [
 
   "networkconnectivity.googleapis.com/PolicyBasedRoute",
 
-  "networkmanagement.googleapis.com/connectivityTest"
+  "networkmanagement.googleapis.com/ConnectivityTest",
+  "discoveryengine.googleapis.com/Collection",
+  "iam.googleapis.com/OauthClient",
+  "iam.googleapis.com/OauthClientCredential",
+  "iam.googleapis.com/Role",
+  "iam.googleapis.com/ServiceAccount",
+  "iam.googleapis.com/ServiceAccountKey",
+  "iam.googleapis.com/WorkforcePool",
+  "iam.googleapis.com/WorkforcePoolProvider",
+  "iam.googleapis.com/WorkforcePoolProviderKey",
+  "iam.googleapis.com/WorkloadIdentityPool",
+  "iam.googleapis.com/WorkloadIdentityPoolManagedIdentity",
+  "iam.googleapis.com/WorkloadIdentityPoolNamespace",
+  "iam.googleapis.com/WorkloadIdentityPoolProvider",
+  "iam.googleapis.com/WorkloadIdentityPoolProviderKey",
+  "iam.googleapis.com/PolicyV2",
+  "iam.googleapis.com/PolicyBinding",
+  "iam.googleapis.com/PrincipalAccessBoundaryPolicy"
 ]
 
 # METADATA
