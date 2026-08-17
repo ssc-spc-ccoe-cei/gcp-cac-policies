@@ -121,6 +121,7 @@ exempt_resources := [
 
   "networkmanagement.googleapis.com/ConnectivityTest",
   "discoveryengine.googleapis.com/Collection",
+  "discoveryengine.googleapis.com/Notebook",
   "iam.googleapis.com/OauthClient",
   "iam.googleapis.com/OauthClientCredential",
   "iam.googleapis.com/Role",
