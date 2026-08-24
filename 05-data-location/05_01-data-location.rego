@@ -39,7 +39,6 @@ required_tagged_asset_kind := "cloudresourcemanager#tagged#asset"
 # List of resources that will be exempt if they are located outside of the allowed regions.
 # This list should contain non-region based resources (global only), or resources
 # that can't exist in allowed_regions.
-# in v2, Organization, Folder, Project, and Organization Policies was added to the list
 exempt_resources := [
   "cloudresourcemanager.googleapis.com/Organization",
   "cloudresourcemanager.googleapis.com/Folder",
@@ -49,6 +48,8 @@ exempt_resources := [
   "cloudresourcemanager.googleapis.com/TagValue",
 
   "orgpolicy.googleapis.com/Policy",
+
+  "osconfig.googleapis.com/OSPolicyAssignment",
 
   "compute.googleapis.com/Firewall",
   "compute.googleapis.com/FirewallPolicy",
