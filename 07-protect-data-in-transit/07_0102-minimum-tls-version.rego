@@ -21,6 +21,45 @@ description := {"description": "Protection of Data-in-Transit"}
 # Set check type based on profile and guardrail number
 check := common.set_check_type(guardrail.guardrail)
 
+# METADATA
+# description: Check if asset has ancestors field (used for project matching)
+has_ancestors_field(asset) if {
+	asset.ancestors
+	not asset.kind
+}
+
+# METADATA
+# description: processing project profile overrides
+is_project_profile_tag(asset) if {
+	asset.kind == "cloudresourcemanager#tagged#project"
+	endswith(asset.tag_key, "PROJECT_PROFILE")
+}
+
+# METADATA
+# description: Extract project_number and tag_value from tagged projects
+# Result: [project_number, tag_value]
+project_profile_details := {[asset.project_number, asset.tag_value] |
+	some asset in input.data
+	is_project_profile_tag(asset)
+}
+
+# METADATA
+# description: Extract project_number and profile_level
+# Result: [project_number, profile_level]
+project_id_and_profile_list := {[project_number, profile_level] |
+	some entry in project_profile_details
+	project_number := entry[0]
+	profile_level := common.extract_profile_from_tag(entry[1])
+}
+
+# METADATA
+# description: Check if asset belongs to a tagged project
+is_in_tagged_project(asset) if {
+	has_ancestors_field(asset)
+	some project_profile in project_id_and_profile_list
+	project_profile[0] in asset.ancestors
+}
+
 # Asset type requirement for both Regional and Global Load Balancers
 required_lb_asset_types := ["compute.googleapis.com/ForwardingRule", "compute.googleapis.com/GlobalForwardingRule"]
 
@@ -209,46 +248,65 @@ invalid_profile_ssl_policies := {asset |
 }
 
 # METADATA
-# title: Check for Failing Assets
+# title: Check for Violating Assets
 # description: Suppress COMPLIANT replies whenever any SSL policy or in-scope target proxy fails
-failing_assets contains asset if {
+violating_assets contains asset if {
 	some asset in invalid_version_ssl_policies
 }
 
-failing_assets contains asset if {
+violating_assets contains asset if {
 	some asset in invalid_profile_ssl_policies
 }
 
-failing_assets contains asset if {
+violating_assets contains asset if {
 	some asset in ext_target_proxy_assets
 	is_using_default_ssl_policy(asset)
 }
 
-failing_assets contains asset if {
+violating_assets contains asset if {
 	some asset in ext_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	not is_using_valid_ssl_policy(policy_name)
 }
 
-failing_assets contains asset if {
+violating_assets contains asset if {
 	some asset in int_target_proxy_assets
 	is_using_default_ssl_policy(asset)
 }
 
-failing_assets contains asset if {
+violating_assets contains asset if {
 	some asset in int_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	not is_using_valid_ssl_policy(policy_name)
 }
 
 # METADATA
-# title: SSL Policy Invalid Minimum TLS - NON-COMPLIANT
+# description: Violating assets that belong to tagged projects
+# Result: [asset, project_number, profile_level]
+violating_assets_with_tagged_project := {[asset, project_profile[0], project_profile[1]] |
+	some asset in violating_assets
+	has_ancestors_field(asset)
+	some project_profile in project_id_and_profile_list
+	project_profile[0] in asset.ancestors
+}
+
+# METADATA
+# description: Violating assets NOT in tagged projects (use global profile)
+violating_assets_without_tagged_project := {asset |
+	some asset in violating_assets
+	not is_in_tagged_project(asset)
+}
+
+# METADATA
+# title: SSL Policy Invalid Minimum TLS - non-tagged projects (use global profile)
 # description: |
 #   Iterate through SSL policies with invalid min. TLS set (if any exist)
 #   and reply back NON-COMPLIANT. Include the name of the asset and the
 #   current min. TLS version it's set with
 reply contains response if {
-	some asset in invalid_version_ssl_policies
+	count(violating_assets_without_tagged_project) > 0
+	some asset in violating_assets_without_tagged_project
+	asset in invalid_version_ssl_policies
 	asset_min_tls_version := asset.resource.data.minTlsVersion
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("SSL Policy with invalid Minimum TLS Version set. Correct: [%v]. Detected: [%v].", [required_min_tls_version, asset_min_tls_version])}
@@ -257,12 +315,32 @@ reply contains response if {
 }
 
 # METADATA
-# title: SSL Policy Invalid Predefined Profile - NON-COMPLIANT
+# title: SSL Policy Invalid Minimum TLS - tagged projects (use override profile)
+reply contains response if {
+	count(violating_assets_with_tagged_project) > 0
+	some violating_asset in violating_assets_with_tagged_project
+	asset := violating_asset[0]
+	asset in invalid_version_ssl_policies
+	override_profile := violating_asset[2]
+	asset_min_tls_version := asset.resource.data.minTlsVersion
+	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
+	msg := {"msg": sprintf("SSL Policy with invalid Minimum TLS Version set. Correct: [%v]. Detected: [%v].", [required_min_tls_version, asset_min_tls_version])}
+	asset_name := {"asset_name": asset.name}
+	proj_parent := {"proj_parent": violating_asset[1]}
+	proj_profile := {"proj_profile": override_profile}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
+}
+
+# METADATA
+# title: SSL Policy Invalid Predefined Profile - non-tagged projects (use global profile)
 # description: |
 #   Iterate through non-CUSTOM SSL policies with an invalid profile set (if any exist)
 #   and reply back NON-COMPLIANT with the allowed and detected profiles.
 reply contains response if {
-	some asset in invalid_profile_ssl_policies
+	count(violating_assets_without_tagged_project) > 0
+	some asset in violating_assets_without_tagged_project
+	asset in invalid_profile_ssl_policies
 	asset_ssl_policy_profile := asset.resource.data.profile
 	asset_ssl_policy_profile != "CUSTOM"
 	status := common.set_status(guardrail.guardrail)
@@ -272,12 +350,33 @@ reply contains response if {
 }
 
 # METADATA
-# title: SSL Policy Invalid CUSTOM Features - NON-COMPLIANT
+# title: SSL Policy Invalid Predefined Profile - tagged projects (use override profile)
+reply contains response if {
+	count(violating_assets_with_tagged_project) > 0
+	some violating_asset in violating_assets_with_tagged_project
+	asset := violating_asset[0]
+	asset in invalid_profile_ssl_policies
+	asset_ssl_policy_profile := asset.resource.data.profile
+	asset_ssl_policy_profile != "CUSTOM"
+	override_profile := violating_asset[2]
+	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
+	msg := {"msg": sprintf("SSL Policy with invalid Profile set. Allowed predefined profiles: %v. Detected profile: [%v].", [required_ssl_policy_profiles, asset_ssl_policy_profile])}
+	asset_name := {"asset_name": asset.name}
+	proj_parent := {"proj_parent": violating_asset[1]}
+	proj_profile := {"proj_profile": override_profile}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
+}
+
+# METADATA
+# title: SSL Policy Invalid CUSTOM Features - non-tagged projects (use global profile)
 # description: |
 #   Iterate through CUSTOM SSL policies with invalid cipher features (if any exist)
 #   and reply back NON-COMPLIANT with the allowed and detected features.
 reply contains response if {
-	some asset in invalid_profile_ssl_policies
+	count(violating_assets_without_tagged_project) > 0
+	some asset in violating_assets_without_tagged_project
+	asset in invalid_profile_ssl_policies
 	asset.resource.data.profile == "CUSTOM"
 	asset_custom_features := object.get(asset.resource.data, "customFeatures", [])
 	status := common.set_status(guardrail.guardrail)
@@ -287,12 +386,31 @@ reply contains response if {
 }
 
 # METADATA
+# title: SSL Policy Invalid CUSTOM Features - tagged projects (use override profile)
+reply contains response if {
+	count(violating_assets_with_tagged_project) > 0
+	some violating_asset in violating_assets_with_tagged_project
+	asset := violating_asset[0]
+	asset in invalid_profile_ssl_policies
+	asset.resource.data.profile == "CUSTOM"
+	override_profile := violating_asset[2]
+	asset_custom_features := object.get(asset.resource.data, "customFeatures", [])
+	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
+	msg := {"msg": sprintf("SSL Policy with invalid CUSTOM cipher features. CUSTOM profiles must contain only approved features: %v. Detected CUSTOM features: %v.", [required_custom_ssl_policy_features, asset_custom_features])}
+	asset_name := {"asset_name": asset.name}
+	proj_parent := {"proj_parent": violating_asset[1]}
+	proj_profile := {"proj_profile": override_profile}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
+}
+
+# METADATA
 # title: SSL Policy Valid Predefined Profile - COMPLIANT
 # description: |
 #   Iterate through SSL policies with a valid predefined profile and min. TLS
 #   set (if any exist) and reply back COMPLIANT.
 reply contains response if {
-	count(failing_assets) == 0
+	count(violating_assets) == 0
 	some asset in valid_ssl_policies
 	asset_ssl_policy_profile := asset.resource.data.profile
 	asset_ssl_policy_profile != "CUSTOM"
@@ -308,7 +426,7 @@ reply contains response if {
 #   Iterate through CUSTOM SSL policies with approved cipher features and min. TLS
 #   set (if any exist) and reply back COMPLIANT.
 reply contains response if {
-	count(failing_assets) == 0
+	count(violating_assets) == 0
 	some asset in valid_ssl_policies
 	asset.resource.data.profile == "CUSTOM"
 	status := {"status": "COMPLIANT"}
@@ -318,12 +436,14 @@ reply contains response if {
 }
 
 # METADATA
-# title: External LB using Default SSL Policy - NON-COMPLIANT
+# title: External LB using Default SSL Policy - non-tagged projects (use global profile)
 # description: |
 #   Iterate through external LBs (if any exist) and check if they're using the
 #   GCP Default SSL policy. If yes, reply back NON-COMPLIANT and include the name of the LB
 reply contains response if {
-	some asset in ext_target_proxy_assets
+	count(violating_assets_without_tagged_project) > 0
+	some asset in violating_assets_without_tagged_project
+	asset in ext_target_proxy_assets
 	is_using_default_ssl_policy(asset)
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "External HTTPS Load Balancer using [GCP Default] SSL Policy."}
@@ -332,13 +452,33 @@ reply contains response if {
 }
 
 # METADATA
-# title: External LB using Invalid SSL Policy - NON-COMPLIANT
+# title: External LB using Default SSL Policy - tagged projects (use override profile)
+reply contains response if {
+	count(violating_assets_with_tagged_project) > 0
+	some violating_asset in violating_assets_with_tagged_project
+	asset := violating_asset[0]
+	asset in ext_target_proxy_assets
+	is_using_default_ssl_policy(asset)
+	override_profile := violating_asset[2]
+	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
+	msg := {"msg": "External HTTPS Load Balancer using [GCP Default] SSL Policy."}
+	asset_name := {"asset_name": asset.name}
+	proj_parent := {"proj_parent": violating_asset[1]}
+	proj_profile := {"proj_profile": override_profile}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
+}
+
+# METADATA
+# title: External LB using Invalid SSL Policy - non-tagged projects (use global profile)
 # description: |
 #   Iterate through external LBs (if any exist) and check if the SSL policy they're
 #   using is invalid. If yes, reply back NON-COMPLIANT and include the name of the LB
 #   and the SSL policy it's using
 reply contains response if {
-	some asset in ext_target_proxy_assets
+	count(violating_assets_without_tagged_project) > 0
+	some asset in violating_assets_without_tagged_project
+	asset in ext_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	not is_using_valid_ssl_policy(policy_name)
 	status := common.set_status(guardrail.guardrail)
@@ -348,13 +488,32 @@ reply contains response if {
 }
 
 # METADATA
+# title: External LB using Invalid SSL Policy - tagged projects (use override profile)
+reply contains response if {
+	count(violating_assets_with_tagged_project) > 0
+	some violating_asset in violating_assets_with_tagged_project
+	asset := violating_asset[0]
+	asset in ext_target_proxy_assets
+	policy_name := asset.resource.data.sslPolicy
+	not is_using_valid_ssl_policy(policy_name)
+	override_profile := violating_asset[2]
+	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
+	msg := {"msg": "External HTTPS Load Balancer using invalid SSL Policy."}
+	asset_name := {"asset_name": policy_name}
+	proj_parent := {"proj_parent": violating_asset[1]}
+	proj_profile := {"proj_profile": override_profile}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
+}
+
+# METADATA
 # title: External LB using Valid SSL Policy - Compliant
 # description: |
 #   Iterate through external LBs (if any exist) and check if the SSL policy they're
 #   using is valid. If yes, reply back COMPLIANT and include the name of the LB
 #   and the SSL policy it's using
 reply contains response if {
-	count(failing_assets) == 0
+	count(violating_assets) == 0
 	some asset in ext_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	is_using_valid_ssl_policy(policy_name)
@@ -365,12 +524,14 @@ reply contains response if {
 }
 
 # METADATA
-# title: Internal LB using Default SSL Policy - NON-COMPLIANT
+# title: Internal LB using Default SSL Policy - non-tagged projects (use global profile)
 # description: |
 #   Iterate through internal LBs (if any exist) and check if they're using the
 #   GCP Default SSL policy. If yes, reply back NON-COMPLIANT and include the name of the LB
 reply contains response if {
-	some asset in int_target_proxy_assets
+	count(violating_assets_without_tagged_project) > 0
+	some asset in violating_assets_without_tagged_project
+	asset in int_target_proxy_assets
 	is_using_default_ssl_policy(asset)
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Internal HTTPS Load Balancer using [GCP Default] SSL Policy."}
@@ -379,13 +540,33 @@ reply contains response if {
 }
 
 # METADATA
-# title: Internal LB using Invalid SSL Policy - NON-COMPLIANT
+# title: Internal LB using Default SSL Policy - tagged projects (use override profile)
+reply contains response if {
+	count(violating_assets_with_tagged_project) > 0
+	some violating_asset in violating_assets_with_tagged_project
+	asset := violating_asset[0]
+	asset in int_target_proxy_assets
+	is_using_default_ssl_policy(asset)
+	override_profile := violating_asset[2]
+	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
+	msg := {"msg": "Internal HTTPS Load Balancer using [GCP Default] SSL Policy."}
+	asset_name := {"asset_name": asset.name}
+	proj_parent := {"proj_parent": violating_asset[1]}
+	proj_profile := {"proj_profile": override_profile}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
+}
+
+# METADATA
+# title: Internal LB using Invalid SSL Policy - non-tagged projects (use global profile)
 # description: |
 #   Iterate through internal LBs (if any exist) and check if the SSL policy they're
 #   using is invlid. If yes, reply back NON-COMPLIANT and include the name of the LB
 #   and the SSL policy it's using
 reply contains response if {
-	some asset in int_target_proxy_assets
+	count(violating_assets_without_tagged_project) > 0
+	some asset in violating_assets_without_tagged_project
+	asset in int_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	not is_using_valid_ssl_policy(policy_name)
 	status := common.set_status(guardrail.guardrail)
@@ -395,13 +576,32 @@ reply contains response if {
 }
 
 # METADATA
+# title: Internal LB using Invalid SSL Policy - tagged projects (use override profile)
+reply contains response if {
+	count(violating_assets_with_tagged_project) > 0
+	some violating_asset in violating_assets_with_tagged_project
+	asset := violating_asset[0]
+	asset in int_target_proxy_assets
+	policy_name := asset.resource.data.sslPolicy
+	not is_using_valid_ssl_policy(policy_name)
+	override_profile := violating_asset[2]
+	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
+	msg := {"msg": "Internal HTTPS Load Balancer using invalid SSL Policy."}
+	asset_name := {"asset_name": policy_name}
+	proj_parent := {"proj_parent": violating_asset[1]}
+	proj_profile := {"proj_profile": override_profile}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
+}
+
+# METADATA
 # title: Internal LB using Valid SSL Policy - Compliant
 # description: |
 #   Iterate through internal LBs (if any exist) and check if the SSL policy they're
 #   using is valid. If yes, reply back COMPLIANT and include the name of the LB
 #   and the SSL policy it's using
 reply contains response if {
-	count(failing_assets) == 0
+	count(violating_assets) == 0
 	some asset in int_target_proxy_assets
 	policy_name := asset.resource.data.sslPolicy
 	is_using_valid_ssl_policy(policy_name)
