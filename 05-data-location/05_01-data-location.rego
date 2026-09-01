@@ -47,36 +47,48 @@ exempt_resources := [
   "cloudresourcemanager.googleapis.com/TagKey",
   "cloudresourcemanager.googleapis.com/TagValue",
 
+  "orgpolicy.googleapis.com/CustomConstraint",
   "orgpolicy.googleapis.com/Policy",
 
   "osconfig.googleapis.com/OSPolicyAssignment",
 
+  "compute.googleapis.com/ExternalVpnGateway",
   "compute.googleapis.com/Firewall",
   "compute.googleapis.com/FirewallPolicy",
-  "compute.googleapis.com/Route",
-  "compute.googleapis.com/Network",
-  "compute.googleapis.com/Subnetwork",
-  "compute.googleapis.com/Project",
   "compute.googleapis.com/GlobalAddress",
   "compute.googleapis.com/GlobalForwardingRule",
   "compute.googleapis.com/HttpHealthCheck",
+  "compute.googleapis.com/Network",
+  "compute.googleapis.com/Project",
+  "compute.googleapis.com/Route",
+  "compute.googleapis.com/Subnetwork",
 
+  "certificatemanager.googleapis.com/CertificateMap",
+
+  "cloudkms.googleapis.com/AutokeyConfig",
   "cloudkms.googleapis.com/CryptoKey",
-  "cloudkms.googleapis.com/KeyRing",
   "cloudkms.googleapis.com/CryptoKeyVersion",
+  "cloudkms.googleapis.com/KeyRing",
 
   "serviceusage.googleapis.com/Service",
 
-  "servicenetworking.googleapis.com/networks/VPCnetworks",
+  "servicenetworking.googleapis.com/Connection",
 
   "secretmanager.googleapis.com/SecretVersion",
   "secretmanager.googleapis.com/Secret",
 
+  "logging.googleapis.com/LogMetric",
   "logging.googleapis.com/LogSink",
+  "logging.googleapis.com/RecentQuery",
+  "logging.googleapis.com/Settings",
 
   "monitoring.googleapis.com/AlertPolicy",
   "monitoring.googleapis.com/NotificationChannel",
   "monitoring.googleapis.com/Dashboard",
+  "monitoring.googleapis.com/Snooze",
+
+  "gkehub.googleapis.com/Feature",
+  "gkehub.googleapis.com/Fleet",
 
   "pubsub.googleapis.com/Topic",
   "pubsub.googleapis.com/Subscription",
@@ -86,6 +98,21 @@ exempt_resources := [
 
   "iam.googleapis.com/ServiceAccount",
   "iam.googleapis.com/workloadIdentityPool",
+  "iam.googleapis.com/OauthClient",
+  "iam.googleapis.com/OauthClientCredential",
+  "iam.googleapis.com/Role",
+  "iam.googleapis.com/ServiceAccountKey",
+  "iam.googleapis.com/WorkforcePool",
+  "iam.googleapis.com/WorkforcePoolProvider",
+  "iam.googleapis.com/WorkforcePoolProviderKey",
+  "iam.googleapis.com/WorkloadIdentityPool",
+  "iam.googleapis.com/WorkloadIdentityPoolManagedIdentity",
+  "iam.googleapis.com/WorkloadIdentityPoolNamespace",
+  "iam.googleapis.com/WorkloadIdentityPoolProvider",
+  "iam.googleapis.com/WorkloadIdentityPoolProviderKey",
+  "iam.googleapis.com/PolicyV2",
+  "iam.googleapis.com/PolicyBinding",
+  "iam.googleapis.com/PrincipalAccessBoundaryPolicy",
 
   "binaryauthorization.googleapis.com/Attestor",
   "binaryauthorization.googleapis.com/Policy",
@@ -100,11 +127,11 @@ exempt_resources := [
 
   "essentialcontacts.googleapis.com/Contact",
 
-  "logging.googleapis.com/Settings",
-  "logging.googleapis.com/RecentQuery",
+  "privilegedaccessmanager.googleapis.com/Grant",
 
   "securitycenter.googleapis.com/ContainerThreatDetectionSettings",
   "securitycenter.googleapis.com/MuteConfig",
+  "securitycenter.googleapis.com/NotificationConfig",
   "securitycenter.googleapis.com/EventThreatDetectionSettings",
   "securitycenter.googleapis.com/WebSecurityScannerSettings",
   "securitycenter.googleapis.com/SecurityHealthAnalyticsSettings",
@@ -118,26 +145,16 @@ exempt_resources := [
   "dns.googleapis.com/ResponsePolicyRule",
   "dns.googleapis.com/ResponsePolicy",
 
+  "networkconnectivity.googleapis.com/Group",
+  "networkconnectivity.googleapis.com/Hub",
+  "networkconnectivity.googleapis.com/HubRoute",
+  "networkconnectivity.googleapis.com/InternalRange",
   "networkconnectivity.googleapis.com/PolicyBasedRoute",
+  "networkconnectivity.googleapis.com/RouteTable",
 
   "networkmanagement.googleapis.com/ConnectivityTest",
-  "discoveryengine.googleapis.com/Collection",
-  "iam.googleapis.com/OauthClient",
-  "iam.googleapis.com/OauthClientCredential",
-  "iam.googleapis.com/Role",
-  "iam.googleapis.com/ServiceAccount",
-  "iam.googleapis.com/ServiceAccountKey",
-  "iam.googleapis.com/WorkforcePool",
-  "iam.googleapis.com/WorkforcePoolProvider",
-  "iam.googleapis.com/WorkforcePoolProviderKey",
-  "iam.googleapis.com/WorkloadIdentityPool",
-  "iam.googleapis.com/WorkloadIdentityPoolManagedIdentity",
-  "iam.googleapis.com/WorkloadIdentityPoolNamespace",
-  "iam.googleapis.com/WorkloadIdentityPoolProvider",
-  "iam.googleapis.com/WorkloadIdentityPoolProviderKey",
-  "iam.googleapis.com/PolicyV2",
-  "iam.googleapis.com/PolicyBinding",
-  "iam.googleapis.com/PrincipalAccessBoundaryPolicy"
+
+  "discoveryengine.googleapis.com/Collection"
 ]
 
 # METADATA
