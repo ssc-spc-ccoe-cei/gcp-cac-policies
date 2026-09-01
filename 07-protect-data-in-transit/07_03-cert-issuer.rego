@@ -49,41 +49,65 @@ has_allowed_ca(asset) if {
 }
 
 # METADATA
-# title: processing project profile overrides
+# description: processing project profile overrides
 is_project_profile_tag(asset) if {
-	asset.kind = "cloudresourcemanager#tagged#project"
+	asset.kind == "cloudresourcemanager#tagged#project"
 	endswith(asset.tag_key, "PROJECT_PROFILE")
 }
 
-project_profile_details := {asset.tag_value | 
+# METADATA
+# description: Extract project_id and tag_value from tagged projects
+# Result: [project_id, tag_value]
+project_profile_details := {[project_id, asset.tag_value] |
 	some asset in input.data
 	is_project_profile_tag(asset)
+	project_id := split(asset.name, "/projects/")[1]
 }
 
 # METADATA
 # description: |
-#   tag value is PROJECT_ID/TAG_KEY/tag_value
-#   here we're extracting just the project_id and tag_value
-project_id_and_profile := split(project_profile_details[_], "/PROJECT_PROFILE/")
-
-cert_in_tagged_project(asset) if {
-	is_correct_asset(asset)
-	contains(asset.name, project_id_and_profile[0])
+#   Extract project_id and profile_level
+#   Result: [project_id, profile_level]
+project_id_and_profile_list := {[project_id, profile_level] |
+	some entry in project_profile_details
+	project_id := entry[0]
+	profile_level := common.extract_profile_from_tag(entry[1])
 }
 
-certs_with_tagged_project := {asset.name |
-	some asset in input.data
-	cert_in_tagged_project(asset)
+# METADATA
+# description: Check if certificate belongs to a tagged project
+is_in_tagged_project(asset) if {
+	is_correct_asset(asset)
+	certificate_project_id := split(asset.name, "/")[1]
+	some project_profile in project_id_and_profile_list
+	project_profile[0] == certificate_project_id
 }
 
 
 # METADATA
 # title: VALIDATION / DATA PROCESSING
-# description: Store certs names that are not from approved CAs
-assets_with_non_approved_ca := {asset.name |
+# description: Store certificates that are not from approved CAs
+violating_assets := {asset |
 	some asset in input.data
-  is_correct_asset(asset)
-  not has_allowed_ca(asset)
+	is_correct_asset(asset)
+	not has_allowed_ca(asset)
+}
+
+# METADATA
+# description: Violating assets that belong to tagged projects
+# Result: [asset, project_id, profile_level]
+violating_assets_with_tagged_project := {[asset, project_profile[0], project_profile[1]] |
+	some asset in violating_assets
+	certificate_project_id := split(asset.name, "/")[1]
+	some project_profile in project_id_and_profile_list
+	project_profile[0] == certificate_project_id
+}
+
+# METADATA
+# description: Violating assets NOT in tagged projects (use global profile)
+violating_assets_without_tagged_project := {asset |
+	some asset in violating_assets
+	not is_in_tagged_project(asset)
 }
 
 
@@ -91,44 +115,34 @@ assets_with_non_approved_ca := {asset.name |
 # title: Policy COMPLIANT
 # description: If all certificates are from approved CAs, then COMPLIANT
 reply contains response if {
-  count(certs_with_tagged_project) == 0
-  count(assets_with_non_approved_ca) == 0
+	count(violating_assets) == 0
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": "Certificates are in found to be from approved Certificate Authorities"}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
 }
 
-reply contains response if {
-  count(certs_with_tagged_project) > 0
-  count(assets_with_non_approved_ca) == 0
-	status := {"status": "COMPLIANT"}
-	msg := {"msg": "Certificates are in found to be from approved Certificate Authorities"}
-  proj_parent := {"proj_parent": project_id_and_profile[0]}
-  proj_profile := {"proj_profile": project_id_and_profile[1]}
-	response := object.union_n([guardrail, validation, status, msg, description, check, proj_parent, proj_profile])
-}
-
 # METADATA
-# title: Policy NON-COMPLIANT
-# description: If some certificates are NOT from approved CAs, then NON-COMPLIANT and report list
+# title: NON-COMPLIANT - violating assets in non-tagged projects (use global profile)
 reply contains response if {
-  count(certs_with_tagged_project) == 0
-  count(assets_with_non_approved_ca) > 0
-  some violating_cert in assets_with_non_approved_ca
+	count(violating_assets_without_tagged_project) > 0
+	some asset in violating_assets_without_tagged_project
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": "Certificates have been found to come from non-approved Certificate Authorities"}
-  asset_name := {"asset_name": violating_cert}
+	asset_name := {"asset_name": asset.name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
+# METADATA
+# title: NON-COMPLIANT - violating assets in tagged projects (use override profile)
 reply contains response if {
-  count(certs_with_tagged_project) > 0
-  count(assets_with_non_approved_ca) > 0
-  some violating_cert in assets_with_non_approved_ca
-	status := common.set_status(guardrail.guardrail)
+	count(violating_assets_with_tagged_project) > 0
+	some violating_asset in violating_assets_with_tagged_project
+	override_profile := violating_asset[2]
+	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
 	msg := {"msg": "Certificates have been found to come from non-approved Certificate Authorities"}
-  asset_name := {"asset_name": violating_cert}
-  proj_parent := {"proj_parent": project_id_and_profile[0]}
-  proj_profile := {"proj_profile": project_id_and_profile[1]}
-	response := object.union_n([guardrail, validation, status, msg, description, check, proj_parent, proj_profile])
+	asset_name := {"asset_name": violating_asset[0].name}
+	proj_parent := {"proj_parent": violating_asset[1]}
+	proj_profile := {"proj_profile": override_profile}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
 }
