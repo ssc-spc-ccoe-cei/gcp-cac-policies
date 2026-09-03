@@ -31,149 +31,120 @@ allowed_regions := [
 	"northamerica-northeast2-a",
 	"northamerica-northeast2-b",
 	"northamerica-northeast2-c",
-  "ca" # Google Cloud location code for Canadian dual-region resources
+	"ca", # Google Cloud location code for Canadian dual-region resources
 ]
 
 required_tagged_asset_kind := "cloudresourcemanager#tagged#asset"
-
 
 # List of resources that will be exempt if they are located outside of the allowed regions.
 # This list should contain non-region based resources (global only), or resources
 # that can't exist in allowed_regions.
 exempt_resources := [
-  "cloudresourcemanager.googleapis.com/Organization",
-  "cloudresourcemanager.googleapis.com/Folder",
-  "cloudresourcemanager.googleapis.com/Project",
-  "cloudresourcemanager.googleapis.com/TagBinding",
-  "cloudresourcemanager.googleapis.com/TagKey",
-  "cloudresourcemanager.googleapis.com/TagValue",
-
-  "orgpolicy.googleapis.com/CustomConstraint",
-  "orgpolicy.googleapis.com/Policy",
-
-  "osconfig.googleapis.com/OSPolicyAssignment",
-
-  "compute.googleapis.com/ExternalVpnGateway",
-  "compute.googleapis.com/Firewall",
-  "compute.googleapis.com/FirewallPolicy",
-  "compute.googleapis.com/GlobalAddress",
-  "compute.googleapis.com/GlobalForwardingRule",
-  "compute.googleapis.com/HttpHealthCheck",
-  "compute.googleapis.com/Network",
-  "compute.googleapis.com/Project",
-  "compute.googleapis.com/Route",
-  "compute.googleapis.com/Subnetwork",
-
-  "certificatemanager.googleapis.com/CertificateMap",
-
-  "cloudkms.googleapis.com/AutokeyConfig",
-  "cloudkms.googleapis.com/CryptoKey",
-  "cloudkms.googleapis.com/CryptoKeyVersion",
-  "cloudkms.googleapis.com/KeyRing",
-
-  "serviceusage.googleapis.com/Service",
-
-  "servicenetworking.googleapis.com/Connection",
-
-  "secretmanager.googleapis.com/SecretVersion",
-  "secretmanager.googleapis.com/Secret",
-
-  "logging.googleapis.com/LogMetric",
-  "logging.googleapis.com/LogSink",
-  "logging.googleapis.com/RecentQuery",
-  "logging.googleapis.com/Settings",
-
-  "monitoring.googleapis.com/AlertPolicy",
-  "monitoring.googleapis.com/NotificationChannel",
-  "monitoring.googleapis.com/Dashboard",
-  "monitoring.googleapis.com/Snooze",
-
-  "gkehub.googleapis.com/Feature",
-  "gkehub.googleapis.com/Fleet",
-
-  "pubsub.googleapis.com/Topic",
-  "pubsub.googleapis.com/Subscription",
-
-  "cloudbilling.googleapis.com/ProjectBillingInfo",
-  "cloudbilling.googleapis.com/BillingAccount",
-
-  "iam.googleapis.com/ServiceAccount",
-  "iam.googleapis.com/workloadIdentityPool",
-  "iam.googleapis.com/OauthClient",
-  "iam.googleapis.com/OauthClientCredential",
-  "iam.googleapis.com/Role",
-  "iam.googleapis.com/ServiceAccountKey",
-  "iam.googleapis.com/WorkforcePool",
-  "iam.googleapis.com/WorkforcePoolProvider",
-  "iam.googleapis.com/WorkforcePoolProviderKey",
-  "iam.googleapis.com/WorkloadIdentityPool",
-  "iam.googleapis.com/WorkloadIdentityPoolManagedIdentity",
-  "iam.googleapis.com/WorkloadIdentityPoolNamespace",
-  "iam.googleapis.com/WorkloadIdentityPoolProvider",
-  "iam.googleapis.com/WorkloadIdentityPoolProviderKey",
-  "iam.googleapis.com/PolicyV2",
-  "iam.googleapis.com/PolicyBinding",
-  "iam.googleapis.com/PrincipalAccessBoundaryPolicy",
-
-  "binaryauthorization.googleapis.com/Attestor",
-  "binaryauthorization.googleapis.com/Policy",
-
-  "artifactregistry.googleapis.com/DockerImage",
-
-  "bigquery.googleapis.com/Table",
-
-  "cloudasset.googleapis.com/Feed",
-
-  "dataplex.googleapis.com/EntryGroup",
-
-  "essentialcontacts.googleapis.com/Contact",
-
-  "privilegedaccessmanager.googleapis.com/Grant",
-
-  "securitycenter.googleapis.com/ContainerThreatDetectionSettings",
-  "securitycenter.googleapis.com/MuteConfig",
-  "securitycenter.googleapis.com/NotificationConfig",
-  "securitycenter.googleapis.com/EventThreatDetectionSettings",
-  "securitycenter.googleapis.com/WebSecurityScannerSettings",
-  "securitycenter.googleapis.com/SecurityHealthAnalyticsSettings",
-
-  "securitycentermanagement.googleapis.com/SecurityCenterService",
-  "securitycentermanagement.googleapis.com/EventThreatDetectionCustomModule",
-
-  "storagetransfer.googleapis.com/TransferJob",
-  
-  "dns.googleapis.com/ResourceRecordSet",
-  "dns.googleapis.com/ResponsePolicyRule",
-  "dns.googleapis.com/ResponsePolicy",
-
-  "networkconnectivity.googleapis.com/Group",
-  "networkconnectivity.googleapis.com/Hub",
-  "networkconnectivity.googleapis.com/HubRoute",
-  "networkconnectivity.googleapis.com/InternalRange",
-  "networkconnectivity.googleapis.com/PolicyBasedRoute",
-  "networkconnectivity.googleapis.com/RouteTable",
-
-  "networkmanagement.googleapis.com/ConnectivityTest",
-
-  "discoveryengine.googleapis.com/Collection"
+	"cloudresourcemanager.googleapis.com/Organization",
+	"cloudresourcemanager.googleapis.com/Folder",
+	"cloudresourcemanager.googleapis.com/Project",
+	"cloudresourcemanager.googleapis.com/TagBinding",
+	"cloudresourcemanager.googleapis.com/TagKey",
+	"cloudresourcemanager.googleapis.com/TagValue",
+	"orgpolicy.googleapis.com/CustomConstraint",
+	"orgpolicy.googleapis.com/Policy",
+	"osconfig.googleapis.com/OSPolicyAssignment",
+	"compute.googleapis.com/ExternalVpnGateway",
+	"compute.googleapis.com/Firewall",
+	"compute.googleapis.com/FirewallPolicy",
+	"compute.googleapis.com/GlobalAddress",
+	"compute.googleapis.com/GlobalForwardingRule",
+	"compute.googleapis.com/HttpHealthCheck",
+	"compute.googleapis.com/Network",
+	"compute.googleapis.com/Project",
+	"compute.googleapis.com/Route",
+	"compute.googleapis.com/Subnetwork",
+	"certificatemanager.googleapis.com/CertificateMap",
+	"cloudkms.googleapis.com/AutokeyConfig",
+	"cloudkms.googleapis.com/CryptoKey",
+	"cloudkms.googleapis.com/CryptoKeyVersion",
+	"cloudkms.googleapis.com/KeyRing",
+	"serviceusage.googleapis.com/Service",
+	"servicenetworking.googleapis.com/Connection",
+	"secretmanager.googleapis.com/SecretVersion",
+	"secretmanager.googleapis.com/Secret",
+	"logging.googleapis.com/LogMetric",
+	"logging.googleapis.com/LogSink",
+	"logging.googleapis.com/RecentQuery",
+	"logging.googleapis.com/Settings",
+	"monitoring.googleapis.com/AlertPolicy",
+	"monitoring.googleapis.com/NotificationChannel",
+	"monitoring.googleapis.com/Dashboard",
+	"monitoring.googleapis.com/Snooze",
+	"gkehub.googleapis.com/Feature",
+	"gkehub.googleapis.com/Fleet",
+	"pubsub.googleapis.com/Topic",
+	"pubsub.googleapis.com/Subscription",
+	"cloudbilling.googleapis.com/ProjectBillingInfo",
+	"cloudbilling.googleapis.com/BillingAccount",
+	"iam.googleapis.com/ServiceAccount",
+	"iam.googleapis.com/workloadIdentityPool",
+	"iam.googleapis.com/OauthClient",
+	"iam.googleapis.com/OauthClientCredential",
+	"iam.googleapis.com/Role",
+	"iam.googleapis.com/ServiceAccountKey",
+	"iam.googleapis.com/WorkforcePool",
+	"iam.googleapis.com/WorkforcePoolProvider",
+	"iam.googleapis.com/WorkforcePoolProviderKey",
+	"iam.googleapis.com/WorkloadIdentityPool",
+	"iam.googleapis.com/WorkloadIdentityPoolManagedIdentity",
+	"iam.googleapis.com/WorkloadIdentityPoolNamespace",
+	"iam.googleapis.com/WorkloadIdentityPoolProvider",
+	"iam.googleapis.com/WorkloadIdentityPoolProviderKey",
+	"iam.googleapis.com/PolicyV2",
+	"iam.googleapis.com/PolicyBinding",
+	"iam.googleapis.com/PrincipalAccessBoundaryPolicy",
+	"binaryauthorization.googleapis.com/Attestor",
+	"binaryauthorization.googleapis.com/Policy",
+	"artifactregistry.googleapis.com/DockerImage",
+	"bigquery.googleapis.com/Table",
+	"cloudasset.googleapis.com/Feed",
+	"dataplex.googleapis.com/EntryGroup",
+	"essentialcontacts.googleapis.com/Contact",
+	"privilegedaccessmanager.googleapis.com/Grant",
+	"securitycenter.googleapis.com/ContainerThreatDetectionSettings",
+	"securitycenter.googleapis.com/MuteConfig",
+	"securitycenter.googleapis.com/NotificationConfig",
+	"securitycenter.googleapis.com/EventThreatDetectionSettings",
+	"securitycenter.googleapis.com/WebSecurityScannerSettings",
+	"securitycenter.googleapis.com/SecurityHealthAnalyticsSettings",
+	"securitycentermanagement.googleapis.com/SecurityCenterService",
+	"securitycentermanagement.googleapis.com/EventThreatDetectionCustomModule",
+	"storagetransfer.googleapis.com/TransferJob",
+	"dns.googleapis.com/ResourceRecordSet",
+	"dns.googleapis.com/ResponsePolicyRule",
+	"dns.googleapis.com/ResponsePolicy",
+	"networkconnectivity.googleapis.com/Group",
+	"networkconnectivity.googleapis.com/Hub",
+	"networkconnectivity.googleapis.com/HubRoute",
+	"networkconnectivity.googleapis.com/InternalRange",
+	"networkconnectivity.googleapis.com/PolicyBasedRoute",
+	"networkconnectivity.googleapis.com/RouteTable",
+	"networkmanagement.googleapis.com/ConnectivityTest",
+	"discoveryengine.googleapis.com/Collection",
 ]
 
 # METADATA
 # description: |
-#   related to GR10.2, these are the jobs Cyber Defense deployed resorses to be exempt from GR5.1 
+#   related to GR10.2, these are the jobs Cyber Defense deployed resorses to be exempt from GR5.1
 #   for project info, need to include project ID and project number as different services reference projects differently
 exempt_cbs_project_info := [
-  "projects/cbs-logging-for-gcp-5dc566bf4a/",
-  "projects/228662832372/",
+	"projects/cbs-logging-for-gcp-5dc566bf4a/",
+	"projects/228662832372/",
 ]
 
 exempt_cbs_resources := [
-  "functions/cbs-",
-  "services/cbs-",
-  "storage.googleapis.com/cbs-",
-  "subscriptions/eventarc-",
-  "subscriptions/cbs-",
-  "topics/cbs-",
+	"functions/cbs-",
+	"services/cbs-",
+	"storage.googleapis.com/cbs-",
+	"subscriptions/eventarc-",
+	"subscriptions/cbs-",
+	"topics/cbs-",
 ]
 
 # METADATA
@@ -185,7 +156,7 @@ env := opa.runtime().env
 #   takes on the value of env var, GR05_01_SECURITY_CATEGORY_KEY
 #   i.e. export GR05_01_SECURITY_CATEGORY_KEY = 'DATA_CLASSIFICATION'
 #   NOTE it is recommended you set the key to 'DATA_CLASSIFICATION'
-required_security_category_key := env["GR05_01_SECURITY_CATEGORY_KEY"]
+required_security_category_key := env.GR05_01_SECURITY_CATEGORY_KEY
 
 # METADATA
 # description: |
@@ -193,29 +164,27 @@ required_security_category_key := env["GR05_01_SECURITY_CATEGORY_KEY"]
 #   Example: a GCS bucket tagged with DATA_CLASSIFICATION: Protected A is exempt.
 exempt_security_categories := ["Unclassified", "Protected A"]
 
-
-
 # METADATA
 # title: HELPER FUNCTIONS
 # description: Ensure asset has location field, otherwise not region-based
 has_resource_location_field(asset) if {
 	asset.resource.location
-  not asset.kind
+	not asset.kind
 }
 
 # METADATA
 # description: Check if asset has ancestors field (used for project matching)
 has_ancestors_field(asset) if {
-  asset.ancestors
-  not asset.kind
+	asset.ancestors
+	not asset.kind
 }
 
 # METADATA
 # description: should not report on the individual Cloud Build step
 is_legacy_cloudbuild_build_step(asset) if {
-  not asset.kind
-  asset.asset_type == "cloudbuild.googleapis.com/Build"
-  asset.resource.data.options.logging == "LEGACY"
+	not asset.kind
+	asset.asset_type == "cloudbuild.googleapis.com/Build"
+	asset.resource.data.options.logging == "LEGACY"
 }
 
 # METADATA
@@ -225,42 +194,42 @@ is_exempt_asset(asset) if {
 }
 
 is_exempt_cbs_project(asset) if {
-  not asset.kind
-  some cbs_project in exempt_cbs_project_info
-  contains(asset.name, cbs_project)
+	not asset.kind
+	some cbs_project in exempt_cbs_project_info
+	contains(asset.name, cbs_project)
 }
 
 is_exempt_cbs_asset(asset) if {
-  not asset.kind
-  some cbs_resource in exempt_cbs_resources
+	not asset.kind
+	some cbs_resource in exempt_cbs_resources
 	contains(asset.name, cbs_resource)
 }
 
 is_tagged_asset(asset) if {
-    asset.kind == required_tagged_asset_kind
+	asset.kind == required_tagged_asset_kind
 }
 
 is_exempt_tagged_asset(asset) if {
-  is_tagged_asset(asset)
-  endswith(asset.tag_key, required_security_category_key)
-  some value in exempt_security_categories
-  endswith(asset.tag_value, value)
+	is_tagged_asset(asset)
+	endswith(asset.tag_key, required_security_category_key)
+	some value in exempt_security_categories
+	endswith(asset.tag_value, value)
 }
 
 # description: Check if asset is in allowed location
 in_allowed_resource_location(asset) if {
-  has_resource_location_field(asset)
+	has_resource_location_field(asset)
 	asset.resource.location in allowed_regions
 }
 
 is_exempt_audit(asset) if {
-  has_resource_location_field(asset)
+	has_resource_location_field(asset)
 	asset.resource.data.description == "Audit bucket"
 	asset.resource.location == "global"
 }
 
 is_exempt_default(asset) if {
-  has_resource_location_field(asset)
+	has_resource_location_field(asset)
 	asset.resource.data.description == "Default bucket"
 	asset.resource.location == "global"
 }
@@ -269,132 +238,132 @@ is_exempt_default(asset) if {
 # title: Consolidated Exemption Check
 # description: Single entry point for all exemption checks. Asset is exempt if any condition matches.
 is_exempt(asset) if {
-  is_exempt_asset(asset)
+	is_exempt_asset(asset)
 }
 
 is_exempt(asset) if {
-  is_legacy_cloudbuild_build_step(asset)
+	is_legacy_cloudbuild_build_step(asset)
 }
 
 is_exempt(asset) if {
-  is_exempt_cbs_project(asset)
+	is_exempt_cbs_project(asset)
 }
 
 is_exempt(asset) if {
-  is_exempt_cbs_asset(asset)
+	is_exempt_cbs_asset(asset)
 }
 
 is_exempt(asset) if {
-  is_exempt_default(asset)
+	is_exempt_default(asset)
 }
 
 is_exempt(asset) if {
-  is_exempt_audit(asset)
+	is_exempt_audit(asset)
 }
 
 is_exempt(asset) if {
-  asset.name in assets_with_exempt_tags
+	asset.name in assets_with_exempt_tags
 }
 
 # METADATA
 # description: processing project profile overrides
 is_project_profile_tag(asset) if {
-  asset.kind == "cloudresourcemanager#tagged#project"
-  endswith(asset.tag_key, "PROJECT_PROFILE")
+	asset.kind == "cloudresourcemanager#tagged#project"
+	endswith(asset.tag_key, "PROJECT_PROFILE")
 }
 
 # METADATA
 # description: Extract project_number and tag_value from tagged projects
 # Result: [project_number, tag_value]
 project_profile_details := {[asset.project_number, asset.tag_value] |
-  some asset in input.data
-  is_project_profile_tag(asset)
+	some asset in input.data
+	is_project_profile_tag(asset)
 }
 
 # METADATA
 # description: Extract project_number and profile_level
 # Result: [project_number, profile_level]
 project_id_and_profile_list := {[project_number, profile_level] |
-  some entry in project_profile_details
-  project_number := entry[0]
-  parts := split(entry[1], "/")
-  profile_level := array.reverse(parts)[0]
+	some entry in project_profile_details
+	project_number := entry[0]
+	parts := split(entry[1], "/")
+	profile_level := array.reverse(parts)[0]
 }
 
 # METADATA
 # description: Check if asset belongs to a tagged project
 is_in_tagged_project(asset) if {
-  has_ancestors_field(asset)
-  some proj_id_profile in project_id_and_profile_list
-  proj_id_profile[0] in asset.ancestors
+	has_ancestors_field(asset)
+	some proj_id_profile in project_id_and_profile_list
+	proj_id_profile[0] in asset.ancestors
 }
 
 # METADATA
 # description: Names of assets with valid exemption tags (from tagged asset records)
 assets_with_exempt_tags := {asset.name |
-  some asset in input.data
-  is_exempt_tagged_asset(asset)
+	some asset in input.data
+	is_exempt_tagged_asset(asset)
 }
 
 # METADATA
 # description: Set of violating assets (not in allowed location and not exempt)
 violating_assets := {asset |
-  some asset in input.data
-  has_resource_location_field(asset)
-  not in_allowed_resource_location(asset)
-  not is_exempt(asset)
+	some asset in input.data
+	has_resource_location_field(asset)
+	not in_allowed_resource_location(asset)
+	not is_exempt(asset)
 }
 
 # METADATA
 # description: Violating assets that belong to tagged projects
 # Result: [asset, project_number, profile_level]
 violating_assets_with_tagged_project := {[asset, proj_id_profile[0], proj_id_profile[1]] |
-  some asset in violating_assets
-  has_ancestors_field(asset)
-  some proj_id_profile in project_id_and_profile_list
-  proj_id_profile[0] in asset.ancestors
+	some asset in violating_assets
+	has_ancestors_field(asset)
+	some proj_id_profile in project_id_and_profile_list
+	proj_id_profile[0] in asset.ancestors
 }
 
 # METADATA
 # description: Violating assets NOT in tagged projects (use global profile)
 violating_assets_without_tagged_project := {asset |
-  some asset in violating_assets
-  not is_in_tagged_project(asset)
+	some asset in violating_assets
+	not is_in_tagged_project(asset)
 }
 
 # METADATA
 # title: Policy COMPLIANT
 # description: If no violating assets, then COMPLIANT
 reply contains response if {
-  count(violating_assets) == 0
-  status := {"status": "COMPLIANT"}
-  msg := {"msg": "Assets are in found to be in accordance to the data location policy and have appropriate tags where applicable."}
-  asset_name := {"asset_name": assets_with_exempt_tags}
-  response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
+	count(violating_assets) == 0
+	status := {"status": "COMPLIANT"}
+	msg := {"msg": "Assets are in found to be in accordance to the data location policy and have appropriate tags where applicable."}
+	asset_name := {"asset_name": assets_with_exempt_tags}
+	response := object.union_n([guardrail, validation, status, asset_name, msg, description, check])
 }
 
 # METADATA
 # title: NON-COMPLIANT - violating assets in non-tagged projects (use global profile)
 reply contains response if {
-  count(violating_assets_without_tagged_project) > 0
-  some asset in violating_assets_without_tagged_project
-  status := common.set_status(guardrail.guardrail)
-  msg := {"msg": "Asset has been found to violate the data location policy"}
-  asset_name := {"asset_name": asset.name}
-  response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+	count(violating_assets_without_tagged_project) > 0
+	some asset in violating_assets_without_tagged_project
+	status := common.set_status(guardrail.guardrail)
+	msg := {"msg": "Asset has been found to violate the data location policy"}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
 # title: NON-COMPLIANT - violating assets in tagged projects (use override profile)
 reply contains response if {
-  count(violating_assets_with_tagged_project) > 0
-  some violating_asset in violating_assets_with_tagged_project
-  override_profile := violating_asset[2]   # violating_asset structure: [asset, project_number, profile_level]
-  status := common.set_status_for_profile(guardrail.guardrail, override_profile)
-  check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
-  msg := {"msg": "Asset has been found to violate the data location policy"}
-  asset_name := {"asset_name": violating_asset[0].name}
-  proj_parent := {"proj_parent": violating_asset[1]}
-  proj_profile := {"proj_profile": override_profile}
-  response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
+	count(violating_assets_with_tagged_project) > 0
+	some violating_asset in violating_assets_with_tagged_project
+	override_profile := violating_asset[2] # violating_asset structure: [asset, project_number, profile_level]
+	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
+	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
+	msg := {"msg": "Asset has been found to violate the data location policy"}
+	asset_name := {"asset_name": violating_asset[0].name}
+	proj_parent := {"proj_parent": violating_asset[1]}
+	proj_profile := {"proj_profile": override_profile}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check_override, proj_parent, proj_profile])
 }
