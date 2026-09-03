@@ -30,7 +30,8 @@ allowed_regions := [
 	"northamerica-northeast1-c",
 	"northamerica-northeast2-a",
 	"northamerica-northeast2-b",
-	"northamerica-northeast2-c",		
+	"northamerica-northeast2-c",
+  "ca" # Google Cloud location code for Canadian dual-region resources
 ]
 
 required_tagged_asset_kind := "cloudresourcemanager#tagged#asset"
