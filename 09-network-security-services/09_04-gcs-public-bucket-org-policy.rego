@@ -61,6 +61,58 @@ is_proj_level_policy(asset) if {
 }
 
 # METADATA
+# title: PROJECT_PROFILE TAG PROCESSING
+# description: |
+#   Mirrors the pattern in 05_01-restrict-location-org-policy.rego. The
+#   collector emits records of kind "cloudresourcemanager#tagged#project"
+#   with project_number in the form "projects/<NUMBER>" and tag_value in
+#   the form "<ORG_ID>/PROJECT_PROFILE/<LEVEL>".
+is_project_profile_tag(asset) if {
+	asset.kind == "cloudresourcemanager#tagged#project"
+	endswith(asset.tag_key, "PROJECT_PROFILE")
+}
+
+# METADATA
+# description: Extract [project_number, profile_level] from tagged projects
+project_id_and_profile_list := {[asset.project_number, profile_level] |
+	some asset in input.data
+	is_project_profile_tag(asset)
+	parts := split(asset.tag_value, "/")
+	count(parts) >= 3
+	profile_level := array.reverse(parts)[0]
+}
+
+# METADATA
+# description: |
+#   Profile levels for which a project-level storage.publicAccessPrevention
+#   exception is tolerated. Profile 1 (Experimentation) per client request.
+#   GR09 is recommended for Profile 1 and required for Profiles 2-6 per
+#   common.profile_enforcement.
+exempt_profile_levels := {"1"}
+
+# METADATA
+# description: Projects tagged with an exempt profile level
+exempt_profile_projects := {entry[0] |
+	some entry in project_id_and_profile_list
+	entry[1] in exempt_profile_levels
+}
+
+# METADATA
+# description: |
+#   Org Policy asset belongs to a project tagged with an exempt profile.
+#   Primary join is via CAI ancestors; fallback join is on the asset name
+#   segment for exports where the orgpolicy asset carries no ancestors field.
+is_exempt_profile_project_policy(asset) if {
+	some proj in exempt_profile_projects
+	proj in asset.ancestors
+}
+
+is_exempt_profile_project_policy(asset) if {
+	some proj in exempt_profile_projects
+	startswith(asset.name, sprintf("//orgpolicy.googleapis.com/%s/", [proj]))
+}
+
+# METADATA
 # title: Check for Matching Assets
 # description: Check if Asset's type is Org Policy matching required_policy
 matching_assets := {asset |
@@ -98,11 +150,27 @@ enforced_proj_level_assets := {asset |
 
 # METADATA
 # title: Check for Project Level Assets
-# description: Check if Org Policy is configured at Project level and is NOT enforced
+# description: |
+#   Check if Org Policy is configured at Project level and is NOT enforced.
+#   Projects tagged with an exempt PROJECT_PROFILE level are excluded.
 non_enforced_proj_level_assets := {asset |
 	some asset in matching_assets
 	is_proj_level_policy(asset)
 	not is_enforced(asset)
+	not is_exempt_profile_project_policy(asset)
+}
+
+# METADATA
+# title: Exempt Project Level Assets
+# description: |
+#   Project level Org Policies that are NOT enforced but belong to projects
+#   tagged with an exempt PROJECT_PROFILE level. Tracked separately for
+#   reporting visibility - these do not block the COMPLIANT verdict.
+exempt_profile_proj_level_assets := {asset |
+	some asset in matching_assets
+	is_proj_level_policy(asset)
+	not is_enforced(asset)
+	is_exempt_profile_project_policy(asset)
 }
 
 # METADATA
@@ -159,6 +227,20 @@ reply contains response if {
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Project level and NOT enforced.", [required_policy])}
 	response := object.union_n([guardrail, validation, status, msg, description, check])
+}
+
+# METADATA
+# title: Exempt Project Level Exception - COMPLIANT (informational)
+# description: |
+#   A non-enforced project level storage.publicAccessPrevention policy was
+#   found, but the project is tagged with an exempt PROJECT_PROFILE level.
+#   Reported for visibility with the asset name; does not affect the verdict.
+reply contains response if {
+	some asset in exempt_profile_proj_level_assets
+	status := {"status": "COMPLIANT"}
+	msg := {"msg": sprintf("Organization Policy [%v] exception detected at the Project level - permitted via PROJECT_PROFILE tag.", [required_policy])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
