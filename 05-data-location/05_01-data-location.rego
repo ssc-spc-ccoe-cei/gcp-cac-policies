@@ -116,7 +116,9 @@ exempt_resources := [
 	"securitycentermanagement.googleapis.com/SecurityCenterService",
 	"securitycentermanagement.googleapis.com/EventThreatDetectionCustomModule",
 	"storagetransfer.googleapis.com/TransferJob",
+	"dns.googleapis.com/ManagedZone",
 	"dns.googleapis.com/ResourceRecordSet",
+	"dns.googleapis.com/Policy",
 	"dns.googleapis.com/ResponsePolicyRule",
 	"dns.googleapis.com/ResponsePolicy",
 	"networkconnectivity.googleapis.com/Group",
@@ -126,6 +128,7 @@ exempt_resources := [
 	"networkconnectivity.googleapis.com/PolicyBasedRoute",
 	"networkconnectivity.googleapis.com/RouteTable",
 	"networkmanagement.googleapis.com/ConnectivityTest",
+	"networkmanagement.googleapis.com/VpcFlowLogsConfig",
 	"discoveryengine.googleapis.com/Collection",
 ]
 
@@ -348,7 +351,7 @@ reply contains response if {
 	count(violating_assets_without_tagged_project) > 0
 	some asset in violating_assets_without_tagged_project
 	status := common.set_status(guardrail.guardrail)
-	msg := {"msg": "Asset has been found to violate the data location policy"}
+	msg := {"msg": sprintf("Asset is located outside the approved data locations. Detected location: [%v].", [asset.resource.location])}
 	asset_name := {"asset_name": asset.name}
 	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
@@ -361,7 +364,7 @@ reply contains response if {
 	override_profile := violating_asset[2] # violating_asset structure: [asset, project_number, profile_level]
 	status := common.set_status_for_profile(guardrail.guardrail, override_profile)
 	check_override := common.set_check_type_for_profile(guardrail.guardrail, override_profile)
-	msg := {"msg": "Asset has been found to violate the data location policy"}
+	msg := {"msg": sprintf("Asset is located outside the approved data locations. Detected location: [%v].", [violating_asset[0].resource.location])}
 	asset_name := {"asset_name": violating_asset[0].name}
 	proj_parent := {"proj_parent": violating_asset[1]}
 	proj_profile := {"proj_profile": override_profile}
