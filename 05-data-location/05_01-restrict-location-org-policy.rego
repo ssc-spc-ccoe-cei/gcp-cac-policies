@@ -41,6 +41,7 @@ allowed_canadian_values := {
 # description: Checks if asset is required type
 is_correct_asset(asset) if {
 	asset.asset_type == required_asset_type
+	is_object(asset.resource.data.spec)
 }
 
 # METADATA
