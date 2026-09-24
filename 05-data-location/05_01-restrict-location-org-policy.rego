@@ -27,8 +27,14 @@ required_asset_type := "orgpolicy.googleapis.com/Policy"
 # Org Policy must be gcp.resourceLocations
 required_policy := "policies/gcp.resourceLocations"
 
-# Org Policy value must match in:canada-locations
-required_value := "in:canada-locations"
+# Org Policy values must resolve only to Canadian locations. Accept the
+# Canada-wide value group as well as the individual Canadian region groups so
+# semantically equivalent (or more restrictive) policies are compliant.
+allowed_canadian_values := {
+	"in:canada-locations",
+	"in:northamerica-northeast1-locations",
+	"in:northamerica-northeast2-locations",
+}
 
 # METADATA
 # title: HELPER FUNCTIONS
@@ -44,11 +50,38 @@ is_correct_org_policy(asset) if {
 }
 
 # METADATA
-# description: Checks that only one value is set, and it matches required_value
+# description: Checks that every allowed location is within Canada
 is_enforced(asset) if {
 	every value in asset.resource.data.spec.rules[0].values.allowedValues {
-		value == required_value
+		value in allowed_canadian_values
 	}
+}
+
+# METADATA
+# description: Returns location values that are not accepted by this policy
+unaccepted_values(asset) := {value |
+	some value in asset.resource.data.spec.rules[0].values.allowedValues
+	not value in allowed_canadian_values
+}
+
+# METADATA
+# description: Checks whether the policy explicitly permits every location
+allows_all_locations(asset) if {
+	asset.resource.data.spec.rules[0].allowAll == true
+}
+
+# METADATA
+# description: Checks whether the policy contains any unaccepted location values
+has_unaccepted_values(asset) if {
+	some value in unaccepted_values(asset)
+}
+
+# METADATA
+# description: Checks whether a non-enforced policy has no recognized Canadian allowlist
+has_no_canadian_allowlist(asset) if {
+	not is_enforced(asset)
+	not allows_all_locations(asset)
+	not has_unaccepted_values(asset)
 }
 
 # METADATA
@@ -170,6 +203,56 @@ non_enforced_proj_level_assets := {asset |
 }
 
 # METADATA
+# title: Organization Policies Allowing All Locations
+# description: Organization-level policies that explicitly allow all locations
+org_level_assets_allowing_all := {asset |
+	some asset in non_enforced_org_level_assets
+	allows_all_locations(asset)
+}
+
+# METADATA
+# title: Organization Policies with Unaccepted Values
+# description: Organization-level policies containing location values outside Canada
+org_level_assets_with_unaccepted_values := {asset |
+	some asset in non_enforced_org_level_assets
+	not allows_all_locations(asset)
+	has_unaccepted_values(asset)
+}
+
+# METADATA
+# title: Organization Policies without a Canadian Allowlist
+# description: Organization-level policies with no recognized Canadian allowlist
+org_level_assets_without_canadian_allowlist := {asset |
+	some asset in non_enforced_org_level_assets
+	has_no_canadian_allowlist(asset)
+}
+
+# METADATA
+# title: Project Policies Allowing All Locations
+# description: Non-exempt project-level policies that explicitly allow all locations
+proj_level_assets_allowing_all := {asset |
+	some asset in non_enforced_proj_level_assets
+	allows_all_locations(asset)
+}
+
+# METADATA
+# title: Project Policies with Unaccepted Values
+# description: Non-exempt project-level policies containing location values outside Canada
+proj_level_assets_with_unaccepted_values := {asset |
+	some asset in non_enforced_proj_level_assets
+	not allows_all_locations(asset)
+	has_unaccepted_values(asset)
+}
+
+# METADATA
+# title: Project Policies without a Canadian Allowlist
+# description: Non-exempt project-level policies with no recognized Canadian allowlist
+proj_level_assets_without_canadian_allowlist := {asset |
+	some asset in non_enforced_proj_level_assets
+	has_no_canadian_allowlist(asset)
+}
+
+# METADATA
 # title: Exempt Project Level Assets
 # description: |
 #   Project level Org Policies belonging to projects tagged with an
@@ -193,20 +276,45 @@ reply contains response if {
 	count(non_enforced_proj_level_assets) == 0
 	status := {"status": "COMPLIANT"}
 	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level and enforced.", [required_policy])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
-# title: Not Enforced Org Level Org Policy - NON-COMPLIANT
-# description: |
-#   Iterate through org level org policy assets that are NOT
-#   enforced(if any exist). If any exist then reply back
-#   NON-COMPLIANT and with name of asset
+# title: Org Level Policy Allows All Locations - NON-COMPLIANT
+# description: Report each organization-level policy that explicitly allows all locations
 reply contains response if {
-	some asset in non_enforced_org_level_assets
+	count(org_level_assets_allowing_all) > 0
+	some asset in org_level_assets_allowing_all
 	status := common.set_status(guardrail.guardrail)
-	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level and NOT enforced.", [required_policy])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level but permits all resource locations and does not restrict resources to Canada.", [required_policy])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+# METADATA
+# title: Org Level Policy Contains Unaccepted Values - NON-COMPLIANT
+# description: Report each organization-level policy containing locations outside Canada
+reply contains response if {
+	count(org_level_assets_with_unaccepted_values) > 0
+	some asset in org_level_assets_with_unaccepted_values
+	status := common.set_status(guardrail.guardrail)
+	invalid_values := unaccepted_values(asset)
+	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level with unaccepted location values: %v.", [required_policy, invalid_values])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+# METADATA
+# title: Org Level Policy Has No Canadian Allowlist - NON-COMPLIANT
+# description: Report each organization-level policy with no recognized Canadian allowlist
+reply contains response if {
+	count(org_level_assets_without_canadian_allowlist) > 0
+	some asset in org_level_assets_without_canadian_allowlist
+	status := common.set_status(guardrail.guardrail)
+	msg := {"msg": sprintf("Organization Policy [%v] detected at the Organization level but does not define an allowed-values restriction limited to Canada.", [required_policy])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
@@ -219,35 +327,100 @@ reply contains response if {
 	some asset in enforced_proj_level_assets
 	status := common.set_status(guardrail.guardrail)
 	msg := {"msg": sprintf("Organization Policy [%v] detected at Project level and enforced.", [required_policy])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
-# title: Not Enforced Project Level Org Policy & Enforced Org Level Policy - NON-COMPLIANT
+# title: Project Policy Allows All Locations & Enforced Org Policy - NON-COMPLIANT
 # description: |
-#   Iterate through project level policy asset(s) that are NOT enforced
-#   (if any exist) and also check if an org level org policy that IS enforced
-#   exists. If both exist then reply back NON-COMPLIANT and with name of asset(s)
+#   Report each project-level override that allows all locations when an
+#   enforced organization-level policy exists.
 reply contains response if {
-	some asset in non_enforced_proj_level_assets
+	count(proj_level_assets_allowing_all) > 0
+	some asset in proj_level_assets_allowing_all
 	count(enforced_org_level_assets) > 0
 	status := common.set_status(guardrail.guardrail)
-	msg := {"msg": sprintf("Organization Policy [%v] override detected at the Project level.", [required_policy])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Organization Policy [%v] override detected at the Project level and permits all resource locations without restricting resources to Canada.", [required_policy])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
-# title: Not Enforced Project Level Org Policy & No Enforced Org Level Policy- NON-COMPLIANT
+# title: Project Policy Contains Unaccepted Values & Enforced Org Policy - NON-COMPLIANT
 # description: |
-#   Iterate through project level policy asset(s) that are enforced
-#   (if any exist) and also check if an org level org policy that is NOT enforced
-#   exists. If both exist then reply back NON-COMPLIANT and with name of asset(s)
+#   Report each project-level override containing locations outside Canada when
+#   an enforced organization-level policy exists.
 reply contains response if {
-	some asset in non_enforced_proj_level_assets
+	count(proj_level_assets_with_unaccepted_values) > 0
+	some asset in proj_level_assets_with_unaccepted_values
+	count(enforced_org_level_assets) > 0
+	status := common.set_status(guardrail.guardrail)
+	invalid_values := unaccepted_values(asset)
+	msg := {"msg": sprintf("Organization Policy [%v] override detected at the Project level with unaccepted location values: %v.", [required_policy, invalid_values])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+# METADATA
+# title: Project Policy Has No Canadian Allowlist & Enforced Org Policy - NON-COMPLIANT
+# description: |
+#   Report each project-level override with no recognized Canadian allowlist
+#   when an enforced organization-level policy exists.
+reply contains response if {
+	count(proj_level_assets_without_canadian_allowlist) > 0
+	some asset in proj_level_assets_without_canadian_allowlist
+	count(enforced_org_level_assets) > 0
+	status := common.set_status(guardrail.guardrail)
+	msg := {"msg": sprintf("Organization Policy [%v] override detected at the Project level but does not define an allowed-values restriction limited to Canada.", [required_policy])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+# METADATA
+# title: Project Policy Allows All Locations & No Enforced Org Policy - NON-COMPLIANT
+# description: |
+#   Report each project-level policy that allows all locations when no enforced
+#   organization-level policy exists.
+reply contains response if {
+	count(proj_level_assets_allowing_all) > 0
+	some asset in proj_level_assets_allowing_all
 	count(enforced_org_level_assets) == 0
 	status := common.set_status(guardrail.guardrail)
-	msg := {"msg": sprintf("Organization Policy [%v] detected at the Project level and NOT enforced.", [required_policy])}
-	response := object.union_n([guardrail, validation, status, msg, description, check])
+	msg := {"msg": sprintf("Organization Policy [%v] detected at the Project level and permits all resource locations without restricting resources to Canada.", [required_policy])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+# METADATA
+# title: Project Policy Contains Unaccepted Values & No Enforced Org Policy - NON-COMPLIANT
+# description: |
+#   Report each project-level policy containing locations outside Canada when
+#   no enforced organization-level policy exists.
+reply contains response if {
+	count(proj_level_assets_with_unaccepted_values) > 0
+	some asset in proj_level_assets_with_unaccepted_values
+	count(enforced_org_level_assets) == 0
+	status := common.set_status(guardrail.guardrail)
+	invalid_values := unaccepted_values(asset)
+	msg := {"msg": sprintf("Organization Policy [%v] detected at the Project level with unaccepted location values: %v.", [required_policy, invalid_values])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
+}
+
+# METADATA
+# title: Project Policy Has No Canadian Allowlist & No Enforced Org Policy - NON-COMPLIANT
+# description: |
+#   Report each project-level policy with no recognized Canadian allowlist when
+#   no enforced organization-level policy exists.
+reply contains response if {
+	count(proj_level_assets_without_canadian_allowlist) > 0
+	some asset in proj_level_assets_without_canadian_allowlist
+	count(enforced_org_level_assets) == 0
+	status := common.set_status(guardrail.guardrail)
+	msg := {"msg": sprintf("Organization Policy [%v] detected at the Project level but does not define an allowed-values restriction limited to Canada.", [required_policy])}
+	asset_name := {"asset_name": asset.name}
+	response := object.union_n([guardrail, validation, status, msg, asset_name, description, check])
 }
 
 # METADATA
