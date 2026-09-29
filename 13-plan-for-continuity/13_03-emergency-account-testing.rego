@@ -29,6 +29,7 @@ description := {"description": "Emergency Account testing"}
 check := common.set_check_type(guardrail.guardrail)
 
 required_asset_kind := "logging#breakglass#auth"
+required_scc_asset_kind := "securitycenter#etd#breakglass#finding"
 
 # METADATA
 # title: CLIENT INPUT
@@ -44,6 +45,10 @@ required_emergency_account_emails := json.unmarshal(env["GR13_03_BREAKGLASS_USER
 # description: Check if asset's kind matches what's required
 is_correct_kind(asset) if {
   asset.kind == required_asset_kind
+}
+
+is_correct_kind(asset) if {
+  asset.kind == required_scc_asset_kind
 }
 
 # METADATA
@@ -67,7 +72,7 @@ matching_logs_by_email[email] = timestamps if {
   some email in required_emergency_account_emails
   timestamps = [asset.timestamp | 
     some asset in input.data
-    asset.kind == required_asset_kind
+    is_correct_kind(asset)
     asset.principalEmail == email
   ]
 }
