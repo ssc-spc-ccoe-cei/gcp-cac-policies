@@ -25,7 +25,7 @@ required_file_count := 1
 required_approval_filename := "GUARDRAIL_APPROVAL"
 
 required_asset_type := "monitoring.googleapis.com/AlertPolicy"
-required_scc_asset_type := "securitycentermanagement.googleapis.com/EventThreatDetectionCustomModule"
+required_scc_asset_kind := "securitycentermanagement#etd#custommodule"
 required_scc_module_type := "CONFIGURABLE_BREAKGLASS_ACCOUNT_USED"
 
 # METADATA
@@ -56,11 +56,13 @@ is_correct_asset(asset) if {
 #   Check for an enabled, organization-resident SCC Event Threat Detection
 #   custom module that detects break-glass account usage. Folder- and
 #   project-resident modules do not provide organization-wide coverage.
+#   These come from the collector's SCC Management API export, not Cloud Asset
+#   Inventory, which omits each module's "config" block.
 is_organization_scc_breakglass_module(asset) if {
-  asset.asset_type == required_scc_asset_type
-  asset.resource.data.type == required_scc_module_type
-  asset.resource.data.enablementState == "ENABLED"
-  startswith(asset.resource.data.name, "organizations/")
+  asset.kind == required_scc_asset_kind
+  asset.type == required_scc_module_type
+  asset.enablementState == "ENABLED"
+  startswith(asset.name, "organizations/")
 }
 
 # METADATA
@@ -96,7 +98,7 @@ emails_with_alerts contains email if {
   some email in required_emergency_account_emails
   some asset in input.data
   is_organization_scc_breakglass_module(asset)
-  email in asset.resource.data.config.accounts
+  email in asset.accounts
 }
 
 # METADATA
