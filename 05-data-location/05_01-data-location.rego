@@ -70,13 +70,11 @@ exempt_resources := [
 	"secretmanager.googleapis.com/Secret",
 	"logging.googleapis.com/LogMetric",
 	"logging.googleapis.com/LogSink",
-	"logging.googleapis.com/RecentQuery",
 	"logging.googleapis.com/Settings",
 	"monitoring.googleapis.com/AlertPolicy",
 	"monitoring.googleapis.com/NotificationChannel",
 	"monitoring.googleapis.com/Dashboard",
 	"monitoring.googleapis.com/Snooze",
-	"gkehub.googleapis.com/Feature",
 	"gkehub.googleapis.com/Fleet",
 	"pubsub.googleapis.com/Topic",
 	"pubsub.googleapis.com/Subscription",
@@ -130,6 +128,35 @@ exempt_resources := [
 	"networkmanagement.googleapis.com/ConnectivityTest",
 	"networkmanagement.googleapis.com/VpcFlowLogsConfig",
 	"discoveryengine.googleapis.com/Collection",
+]
+
+# METADATA
+# description: |
+#   Asset types that exist at BOTH global and regional scope under a single CAI
+#   asset type. These must NOT be blanket-exempted: only the global instance is
+#   out of scope for GR5, while a regional instance of the same type must still
+#   be evaluated against allowed_regions.
+#
+#   Scope is determined from the resource name, which is stable across the
+#   export/list and search APIs:
+#     global:   /global/<collection>/        or /locations/global/<collection>/
+#     regional: /regions/REGION/<collection>/ or /locations/LOCATION/<collection>/
+#
+#   Name formats verified against:
+#   https://cloud.google.com/asset-inventory/docs/resource-name-format
+scope_aware_resources := [
+	"certificatemanager.googleapis.com/Certificate",
+	"certificatemanager.googleapis.com/DnsAuthorization",
+	"compute.googleapis.com/BackendService",
+	"compute.googleapis.com/HealthCheck",
+	"compute.googleapis.com/InstanceTemplate",
+	"compute.googleapis.com/SslPolicy",
+	"compute.googleapis.com/TargetHttpProxy",
+	"compute.googleapis.com/UrlMap",
+	"gkehub.googleapis.com/Feature",
+	"logging.googleapis.com/RecentQuery",
+	"logging.googleapis.com/SavedQuery",
+	"networkconnectivity.googleapis.com/Spoke",
 ]
 
 # METADATA
@@ -238,6 +265,21 @@ is_exempt_default(asset) if {
 }
 
 # METADATA
+# description: |
+#   Exempt only the global instance of a dual-scope asset type. A regional
+#   instance of the same type remains in scope and is still evaluated against
+#   allowed_regions, so a resource deployed outside Canada is not hidden by a
+#   blanket asset-type exemption.
+#
+#   Matching "/global/" also covers the "/locations/global/" form used by the
+#   logging, gkehub, networkconnectivity and certificatemanager APIs.
+is_exempt_global_instance(asset) if {
+	not asset.kind
+	asset.asset_type in scope_aware_resources
+	contains(asset.name, "/global/")
+}
+
+# METADATA
 # title: Consolidated Exemption Check
 # description: Single entry point for all exemption checks. Asset is exempt if any condition matches.
 is_exempt(asset) if {
@@ -266,6 +308,10 @@ is_exempt(asset) if {
 
 is_exempt(asset) if {
 	asset.name in assets_with_exempt_tags
+}
+
+is_exempt(asset) if {
+	is_exempt_global_instance(asset)
 }
 
 # METADATA
